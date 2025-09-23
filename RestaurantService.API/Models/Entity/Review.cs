@@ -18,6 +18,7 @@ public partial class Review
     public DateTime CreatedAt { get; set; }
 
     public virtual ICollection<PhotoReview> PhotoReviews { get; set; } = new List<PhotoReview>();
+
     public virtual Restaurant? Restaurant { get; set; }
 
 }
