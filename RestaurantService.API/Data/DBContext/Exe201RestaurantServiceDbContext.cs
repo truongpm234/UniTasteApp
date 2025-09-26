@@ -24,7 +24,7 @@ public partial class Exe201RestaurantServiceDbContext : DbContext
 
     public virtual DbSet<Feature> Features { get; set; }
 
-    public virtual DbSet<OpeningHour> OpeningHours { get; set; }
+    //public virtual DbSet<OpeningHour> OpeningHours { get; set; }
 
     public virtual DbSet<PhotoReview> PhotoReviews { get; set; }
 
@@ -93,12 +93,12 @@ public partial class Exe201RestaurantServiceDbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
-        modelBuilder.Entity<OpeningHour>(entity =>
-        {
-            entity.HasKey(e => e.OpeningHourId).HasName("PK__OpeningH__F6C47B0D9899D16F");
+        //modelBuilder.Entity<OpeningHour>(entity =>
+        //{
+        //    entity.HasKey(e => e.OpeningHourId).HasName("PK__OpeningH__F6C47B0D9899D16F");
 
-            entity.ToTable("OpeningHour");
-        });
+        //    entity.ToTable("OpeningHour");
+        //});
 
         modelBuilder.Entity<PhotoReview>(entity =>
         {

@@ -37,7 +37,7 @@ namespace UserService.API.Controllers
         }
 
         private string GenerateJSONWebToken(User systemUserAccount)
-        {      
+        {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -71,5 +71,32 @@ namespace UserService.API.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpPost("request")]
+        public async Task<IActionResult> RequestReset([FromBody] RequestResetPasswordDto dto)
+        {
+            var ok = await _userService.SendResetPasswordEmailAsync(dto.Email);
+            if (!ok) return NotFound("Email not found!");
+            return Ok("Please check your email to reset password.");
+        }
+
+        [HttpPost("confirm")]
+        public async Task<IActionResult> ConfirmReset([FromBody] ConfirmResetPasswordDto dto)
+        {
+            var ok = await _userService.ResetPasswordAsync(dto.Token, dto.NewPassword);
+            if (!ok) return BadRequest("Invalid or expired token!");
+            return Ok("Password changed successfully.");
+        }
+    }
+
+    public class RequestResetPasswordDto
+    {
+        public string Email { get; set; }
+    }
+
+    public class ConfirmResetPasswordDto
+    {
+        public string Token { get; set; }
+        public string NewPassword { get; set; }
     }
 }
