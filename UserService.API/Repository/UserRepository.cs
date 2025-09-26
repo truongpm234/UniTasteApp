@@ -41,6 +41,28 @@ namespace UserService.API.Repository
             await _context.SaveChangesAsync();
             return newUser;
         }
-      
+
+        public async Task<PasswordResetToken?> GetByTokenAsync(string token)
+        {
+            return await _context.PasswordResetTokens.Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Token == token && t.IsUsed == false && t.ExpiresAt > DateTime.UtcNow);
+        }
+
+        public async Task AddAsync(PasswordResetToken token)
+        {
+            await _context.PasswordResetTokens.AddAsync(token);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+
     }
 }

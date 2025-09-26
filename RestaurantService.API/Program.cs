@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using RestaurantService.API.Data.DBContext;
+using RestaurantService.API.Models.DTO;
 using RestaurantService.API.Repository;
 using RestaurantService.API.Service;
 
@@ -18,7 +19,7 @@ namespace RestaurantService.API
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
-
+            builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));
             builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
 

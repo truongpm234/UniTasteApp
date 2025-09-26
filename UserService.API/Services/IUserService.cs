@@ -7,5 +7,7 @@ namespace UserService.API.Services
     {
         Task<User> GetUserAccount(string email, string password);
         Task<User> RegisterAsync(RegisterRequest req);
+        Task<bool> SendResetPasswordEmailAsync(string email);
+        Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }
