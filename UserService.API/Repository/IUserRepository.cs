@@ -7,6 +7,9 @@ namespace UserService.API.Repository
     {
         Task<User> GetUserAccount(string email, string password);
         Task<User> RegisterAsync(RegisterRequest req);
-
+        Task<PasswordResetToken?> GetByTokenAsync(string token);
+        Task AddAsync(PasswordResetToken token);
+        Task SaveChangesAsync();
+        Task<User?> GetByEmailAsync(string email);
     }
 }

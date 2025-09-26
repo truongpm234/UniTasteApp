@@ -37,7 +37,7 @@ public partial class Restaurant
 
     public virtual ICollection<BannerBooking> BannerBookings { get; set; } = new List<BannerBooking>();
 
-    public virtual ICollection<OpeningHour> OpeningHoursNavigation { get; set; } = new List<OpeningHour>();
+    //public virtual ICollection<OpeningHour> OpeningHoursNavigation { get; set; } = new List<OpeningHour>();
 
     public virtual PriceRange? PriceRange { get; set; }
 
