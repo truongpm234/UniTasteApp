@@ -11,5 +11,7 @@ namespace UserService.API.Repository
         Task AddAsync(PasswordResetToken token);
         Task SaveChangesAsync();
         Task<User?> GetByEmailAsync(string email);
+        string GenerateOtpCode(int length = 6);
+
     }
 }
