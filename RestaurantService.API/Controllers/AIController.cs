@@ -1,48 +1,39 @@
-﻿//using Microsoft.AspNetCore.Mvc;
-//using RestaurantService.API.Service;
-//using RestaurantService.API.Repository;
-//using RestaurantService.API.Models.Entity;
+﻿using Microsoft.AspNetCore.Mvc;
+using RestaurantService.API.Service;
+using RestaurantService.API.Repository;
+using RestaurantService.API.Models.Entity;
+using RestaurantService.API.Models.DTO;
 
-//namespace RestaurantService.API.Controllers
-//{
-//    [ApiController]
-//    [Route("api/[controller]")]
-//    public class AIController : ControllerBase
-//    {
-//        private readonly OpenAIService _openAIService;
+namespace RestaurantService.API.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AIController : ControllerBase
+    {
+        private readonly IGeminiAIService _geminiAIService;
 
-//        public AIController(OpenAIService openAIService)
-//        {
-//            _openAIService = openAIService;
-//        }
+        public AIController(IGeminiAIService geminiAIService)
+        {
+            _geminiAIService = geminiAIService;
+        }
+        [HttpPost("chat")]
+        public async Task<IActionResult> Chat([FromQuery] string prompt)
+        {
+            if (string.IsNullOrEmpty(prompt))
+            {
+                return BadRequest("Prompt is required.");
+            }
+            try
+            {
+                var response = await _geminiAIService.getChatResponse(prompt);
+                return Ok(new ChatResponse { Response = response});
+            }
+            catch (Exception)
+            {
 
-//        // API đề xuất quán ăn
-//        [HttpPost("recommend")]
-//        public async Task<IActionResult> Recommend([FromBody] RecommendRequest req)
-//        {
-//            var result = await _openAIService.RecommendRestaurantsAsync(req.UserHistory, req.Search, req.RestaurantNames);
-//            return Ok(result);
-//        }
-
-//        // API tóm tắt review
-//        [HttpPost("summarize")]
-//        public async Task<IActionResult> Summarize([FromBody] SummarizeRequest req)
-//        {
-//            var result = await _openAIService.SummarizeReviewsAsync(req.RestaurantName, req.Reviews);
-//            return Ok(result);
-//        }
-//    }
-
-//    public class RecommendRequest
-//    {
-//        public string UserHistory { get; set; }
-//        public string Search { get; set; }
-//        public List<string> RestaurantNames { get; set; }
-//    }
-
-//    public class SummarizeRequest
-//    {
-//        public string RestaurantName { get; set; }
-//        public List<string> Reviews { get; set; }
-//    }
-//}
+                throw;
+            }
+            
+        }   
+    }
+}
