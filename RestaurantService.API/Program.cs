@@ -14,12 +14,13 @@ namespace RestaurantService.API
             var builder = WebApplication.CreateBuilder(args);
 
            builder.Services.AddDbContext<Exe201RestaurantServiceDbContext>(options =>
-           options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionStrings")));
+           options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
+
             builder.Services.AddScoped<IRestaurantService, Service.RestaurantService>();
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
-            builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));
+            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
             builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
 
