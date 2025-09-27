@@ -72,7 +72,7 @@ namespace UserService.API.Controllers
             }
         }
 
-        [HttpPost("request")]
+        [HttpPost("request-reset-password")]
         public async Task<IActionResult> RequestReset([FromBody] RequestResetPasswordDto dto)
         {
             var ok = await _userService.SendResetPasswordEmailAsync(dto.Email);
@@ -80,7 +80,7 @@ namespace UserService.API.Controllers
             return Ok("Please check your email to reset password.");
         }
 
-        [HttpPost("confirm")]
+        [HttpPost("confirm-reset-password")]
         public async Task<IActionResult> ConfirmReset([FromBody] ConfirmResetPasswordDto dto)
         {
             var ok = await _userService.ResetPasswordAsync(dto.Token, dto.NewPassword);
