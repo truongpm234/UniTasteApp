@@ -45,6 +45,13 @@ namespace UserService.API
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllHosts",
+                    policy => policy.AllowAnyOrigin()
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod());
+            });
 
             builder.Services.AddSwaggerGen(option =>
             {
