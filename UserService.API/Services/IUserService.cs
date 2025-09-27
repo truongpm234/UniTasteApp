@@ -9,5 +9,7 @@ namespace UserService.API.Services
         Task<User> RegisterAsync(RegisterRequest req);
         Task<bool> SendResetPasswordEmailAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);
+        string GenerateOtpCode(int length = 6);
+
     }
 }

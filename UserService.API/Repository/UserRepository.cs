@@ -62,7 +62,14 @@ namespace UserService.API.Repository
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
-
+        public string GenerateOtpCode(int length = 6)
+        {
+            var random = new Random();
+            string code = "";
+            for (int i = 0; i < length; i++)
+                code += random.Next(0, 10); // mỗi lần lấy 1 số từ 0-9
+            return code;
+        }
 
     }
 }
