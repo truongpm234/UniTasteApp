@@ -45,7 +45,7 @@ namespace RestaurantService.API.Service
             requestJson.Headers.Add("X-goog-Api-Key", _apiKey);
             requestJson.Content = new StringContent(
                 JsonSerializer.Serialize(requestBody), 
-                Encoding.UTF8, "application/json"
+                Encoding.UTF8, "application/json"   
                 );
             var response = await _httpClient.SendAsync(requestJson);
             if (response.IsSuccessStatusCode)

@@ -15,7 +15,14 @@ namespace UserService.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                var port = Environment.GetEnvironmentVariable("PORT");
+                if (!string.IsNullOrEmpty(port))
+                {
+                    serverOptions.ListenAnyIP(int.Parse(port));
+                }
+            });
             // Add services to the container.
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -57,7 +64,7 @@ namespace UserService.API
             {
                 ////JWT Config
                 option.DescribeAllParametersInCamelCase();
-                option.ResolveConflictingActions(conf => conf.First());     // duplicate API name if any
+                option.ResolveConflictingActions(conf => conf.First());    
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
