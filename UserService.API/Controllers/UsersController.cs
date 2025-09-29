@@ -37,24 +37,24 @@ namespace UserService.API.Controllers
         }
 
         private string GenerateJSONWebToken(User systemUserAccount)
-        {      
+        {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"]
-                    , _config["Jwt:Audience"]
-                    , new Claim[]
-                    {
-                    new(ClaimTypes.Email, systemUserAccount.Email),
-                    new(ClaimTypes.Role, systemUserAccount.RoleId.ToString()),
-                    },
-                    expires: DateTime.Now.AddMinutes(5000),
-                    signingCredentials: credentials
-                );
+            var token = new JwtSecurityToken(
+                _config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                new Claim[]
+                {
+            new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()), // ✅ thêm UserId
+            new(ClaimTypes.Email, systemUserAccount.Email),
+            new(ClaimTypes.Role, systemUserAccount.RoleId.ToString()),
+                },
+                expires: DateTime.Now.AddMinutes(5000),
+                signingCredentials: credentials
+            );
 
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return tokenString;
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
         public sealed record LoginRequest(string Email, string Password);
 
