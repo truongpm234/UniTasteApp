@@ -15,7 +15,14 @@ namespace UserService.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                var port = Environment.GetEnvironmentVariable("PORT");
+                if (!string.IsNullOrEmpty(port))
+                {
+                    serverOptions.ListenAnyIP(int.Parse(port));
+                }
+            });
             // Add services to the container.
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -25,6 +32,7 @@ namespace UserService.API
             builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -44,12 +52,19 @@ namespace UserService.API
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllHosts",
+                    policy => policy.AllowAnyOrigin()
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod());
+            });
 
             builder.Services.AddSwaggerGen(option =>
             {
                 ////JWT Config
                 option.DescribeAllParametersInCamelCase();
-                option.ResolveConflictingActions(conf => conf.First());     // duplicate API name if any
+                option.ResolveConflictingActions(conf => conf.First());    
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,

@@ -41,6 +41,35 @@ namespace UserService.API.Repository
             await _context.SaveChangesAsync();
             return newUser;
         }
-      
+
+        public async Task<PasswordResetToken?> GetByTokenAsync(string token)
+        {
+            return await _context.PasswordResetTokens.Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Token == token && t.IsUsed == false && t.ExpiresAt > DateTime.UtcNow);
+        }
+
+        public async Task AddAsync(PasswordResetToken token)
+        {
+            await _context.PasswordResetTokens.AddAsync(token);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+        public string GenerateOtpCode(int length = 6)
+        {
+            var random = new Random();
+            string code = "";
+            for (int i = 0; i < length; i++)
+                code += random.Next(0, 10); // mỗi lần lấy 1 số từ 0-9
+            return code;
+        }
+
     }
 }
