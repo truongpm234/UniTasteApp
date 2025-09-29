@@ -18,13 +18,7 @@ namespace RestaurantService.API.Repository
         }
         public async Task<List<Restaurant>> GetAllRestaurantAsync()
         {
-            return await _context.Restaurants
-                .Include(r => r.Categories)
-                .Include(r => r.Features)
-                .Include(r => r.PriceRange)
-                .Include(r => r.Reviews)
-                .Include(r => r.OpeningHoursNavigation)
-                .ToListAsync();
+            return await _context.Restaurants.ToListAsync();
         }
 
         public async Task<Restaurant> GetByGooglePlaceIdAsync(string googlePlaceId)
@@ -34,7 +28,7 @@ namespace RestaurantService.API.Repository
                 .Include(r => r.Features)
                 .Include(r => r.PriceRange)
                 .Include(r => r.Reviews)
-                .Include(r => r.OpeningHoursNavigation)
+                //.Include(r => r.OpeningHoursNavigation)
                 .FirstOrDefaultAsync(r => r.GooglePlaceId == googlePlaceId);
         }
 
