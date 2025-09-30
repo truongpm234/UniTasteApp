@@ -76,17 +76,20 @@ namespace UserService.API.Controllers
         public async Task<IActionResult> RequestReset([FromBody] RequestResetPasswordDto dto)
         {
             var ok = await _userService.SendResetPasswordEmailAsync(dto.Email);
-            if (!ok) return NotFound("Email not found!");
-            return Ok("Please check your email to reset password.");
+            if (!ok)
+                return Ok(new { status = "false", message = "Email not found!" }); 
+            return Ok(new { status = "true", message = "Please check email to get OTP" });
         }
 
         [HttpPost("confirm-reset-password")]
         public async Task<IActionResult> ConfirmReset([FromBody] ConfirmResetPasswordDto dto)
         {
             var ok = await _userService.ResetPasswordAsync(dto.Token, dto.NewPassword);
-            if (!ok) return BadRequest("Invalid or expired token!");
-            return Ok("Password changed successfully.");
+            if (!ok)
+                return Ok(new { status = "false", message = "Invalid or expired token!" });
+            return Ok(new { status = "true", message = "Password changed successfully." });
         }
+
     }
 
     public class RequestResetPasswordDto
