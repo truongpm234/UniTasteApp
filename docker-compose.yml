@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    environment:
+      SA_PASSWORD: "@truong234"     
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    networks:
+      - uninet
+
+  userservice:
+    build:
+      context: ./UserService.API
+      dockerfile: Dockerfile
+    container_name: userservice
+    environment:
+      - ConnectionStrings__DefaultConnectionStringDB=Server=mssql;Database=EXE201_UserServiceDB;User Id=sa;Password=@truong234;TrustServerCertificate=True
+      - Jwt__Key=0ccfeb299b126a479a64630e2d34e9e91e5fcbcaea8ac9e3347e224b0557a53e
+      - Jwt__Issuer=http://userservice:8080
+      - Jwt__Audience=http://userservice:8080
+      - Smtp__Host=smtp.gmail.com
+      - Smtp__Port=587
+      - Smtp__User=phamminhtruong2032004@gmail.com
+      - Smtp__Pass=pozy xknm aosw byvl
+      - Frontend__ResetPasswordUrl=https://localhost:5001/Account/ResetPassword
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5001:8080"
+    depends_on:
+      - mssql
+    networks:
+      - uninet
+
+  restaurantservice:
+    build:
+      context: ./RestaurantService.API
+      dockerfile: Dockerfile
+    container_name: restaurantservice
+    environment:
+      - ConnectionStrings__DefaultConnectionStringDB=Server=mssql;Database=EXE201_RestaurantServiceDB;User Id=sa;Password=@truong234;TrustServerCertificate=True
+      - GooglePlaces__ApiKey=AIzaSyBTdwm2TIG6d0KiH8lCZllweMUV9P99afg
+      - GooglePlaces__BaseUrl=https://maps.googleapis.com/maps/api/place
+      - GeminiAI__ApiKey=AIzaSyBujFKVBTJgXk945LC_7T0Erz9VewTrUc8
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5003:8080"
+    depends_on:
+      - mssql
+    networks:
+      - uninet
+
+  paymentservice:
+    build:
+      context: ./PaymentService.API
+      dockerfile: Dockerfile
+    container_name: paymentservice
+    environment:
+      - ConnectionStrings__DefaultConnectionStringDB=Server=mssql;Database=EXE201_PaymentServiceDB;User Id=sa;Password=@truong234;TrustServerCertificate=True
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5005:8080"
+    depends_on:
+      - mssql
+    networks:
+      - uninet
+
+  reviewservice:
+    build:
+      context: ./ReviewService.API
+      dockerfile: Dockerfile
+    container_name: reviewservice
+    environment:
+      - ConnectionStrings__DefaultConnectionStringDB=Server=mssql;Database=EXE201_ReviewServiceDB;User Id=sa;Password=@truong234;TrustServerCertificate=True
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5004:8080"
+    depends_on:
+      - mssql
+    networks:
+      - uninet
+
+  socialservice:
+    build:
+      context: ./SocialService.API
+      dockerfile: Dockerfile
+    container_name: socialservice
+    environment:
+      - ConnectionStrings__DefaultConnectionStringDB=Server=mssql;Database=EXE201_SocialServiceDB;User Id=sa;Password=@truong234;TrustServerCertificate=True
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5002:8080"
+    depends_on:
+      - mssql
+    networks:
+      - uninet
+
+  apigateway:
+    build:
+      context: ./ApiGateway
+      dockerfile: Dockerfile
+    container_name: apigateway
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      # Nếu cần biến env cho Ocelot hay JWT thì thêm vào đây
+    ports:
+      - "8001:8080"
+    depends_on:
+      - userservice
+      - restaurantservice
+      - paymentservice
+      - reviewservice
+      - socialservice
+    networks:
+      - uninet
+
+volumes:
+  mssql-data:
+
+networks:
+  uninet:
+    driver: bridge
