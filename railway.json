@@ -1,7 +1,0 @@
-{
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "dotnet publish -c Release -o out ./RestaurantService.API/RestaurantService.API.csproj",
-    "startCommand": "dotnet ./out/RestaurantService.API.dll"
-  }
-}

@@ -1,10 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore "SocialService.API.csproj"
-RUN dotnet publish "SocialService.API.csproj" -c Release -o /app/publish
+RUN dotnet restore "ApiGateway.csproj"
+RUN dotnet publish "ApiGateway.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "SocialService.API.dll"]
+ENTRYPOINT ["dotnet", "ApiGateway.dll"]
