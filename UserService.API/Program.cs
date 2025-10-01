@@ -61,11 +61,15 @@ namespace UserService.API
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-            builder.Services.AddCors(options => 
-            { options.AddPolicy("AllowAllHosts", 
-            policy => policy.AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod()); });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                );
+            });
 
             builder.Services.AddSwaggerGen(option =>
             {
@@ -104,9 +108,9 @@ namespace UserService.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseCors("AllowAll");
             app.UseAuthorization();
             app.UseAuthentication();
-            app.UseCors();
             app.MapControllers();
             app.UseSwagger();
             app.UseSwaggerUI();
