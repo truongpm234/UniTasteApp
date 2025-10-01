@@ -24,17 +24,23 @@ namespace UserService.API.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = _userService.GetUserAccount(request.Email, request.Password);
+            var user = await _userService.GetUserAccount(request.Email, request.Password);
 
-            if (user == null || user.Result == null)
+            if (user == null)
                 return Unauthorized();
 
-            var token = GenerateJSONWebToken(user.Result);
+            var token = GenerateJSONWebToken(user);
 
-            return Ok(token);
+            return Ok(new
+            {
+                token,
+                fullName = user.FullName,
+                email = user.Email
+            });
         }
+
 
         private string GenerateJSONWebToken(User systemUserAccount)
         {
