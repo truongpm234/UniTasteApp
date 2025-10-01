@@ -97,7 +97,6 @@ namespace UserService.API
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
             app.UseAuthorization();
             app.UseAuthentication();
             app.UseCors();
