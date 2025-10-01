@@ -30,8 +30,16 @@ namespace UserService.API
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
             });
             builder.Configuration.AddEnvironmentVariables();
+            builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
             builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
+
+            Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnectionStringDB"));
+
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
@@ -96,7 +104,6 @@ namespace UserService.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseAuthorization();
             app.UseAuthentication();
             app.UseCors();

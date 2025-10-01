@@ -46,7 +46,7 @@ namespace UserService.API.Controllers
                 _config["Jwt:Audience"],
                 new Claim[]
                 {
-            new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()), // ✅ thêm UserId
+            new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()), 
             new(ClaimTypes.Email, systemUserAccount.Email),
             new(ClaimTypes.Role, systemUserAccount.RoleId.ToString()),
                 },
