@@ -34,10 +34,10 @@ node_modules/
 npm-debug.log*
 
 # Secrets and user configs
-appsettings.json
-appsettings.Development.json
-appsettings.*.json
-secrets.json
+# appsettings.json
+# appsettings.Development.json
+# appsettings.*.json
+# secrets.json
 
 # NuGet
 *.nupkg
