@@ -108,7 +108,8 @@ namespace UserService.API
             app.UseAuthentication();
             app.UseCors();
             app.MapControllers();
-
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.Run();
         }
     }
