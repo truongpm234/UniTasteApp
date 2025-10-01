@@ -37,6 +37,7 @@ namespace ApiGateway
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                     };
                 });
+            builder.Configuration.AddEnvironmentVariables();
 
             builder.Services.AddAuthorization();
 
