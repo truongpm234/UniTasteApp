@@ -29,6 +29,7 @@ namespace UserService.API
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
             });
+            builder.Configuration.AddEnvironmentVariables();
             builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -54,10 +55,12 @@ namespace UserService.API
     });
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAllHosts",
-                    policy => policy.AllowAnyOrigin()
-                                    .AllowAnyHeader()
-                                    .AllowAnyMethod());
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins("https://unitaste-fe.vercel.app")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
             });
 
             builder.Services.AddSwaggerGen(option =>
@@ -99,11 +102,9 @@ namespace UserService.API
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
             app.UseAuthentication();
-
-
+            app.UseCors();
             app.MapControllers();
 
             app.Run();
