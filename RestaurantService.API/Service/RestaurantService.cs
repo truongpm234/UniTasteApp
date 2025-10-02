@@ -1,5 +1,6 @@
 ﻿using RestaurantService.API.Models.DTO;
 using RestaurantService.API.Models.Entity;
+using RestaurantService.API.Models.GooglePlaces;
 using RestaurantService.API.Repository;
 using RestaurantService.API.Service;
 
@@ -58,7 +59,15 @@ namespace RestaurantService.API.Service
             return await _restaurantRepo.GetOrCreateCategoryByNameAsync(name, sourceType);
         }
 
-       
+        public async Task<Restaurant> GetRestaurantByIdAsync(int id)
+        {
+            return await _restaurantRepo.GetRestaurantByIdAsync(id);
+        }
+
+        public async Task<Restaurant> MapGooglePlaceToRestaurantAsync(GooglePlace place)
+        {
+            return await _restaurantRepo.MapGooglePlaceToRestaurantAsync(place);
+        }
     }
 
 }

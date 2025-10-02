@@ -41,6 +41,10 @@ namespace UserService.API.Repository
             await _context.SaveChangesAsync();
             return newUser;
         }
+        public static class RegisterOtpMemory
+        {
+            public static Dictionary<string, RegisterVerification> Pending = new();
+        }
 
         public async Task<PasswordResetToken?> GetByTokenAsync(string token)
         {

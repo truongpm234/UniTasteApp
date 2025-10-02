@@ -11,16 +11,30 @@ namespace RestaurantService.API.Repository
     public class RestaurantRepository : IRestaurantRepository
     {
         private readonly Exe201RestaurantServiceDbContext _context;
-        //private readonly IGooglePlacesService _googlePlacesService;
-        public RestaurantRepository(Exe201RestaurantServiceDbContext context) 
+        public RestaurantRepository(Exe201RestaurantServiceDbContext context)
         {
             _context = context;
         }
         public async Task<List<Restaurant>> GetAllRestaurantAsync()
         {
-            return await _context.Restaurants.ToListAsync();
+            return await _context.Restaurants
+    .Include(r => r.Categories)
+    .Include(r => r.Features)
+    .Include(r => r.PriceRange)
+    .Include(r => r.Reviews)
+    .ToListAsync();
+
         }
 
+        public async Task<Restaurant> GetRestaurantByIdAsync(int id)
+        {
+            return await _context.Restaurants
+                .Include(r => r.Categories)
+                .Include(r => r.Features)
+                .Include(r => r.PriceRange)
+                .Include(r => r.Reviews)
+                .FirstOrDefaultAsync(r => r.RestaurantId == id);
+        }
         public async Task<Restaurant> GetByGooglePlaceIdAsync(string googlePlaceId)
         {
             return await _context.Restaurants

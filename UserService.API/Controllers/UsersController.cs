@@ -7,6 +7,7 @@ using System.Text;
 using UserService.API.Models.DTO;
 using UserService.API.Models.Entity;
 using UserService.API.Services;
+using static UserService.API.Repository.UserRepository;
 
 namespace UserService.API.Controllers
 {
@@ -16,11 +17,12 @@ namespace UserService.API.Controllers
     {
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
-
-        public UsersController(IConfiguration config, IUserService userService)
+        private readonly IEmailService _emailService;
+        public UsersController(IConfiguration config, IUserService userService, IEmailService emailService)
         {
             _config = config;
             _userService = userService;
+            _emailService = emailService;
         }
 
         [HttpPost("Login")]
@@ -66,17 +68,52 @@ namespace UserService.API.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
-        {
-            try
+        {            
+            var otpCode = _userService.GenerateOtpCode();
+
+            // 3. Lưu thông tin vào bộ nhớ tạm (hoặc DB nếu muốn)
+            RegisterOtpMemory.Pending[req.Email] = new RegisterVerification
             {
-                var user = await _userService.RegisterAsync(req);
-                return Ok(new { user.UserId, user.Email, user.FullName, user.BirthDate, user.RoleId, user.RoleName });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
+                Email = req.Email,
+                FullName = req.FullName,
+                PasswordHash = req.PasswordHash,
+                BirthDate = req.BirthDate.ToDateTime(TimeOnly.MinValue),
+                OtpCode = otpCode,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+            };
+            // 4. Gửi mail
+            await _emailService.SendEmailAsync(req.Email, "Your UniTaste OTP code", $"Your OTP is: {otpCode}");
+
+            return Ok(new { status = true, message = "OTP sent to your email. Please verify to complete registration." });
         }
+        
+        [HttpPost("verify-register")]
+        public async Task<IActionResult> VerifyRegister([FromBody] RegisterVerifyRequest req)
+        {
+            if (!RegisterOtpMemory.Pending.TryGetValue(req.Email, out var pending) ||
+                pending.ExpiresAt < DateTime.UtcNow ||
+                pending.OtpCode != req.OtpCode)
+            {
+                return BadRequest(new { error = "OTP is invalid or expired" });
+            }
+
+            // Đăng ký user thật sự
+            var registerRequest = new RegisterRequest
+            {
+                Email = pending.Email,
+                FullName = pending.FullName,
+                PasswordHash = pending.PasswordHash,
+                BirthDate = DateOnly.FromDateTime(pending.BirthDate)
+            };
+
+            var user = await _userService.RegisterAsync(registerRequest);
+
+            // Xóa thông tin khỏi bộ nhớ tạm
+            RegisterOtpMemory.Pending.Remove(req.Email);
+
+            return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
+        }
+
 
         [HttpPost("request-reset-password")]
         public async Task<IActionResult> RequestReset([FromBody] RequestResetPasswordDto dto)
@@ -102,7 +139,11 @@ namespace UserService.API.Controllers
     {
         public string Email { get; set; }
     }
-
+    public class RegisterVerifyRequest
+    {
+        public string Email { get; set; }
+        public string OtpCode { get; set; }
+    }
     public class ConfirmResetPasswordDto
     {
         public string Token { get; set; }
