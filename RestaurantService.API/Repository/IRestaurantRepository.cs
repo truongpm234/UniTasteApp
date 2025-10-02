@@ -7,6 +7,7 @@ namespace RestaurantService.API.Repository
     public interface IRestaurantRepository
     {
         Task<List<Restaurant>> GetAllRestaurantAsync();
+        Task<Restaurant> GetRestaurantByIdAsync(int id);
         Task<Restaurant> GetByGooglePlaceIdAsync(string googlePlaceId);
         Task<bool> ExistsByGooglePlaceIdAsync(string googlePlaceId);
         Task<Restaurant> CreateAsync(Restaurant restaurant);
