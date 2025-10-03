@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -63,12 +63,12 @@ namespace UserService.API
     });
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
-                    builder => builder
-                        .AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                );
+                options.AddPolicy("AllowAllOrigins", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
             });
 
             builder.Services.AddSwaggerGen(option =>
@@ -108,9 +108,10 @@ namespace UserService.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseCors("AllowAll");
-            app.UseAuthorization();
+            app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
+            app.UseAuthorization();
+           
             app.MapControllers();
             app.UseSwagger();
             app.UseSwaggerUI();
