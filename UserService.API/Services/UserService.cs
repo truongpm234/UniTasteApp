@@ -31,8 +31,49 @@ namespace UserService.API.Services
 
         public async Task<User> RegisterAsync(RegisterRequest req)
         {
-            return await _userRepository.RegisterAsync(req);
+            var user = await _userRepository.RegisterAsync(req);
+            return user;
         }
+
+        public async Task SendRegisterOtpEmailAsync(string email, string fullName, string otpCode)
+        {
+            var body = $@"
+<table style='width:100%;max-width:480px;margin:auto;
+              font-family:Segoe UI, Arial, sans-serif;
+              border-radius:12px;background:#ffffff;
+              box-shadow:0 2px 12px rgba(0,0,0,0.1);
+              border:1px solid #eee'>
+  <tr>
+    <td style='padding:32px 24px;text-align:center'>
+      <!-- Logo đơn giản, không có background -->
+      <img src='https://sv2.anhsieuviet.com/2025/09/27/unitaste.jpg' 
+           width='160' alt='UniTaste' style='margin-bottom:20px;display:block;margin-left:auto;margin-right:auto;' />
+      
+      <h2 style='margin:0 0 16px 0;color:#1181FF;
+                 font-size:22px;font-weight:600'>
+          Xác minh tài khoản UniTaste
+      </h2>
+      <p style='font-size:15px;color:#444;margin:0 0 20px 0'>
+          Xin chào {fullName}, <br/>
+          Đây là mã OTP để hoàn tất việc đăng ký tài khoản của bạn:
+      </p>
+      <div style='background:#1181FF;color:#fff;border-radius:8px;
+                  display:inline-block;padding:14px 28px;
+                  font-size:24px;letter-spacing:6px;
+                  font-weight:bold;margin:20px 0'>
+          {otpCode}
+      </div>
+      <p style='font-size:14px;color:#666;margin:24px 0 0 0;line-height:1.6'>
+          Mã sẽ <b>hết hạn sau 15 phút</b>.<br/>
+          Vui lòng nhập mã này trong ứng dụng để kích hoạt tài khoản.
+      </p>
+    </td>
+  </tr>
+</table>";
+
+            await _emailService.SendEmailAsync(email, "UniTaste - Account Verification Code", body);
+        }
+
         public async Task<bool> SendResetPasswordEmailAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);
