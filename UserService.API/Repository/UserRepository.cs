@@ -18,7 +18,11 @@ namespace UserService.API.Repository
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email && u.PasswordHash == password && u.Status == "Active");
         }
-
+        public async Task<User> GetUserAccountByEmail(string email)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
         public async Task<User> RegisterAsync(RegisterRequest req)
         {
             // Kiểm tra email đã tồn tại
