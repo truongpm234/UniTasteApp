@@ -19,6 +19,10 @@ namespace RestaurantService.API.Service
         {
             return await _restaurantRepo.GetAllRestaurantAsync();
         }
+        public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
+        {
+            return await _restaurantRepo.GetRestaurantsWithinRadiusAsync(latitude, longitude, radiusKm);
+        }
         public async Task<Restaurant> GetByGooglePlaceIdAsync(string googlePlaceId)
         {
             return await _restaurantRepo.GetByGooglePlaceIdAsync(googlePlaceId);

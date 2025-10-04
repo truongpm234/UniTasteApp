@@ -26,6 +26,28 @@ namespace RestaurantService.API.Repository
 
         }
 
+        public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
+        {
+            // Haversine Formula in LINQ
+            const double EarthRadius = 6371; // km
+
+            return await _context.Restaurants
+                .Where(r =>
+                    EarthRadius * 2 * Math.Asin(
+                        Math.Sqrt(
+                            Math.Pow(Math.Sin((double)((latitude - r.Latitude) * Math.PI / 360)), 2) +
+                            Math.Cos(latitude * Math.PI / 180) * Math.Cos((double)(r.Latitude * Math.PI / 180)) *
+                            Math.Pow(Math.Sin((double)((longitude - r.Longitude) * Math.PI / 360)), 2)
+                        )
+                    ) <= radiusKm
+                )
+                .Include(r => r.Categories)
+                .Include(r => r.Features)
+                .Include(r => r.PriceRange)
+                .Include(r => r.Reviews)
+                .ToListAsync();
+        }
+
         public async Task<Restaurant> GetRestaurantByIdAsync(int id)
         {
             return await _context.Restaurants
