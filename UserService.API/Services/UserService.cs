@@ -28,6 +28,10 @@ namespace UserService.API.Services
         {
             return await _userRepository.GetUserAccount(email, password);
         }
+        public async Task<User> GetUserAccountByEmail(string email)
+        {
+            return await _userRepository.GetUserAccountByEmail(email);
+        }
 
         public async Task<User> RegisterAsync(RegisterRequest req)
         {
@@ -133,6 +137,6 @@ namespace UserService.API.Services
         {
             return _userRepository.GenerateOtpCode(length);
         }
-        
+
     }
 }

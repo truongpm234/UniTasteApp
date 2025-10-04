@@ -6,6 +6,7 @@ namespace UserService.API.Services
     public interface IUserService
     {
         Task<User> GetUserAccount(string email, string password);
+        Task<User> GetUserAccountByEmail(string email);
         Task<User> RegisterAsync(RegisterRequest req);
         Task<bool> SendResetPasswordEmailAsync(string email);
         Task<bool> ResetPasswordAsync(string token, string newPassword);

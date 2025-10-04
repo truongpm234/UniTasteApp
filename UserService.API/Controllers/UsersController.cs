@@ -69,9 +69,15 @@ namespace UserService.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
+            // Check if email already exists in the database
+            var existingUser = await _userService.GetUserAccountByEmail(req.Email);
+            if (existingUser != null)
+            {
+                return BadRequest(new { status = false, message = "Email already exists." });
+            }
+
             var otpCode = _userService.GenerateOtpCode();
 
-            // 1. Lưu thông tin vào bộ nhớ tạm
             RegisterOtpMemory.Pending[req.Email] = new RegisterVerification
             {
                 Email = req.Email,
@@ -82,7 +88,6 @@ namespace UserService.API.Controllers
                 ExpiresAt = DateTime.UtcNow.AddMinutes(15)
             };
 
-            // 2. Gọi UserService để gửi email OTP (có CSS)
             await _userService.SendRegisterOtpEmailAsync(req.Email, req.FullName, otpCode);
 
             return Ok(new { status = true, message = "OTP sent to your email. Please verify to complete registration." });
