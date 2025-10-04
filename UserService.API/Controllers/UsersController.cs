@@ -68,10 +68,10 @@ namespace UserService.API.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
-        {            
+        {
             var otpCode = _userService.GenerateOtpCode();
 
-            // 3. Lưu thông tin vào bộ nhớ tạm (hoặc DB nếu muốn)
+            // 1. Lưu thông tin vào bộ nhớ tạm
             RegisterOtpMemory.Pending[req.Email] = new RegisterVerification
             {
                 Email = req.Email,
@@ -81,15 +81,18 @@ namespace UserService.API.Controllers
                 OtpCode = otpCode,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(15)
             };
-            // 4. Gửi mail
-            await _emailService.SendEmailAsync(req.Email, "Your UniTaste OTP code", $"Your OTP is: {otpCode}");
+
+            // 2. Gọi UserService để gửi email OTP (có CSS)
+            await _userService.SendRegisterOtpEmailAsync(req.Email, req.FullName, otpCode);
 
             return Ok(new { status = true, message = "OTP sent to your email. Please verify to complete registration." });
         }
-        
+
+
         [HttpPost("verify-register")]
         public async Task<IActionResult> VerifyRegister([FromBody] RegisterVerifyRequest req)
         {
+            // Kiểm tra OTP
             if (!RegisterOtpMemory.Pending.TryGetValue(req.Email, out var pending) ||
                 pending.ExpiresAt < DateTime.UtcNow ||
                 pending.OtpCode != req.OtpCode)
@@ -97,22 +100,22 @@ namespace UserService.API.Controllers
                 return BadRequest(new { error = "OTP is invalid or expired" });
             }
 
-            // Đăng ký user thật sự
-            var registerRequest = new RegisterRequest
-            {
-                Email = pending.Email,
-                FullName = pending.FullName,
-                PasswordHash = pending.PasswordHash,
-                BirthDate = DateOnly.FromDateTime(pending.BirthDate)
-            };
+ 
+                // Chuẩn bị thông tin để lưu vào DB
+                var registerRequest = new RegisterRequest
+                {
+                    Email = pending.Email,
+                    FullName = pending.FullName,
+                    PasswordHash = pending.PasswordHash,
+                    BirthDate = DateOnly.FromDateTime(pending.BirthDate)
+                };
+                var user = await _userService.RegisterAsync(registerRequest);           
+                RegisterOtpMemory.Pending.Remove(req.Email);
 
-            var user = await _userService.RegisterAsync(registerRequest);
-
-            // Xóa thông tin khỏi bộ nhớ tạm
-            RegisterOtpMemory.Pending.Remove(req.Email);
-
-            return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
+                return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
         }
+
+
 
 
         [HttpPost("request-reset-password")]
