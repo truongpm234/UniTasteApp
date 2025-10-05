@@ -121,16 +121,22 @@ namespace UserService.API.Controllers
         }
 
 
-
-
         [HttpPost("request-reset-password")]
         public async Task<IActionResult> RequestReset([FromBody] RequestResetPasswordDto dto)
         {
-            var ok = await _userService.SendResetPasswordEmailAsync(dto.Email);
-            if (!ok)
-                return Ok(new { status = "false", message = "Email not found!" }); 
-            return Ok(new { status = "true", message = "Please check email to get OTP" });
+            var otpCode = await _userService.SendResetPasswordEmailAsync(dto.Email);
+            if (otpCode == null)
+                return Ok(new { status = "false", message = "Email not found!" });
+
+            // Trả về cả OTP trong response
+            return Ok(new
+            {
+                status = "true",
+                message = "Please check email to get OTP",
+                otp = otpCode
+            });
         }
+
 
         [HttpPost("confirm-reset-password")]
         public async Task<IActionResult> ConfirmReset([FromBody] ConfirmResetPasswordDto dto)
