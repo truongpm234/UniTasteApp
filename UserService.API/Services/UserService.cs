@@ -78,10 +78,10 @@ namespace UserService.API.Services
             await _emailService.SendEmailAsync(email, "UniTaste - Account Verification Code", body);
         }
 
-        public async Task<bool> SendResetPasswordEmailAsync(string email)
+        public async Task<string?> SendResetPasswordEmailAsync(string email)
         {
             var user = await _userRepository.GetByEmailAsync(email);
-            if (user == null) return false;
+            if (user == null) return null;
 
             var otpCode = GenerateOtpCode(6);
 
@@ -114,7 +114,7 @@ namespace UserService.API.Services
 
             await _emailService.SendEmailAsync(email, "UniTaste - Password Reset Verification Code", body);
 
-            return true;
+            return otpCode;
         }
 
         public async Task<bool> ResetPasswordAsync(string token, string newPassword)
