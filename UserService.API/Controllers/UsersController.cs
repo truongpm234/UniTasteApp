@@ -73,7 +73,7 @@ namespace UserService.API.Controllers
             var existingUser = await _userService.GetUserAccountByEmail(req.Email);
             if (existingUser != null)
             {
-                return Ok(new { status = false, message = "Email already exists." });
+                return BadRequest(new { status = false, message = "Email already exists." });
             }
 
             var otpCode = _userService.GenerateOtpCode();
