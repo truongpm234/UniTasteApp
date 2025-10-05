@@ -58,7 +58,7 @@ namespace UserService.API.Controllers
             new(ClaimTypes.Email, systemUserAccount.Email),
             new(ClaimTypes.Role, systemUserAccount.RoleId.ToString()),
                 },
-                expires: DateTime.Now.AddMinutes(5000),
+                expires: DateTime.Now.AddMinutes(500000),
                 signingCredentials: credentials
             );
 
@@ -73,7 +73,7 @@ namespace UserService.API.Controllers
             var existingUser = await _userService.GetUserAccountByEmail(req.Email);
             if (existingUser != null)
             {
-                return BadRequest(new { status = false, message = "Email already exists." });
+                return Ok(new { status = false, message = "Email already exists." });
             }
 
             var otpCode = _userService.GenerateOtpCode();
@@ -85,7 +85,7 @@ namespace UserService.API.Controllers
                 PasswordHash = req.PasswordHash,
                 BirthDate = req.BirthDate.ToDateTime(TimeOnly.MinValue),
                 OtpCode = otpCode,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+                ExpiresAt = DateTime.UtcNow.AddMinutes(120)
             };
 
             await _userService.SendRegisterOtpEmailAsync(req.Email, req.FullName, otpCode);
