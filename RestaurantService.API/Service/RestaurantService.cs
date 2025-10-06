@@ -72,6 +72,11 @@ namespace RestaurantService.API.Service
         {
             return await _restaurantRepo.MapGooglePlaceToRestaurantAsync(place);
         }
+        public async Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name)
+        {
+            return await _restaurantRepo.SearchRestaurantsByNameAsync(name);
+        }
+
     }
 
 }
