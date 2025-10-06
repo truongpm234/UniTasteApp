@@ -17,6 +17,8 @@ public interface IRestaurantService
     Task<int> GetOrCreateFeatureIdAsync(string name);
     Task<Restaurant> MapGooglePlaceToRestaurantAsync(GooglePlace place);
     Task<Category> GetOrCreateCategoryByNameAsync(string name, string sourceType = "Google");
+    Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name);
+
 
 }
 

@@ -177,6 +177,16 @@ namespace RestaurantService.API.Repository
             await _context.SaveChangesAsync();
             return category;
         }
+        public async Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return new List<Restaurant>();
+
+            return await _context.Restaurants
+                .Where(r => r.Name != null && EF.Functions.Like(r.Name.ToLower(), $"%{name.ToLower()}%"))
+                .ToListAsync();
+        }
+
 
     }
 }

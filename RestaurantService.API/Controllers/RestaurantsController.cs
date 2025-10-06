@@ -67,4 +67,25 @@ public class RestaurantsController : ControllerBase
         }
         return Ok(restaurants);
     }
+
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchRestaurantByName([FromQuery] string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return BadRequest("Restaurant name is required.");
+
+        var restaurants = await _restaurantService.SearchRestaurantsByNameAsync(name);
+        int count = restaurants?.Count ?? 0;
+
+        if (count == 0)
+            return NotFound(new { count = 0, message = "No restaurants found matching the name." });
+
+        return Ok(new
+        {
+            count,
+            restaurants
+        });
+    }
+
 }
