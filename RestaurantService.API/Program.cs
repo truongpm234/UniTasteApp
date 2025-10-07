@@ -49,6 +49,15 @@ namespace RestaurantService.API
                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 });
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
             builder.Services.AddSwaggerGen(option =>
             {
                 ////JWT Config
@@ -97,6 +106,7 @@ namespace RestaurantService.API
             app.UseSwagger();
             app.UseSwaggerUI();
             app.MapControllers();
+            app.UseCors("AllowAllOrigins");
 
             app.Run();
         }
