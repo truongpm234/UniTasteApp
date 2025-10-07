@@ -101,12 +101,13 @@ namespace RestaurantService.API
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowAllOrigins");
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSwagger();
             app.UseSwaggerUI();
             app.MapControllers();
-            app.UseCors("AllowAllOrigins");
 
             app.Run();
         }
