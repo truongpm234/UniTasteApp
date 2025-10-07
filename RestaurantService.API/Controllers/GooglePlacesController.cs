@@ -16,7 +16,7 @@ namespace RestaurantService.API.Controllers
             _googlePlacesService = googlePlacesService;
         }
 
-        
+
         //[HttpGet("search-nearby")]
         //public async Task<IActionResult> SearchNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] int radius = 5000, [FromQuery] string type = "restaurant", [FromQuery] string keyword = "")
         //{
@@ -37,7 +37,7 @@ namespace RestaurantService.API.Controllers
         //    return Ok(results);
         //}
 
-       
+
         //[HttpPost("search-import-nearby")]
         //public async Task<IActionResult> SearchImportNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] int radius = 5000, [FromQuery] string type = "restaurant", [FromQuery] string keyword = "")
         //{
