@@ -19,6 +19,45 @@ namespace RestaurantService.API.Service
         {
             return await _restaurantRepo.GetAllRestaurantAsync();
         }
+
+        public async Task<List<RestaurantResponseDto>> GetAllRestaurantFullAsync()
+        {
+            var restaurants = await _restaurantRepo.GetAllRestaurantAsync();
+            var result = new List<RestaurantResponseDto>();
+
+            foreach (var r in restaurants)
+            {
+                // ✅ Get categories for specific restaurant only
+                var categories = await _restaurantRepo.GetCategoriesByRestaurantIdAsync(r.RestaurantId);
+
+                // ✅ Parse opening hours to OpeningHourDto2
+                var openingHours = _restaurantRepo.ParseOpeningHours(r.OpeningHours ?? string.Empty);
+
+                result.Add(new RestaurantResponseDto
+                {
+                    RestaurantId = r.RestaurantId,
+                    Name = r.Name,
+                    Address = r.Address,
+                    Latitude = r.Latitude ?? 0,
+                    Longitude = r.Longitude ?? 0,
+                    GooglePlaceId = r.GooglePlaceId,
+                    Phone = r.Phone,
+                    Website = r.Website,
+                    CoverImageUrl = r.CoverImageUrl,
+                    GoogleRating = r.GoogleRating,
+                    PriceRangeId = r.PriceRangeId,
+                    CreatedAt = r.CreatedAt,
+                    Status = r.Status,
+                    PriceRange = r.PriceRange,
+                    Categories = categories,
+                    Features = r.Features?.ToList() ?? new List<Feature>(),
+                    Reviews = r.Reviews?.ToList() ?? new List<Review>(),
+                    OpeningHours = openingHours
+                });
+            }
+
+            return result;
+        }
         public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
         {
             return await _restaurantRepo.GetRestaurantsWithinRadiusAsync(latitude, longitude, radiusKm);

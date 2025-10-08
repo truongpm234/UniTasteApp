@@ -20,7 +20,7 @@ public class RestaurantsController : ControllerBase
     [Route("get-all-restaurant")]
     public async Task<IActionResult> GetAllRestaurant()
     {
-        var restaurants = await _restaurantService.GetAllRestaurantAsync();
+        var restaurants = await _restaurantService.GetAllRestaurantFullAsync();
         int count = restaurants?.Count ?? 0;
 
         if (restaurants == null || restaurants.Count == 0)

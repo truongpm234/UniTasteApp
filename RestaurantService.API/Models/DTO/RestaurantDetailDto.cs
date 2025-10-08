@@ -2,7 +2,7 @@
 {
     public class RestaurantDetailDto
     {
-        public List<OpeningHourDto> OpeningHours { get; set; } = new();
+        public List<OpeningHourDto2> OpeningHours { get; set; } = new();
         public int RestaurantId { get; set; }
 
         public string? Name { get; set; }
