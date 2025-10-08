@@ -25,7 +25,43 @@ namespace RestaurantService.API.Repository
     .ToListAsync();
 
         }
+        public async Task<List<Category>> GetCategoriesByRestaurantIdAsync(int restaurantId)
+        {
+            return await _context.RestaurantCategories
+                .Where(rc => rc.RestaurantId == restaurantId)
+                .Join(_context.Categories,
+                    rc => rc.CategoryId,
+                    c => c.CategoryId,
+                    (rc, c) => c)
+                .ToListAsync();
+        }
+        public List<OpeningHourDto2> ParseOpeningHours(string openingHours)
+        {
+            var result = new List<OpeningHourDto2>();
 
+            if (string.IsNullOrWhiteSpace(openingHours))
+                return result;
+
+            // Split by semicolon to get each day
+            var dayEntries = openingHours.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var entry in dayEntries)
+            {
+                // Split by colon to separate day and hours
+                var parts = entry.Split(':', 2);
+
+                if (parts.Length == 2)
+                {
+                    result.Add(new OpeningHourDto2
+                    {
+                        Day = parts[0].Trim(),
+                        Hours = parts[1].Trim()
+                    });
+                }
+            }
+
+            return result;
+        }
         public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
         {
             // Haversine Formula in LINQ

@@ -7,6 +7,8 @@ namespace RestaurantService.API.Repository
     public interface IRestaurantRepository
     {
         Task<List<Restaurant>> GetAllRestaurantAsync();
+        Task<List<Category>> GetCategoriesByRestaurantIdAsync(int restaurantId);
+        List<OpeningHourDto2> ParseOpeningHours(string openingHours);
         Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm);
         Task<Restaurant> GetRestaurantByIdAsync(int id);
         Task<Restaurant> GetByGooglePlaceIdAsync(string googlePlaceId);
