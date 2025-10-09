@@ -102,10 +102,39 @@ namespace RestaurantService.API.Service
             return await _restaurantRepo.GetOrCreateCategoryByNameAsync(name, sourceType);
         }
 
-        public async Task<Restaurant> GetRestaurantByIdAsync(int id)
+        public async Task<RestaurantResponseDto?> GetRestaurantByIdAsync(int id)
         {
-            return await _restaurantRepo.GetRestaurantByIdAsync(id);
+            var restaurant = await _restaurantRepo.GetRestaurantByIdAsync(id);
+            if (restaurant == null)
+                return null;
+
+            var categories = await _restaurantRepo.GetCategoriesByRestaurantIdAsync(restaurant.RestaurantId);
+
+            var openingHours = _restaurantRepo.ParseOpeningHours(restaurant.OpeningHours ?? string.Empty);
+
+            return new RestaurantResponseDto
+            {
+                RestaurantId = restaurant.RestaurantId,
+                Name = restaurant.Name,
+                Address = restaurant.Address,
+                Latitude = restaurant.Latitude ?? 0,
+                Longitude = restaurant.Longitude ?? 0,
+                GooglePlaceId = restaurant.GooglePlaceId,
+                Phone = restaurant.Phone,
+                Website = restaurant.Website,
+                CoverImageUrl = restaurant.CoverImageUrl,
+                GoogleRating = restaurant.GoogleRating,
+                PriceRangeId = restaurant.PriceRangeId,
+                CreatedAt = restaurant.CreatedAt,
+                Status = restaurant.Status,
+                PriceRange = restaurant.PriceRange,
+                Categories = categories,
+                Features = restaurant.Features?.ToList() ?? new List<Feature>(),
+                Reviews = restaurant.Reviews?.ToList() ?? new List<Review>(),
+                OpeningHours = openingHours
+            };
         }
+
 
         public async Task<Restaurant> MapGooglePlaceToRestaurantAsync(GooglePlace place)
         {
