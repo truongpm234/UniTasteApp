@@ -223,6 +223,52 @@ namespace RestaurantService.API.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Restaurant>> SearchByNameAndCategoryAsync(string name, string categoryName)
+        {
+            var query = from r in _context.Restaurants
+                        join rc in _context.RestaurantCategories on r.RestaurantId equals rc.RestaurantId
+                        join c in _context.Categories on rc.CategoryId equals c.CategoryId
+                        where EF.Functions.Like(r.Name.ToLower(), $"%{name.ToLower()}%")
+                              && c.Name.ToLower().Contains(categoryName.ToLower())
+                        select r;
+
+            return await query
+                .Include(r => r.Categories)
+                .Include(r => r.Features)
+                .Include(r => r.PriceRange)
+                .Include(r => r.Reviews)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName)
+        {
+            const double EarthRadius = 6371;
+
+            var query = from r in _context.Restaurants
+                        join rc in _context.RestaurantCategories on r.RestaurantId equals rc.RestaurantId
+                        join c in _context.Categories on rc.CategoryId equals c.CategoryId
+                        where
+                            (
+                                EarthRadius * 2 * Math.Asin(
+                                    Math.Sqrt(
+                                        Math.Pow(Math.Sin((double)((latitude - r.Latitude) * Math.PI / 360)), 2) +
+                                        Math.Cos(latitude * Math.PI / 180) * Math.Cos((double)(r.Latitude * Math.PI / 180)) *
+                                        Math.Pow(Math.Sin((double)((longitude - r.Longitude) * Math.PI / 360)), 2)
+                                    )
+                                )
+                            ) <= radiusKm
+                            && c.Name.ToLower().Contains(categoryName.ToLower())
+                        select r;
+
+            return await query
+                .Include(r => r.Categories)
+                .Include(r => r.Features)
+                .Include(r => r.PriceRange)
+                .Include(r => r.Reviews)
+                .Distinct()
+                .ToListAsync();
+        }
 
     }
 }

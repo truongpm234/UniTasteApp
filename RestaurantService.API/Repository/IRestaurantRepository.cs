@@ -22,6 +22,8 @@ namespace RestaurantService.API.Repository
         Task<Restaurant> MapGooglePlaceToRestaurantAsync(GooglePlace place);
         Task<Category> GetOrCreateCategoryByNameAsync(string name, string sourceType = "Google");
         Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name);
+        Task<List<Restaurant>> SearchByNameAndCategoryAsync(string name, string categoryName);
+        Task<List<Restaurant>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName);
 
 
     }

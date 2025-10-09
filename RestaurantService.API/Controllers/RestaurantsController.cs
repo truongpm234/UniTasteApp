@@ -15,7 +15,7 @@ public class RestaurantsController : ControllerBase
         _restaurantService = restaurantService;
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpGet]
     [Route("get-all-restaurant")]
     public async Task<IActionResult> GetAllRestaurant()
@@ -34,7 +34,7 @@ public class RestaurantsController : ControllerBase
         });
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpPost("find-by-location-10km")]
     public async Task<IActionResult> GetRestaurantsByLocation([FromBody] LocationRequestDto location)
     {
@@ -80,6 +80,43 @@ public class RestaurantsController : ControllerBase
 
         if (count == 0)
             return NotFound(new { count = 0, message = "No restaurants found matching the name." });
+
+        return Ok(new
+        {
+            count,
+            restaurants
+        });
+    }
+
+    [Authorize]
+    [HttpGet("search-by-name-and-category")]
+    public async Task<IActionResult> SearchByNameAndCategory([FromQuery] string name, [FromQuery] string category)
+    {
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(category))
+            return BadRequest("Name and Category are required.");
+
+        var restaurants = await _restaurantService.SearchByNameAndCategoryAsync(name, category);
+        int count = restaurants?.Count ?? 0;
+
+        if (count == 0)
+            return Ok(new { count = 0, message = "No restaurants found matching the name and category." });
+
+        return Ok(new
+        {
+            count,
+            restaurants
+        });
+    }
+
+    [Authorize]
+    [HttpPost("find-by-location-and-category")]
+    public async Task<IActionResult> GetRestaurantsWithinRadiusAndCategory([FromBody] LocationCategoryRequestDto request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.CategoryName))
+            return BadRequest("Invalid request. Please provide location and category name.");
+
+        var restaurants = await _restaurantService.GetRestaurantsWithinRadiusAndCategoryAsync(request.Latitude, request.Longitude, request.RadiusKm, request.CategoryName);
+        int count = restaurants?.Count ?? 0;
 
         return Ok(new
         {
