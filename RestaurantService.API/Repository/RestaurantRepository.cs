@@ -222,7 +222,32 @@ namespace RestaurantService.API.Repository
                 .Where(r => r.Name != null && EF.Functions.Like(r.Name.ToLower(), $"%{name.ToLower()}%"))
                 .ToListAsync();
         }
+        public async Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize)
+        {
+            var restaurants = await this.SearchRestaurantsByNameAsync(name) ?? new List<Restaurant>();
 
+            var totalItems = restaurants.Count();
+            var totalPages = pageSize > 0
+                ? (int)Math.Ceiling((double)totalItems / pageSize)
+                : 0;
+
+            if (pageSize > 0 && currentPage > 0)
+            {
+                restaurants = restaurants
+                    .Skip((currentPage - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+            }
+
+            return new PaginationResult<List<Restaurant>>
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                Items = restaurants
+            };
+        }
         public async Task<List<Restaurant>> SearchByNameAndCategoryAsync(string name, string categoryName)
         {
             var query = from r in _context.Restaurants
