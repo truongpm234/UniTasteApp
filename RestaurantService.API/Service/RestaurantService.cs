@@ -145,6 +145,10 @@ namespace RestaurantService.API.Service
 
             return await _restaurantRepo.SearchRestaurantsByNameAsync(name);
         }
+        public async Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize)
+        {
+            return await _restaurantRepo.SearchWithPagingAsync(name, currentPage, pageSize);
+        }
         public async Task<List<RestaurantResponseDto>> SearchByNameAndCategoryAsync(string name, string categoryName)
         {
             var restaurants = await _restaurantRepo.SearchByNameAndCategoryAsync(name, categoryName);

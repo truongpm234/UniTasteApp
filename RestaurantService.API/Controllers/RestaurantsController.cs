@@ -89,6 +89,19 @@ public class RestaurantsController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("search-by-name-with-paging")]
+    public async Task<IActionResult> SearchWithPagingAsync([FromQuery] string name, [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return BadRequest("Restaurant name is required.");
+        if (currentPage <= 0) currentPage = 1;
+        if (pageSize <= 0) pageSize = 10;
+
+        var result = await _restaurantService.SearchWithPagingAsync(name, currentPage, pageSize);
+        return Ok(result);
+    }
+
+    [Authorize]
     [HttpGet("search-by-name-and-category")]
     public async Task<IActionResult> SearchByNameAndCategory([FromQuery] string name, [FromQuery] string category)
     {
