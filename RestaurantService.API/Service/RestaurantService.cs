@@ -66,7 +66,7 @@ namespace RestaurantService.API.Service
         {
             return await _restaurantRepo.GetByGooglePlaceIdAsync(googlePlaceId);
         }
-        
+
         public async Task<bool> ExistsByGooglePlaceIdAsync(string googlePlaceId)
         {
             return await _restaurantRepo.ExistsByGooglePlaceIdAsync(googlePlaceId);
@@ -88,7 +88,7 @@ namespace RestaurantService.API.Service
             return await _restaurantRepo.GetCategoryByIdAsync(categoryId);
         }
 
-        public async Task<int?> GetCategoryIdAsync(string name, string? sourceType = null) 
+        public async Task<int?> GetCategoryIdAsync(string name, string? sourceType = null)
         {
             return await _restaurantRepo.GetCategoryIdAsync(name, sourceType);
         }
@@ -145,10 +145,44 @@ namespace RestaurantService.API.Service
 
             return await _restaurantRepo.SearchRestaurantsByNameAsync(name);
         }
-        public async Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize)
+        public async Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchWithPagingAsync(string name, int currentPage, int pageSize)
         {
-            return await _restaurantRepo.SearchWithPagingAsync(name, currentPage, pageSize);
+            var restaurantsPaged = await _restaurantRepo.SearchWithPagingAsync(name, currentPage, pageSize);
+
+            var dtoList = new List<GetCategoryIdByRestaurantIdDto>();
+
+            foreach (var r in restaurantsPaged.Items)
+            {
+                var categories = await _restaurantRepo.GetCategoriesByRestaurantIdAsync(r.RestaurantId);
+
+                dtoList.Add(new GetCategoryIdByRestaurantIdDto
+                {
+                    RestaurantId = r.RestaurantId,
+                    PriceRangeId = r.PriceRangeId,
+                    Name = r.Name,
+                    PriceRange = r.PriceRange,
+                    Address = r.Address,
+                    Latitude = r.Latitude,
+                    Longitude = r.Longitude,
+                    GooglePlaceId = r.GooglePlaceId,
+                    Phone = r.Phone,
+                    Website = r.Website,
+                    CoverImageUrl = r.CoverImageUrl,
+                    GoogleRating = r.GoogleRating,
+                    Categories = categories.ToList()
+                });
+            }
+
+            return new PaginationResult<List<GetCategoryIdByRestaurantIdDto>>
+            {
+                TotalItems = restaurantsPaged.TotalItems,
+                TotalPages = restaurantsPaged.TotalPages,
+                CurrentPage = restaurantsPaged.CurrentPage,
+                PageSize = restaurantsPaged.PageSize,
+                Items = dtoList
+            };
         }
+
         public async Task<List<RestaurantResponseDto>> SearchByNameAndCategoryAsync(string name, string categoryName)
         {
             var restaurants = await _restaurantRepo.SearchByNameAndCategoryAsync(name, categoryName);
