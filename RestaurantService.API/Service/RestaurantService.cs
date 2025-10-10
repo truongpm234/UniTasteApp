@@ -183,40 +183,42 @@ namespace RestaurantService.API.Service
             };
         }
 
-        public async Task<List<RestaurantResponseDto>> SearchByNameAndCategoryAsync(string name, string categoryName)
+        public async Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize)
         {
-            var restaurants = await _restaurantRepo.SearchByNameAndCategoryAsync(name, categoryName);
-            var result = new List<RestaurantResponseDto>();
+            var restaurantsPaged = await _restaurantRepo.SearchByNameAndCategoryWithPagingAsync(name, categoryName, currentPage, pageSize);
 
-            foreach (var r in restaurants)
+            var dtoList = new List<GetCategoryIdByRestaurantIdDto>();
+
+            foreach (var r in restaurantsPaged.Items)
             {
                 var categories = await _restaurantRepo.GetCategoriesByRestaurantIdAsync(r.RestaurantId);
 
-                var openingHourDto2List = _restaurantRepo.ParseOpeningHours(r.OpeningHours ?? string.Empty);
-
-                result.Add(new RestaurantResponseDto
+                dtoList.Add(new GetCategoryIdByRestaurantIdDto
                 {
                     RestaurantId = r.RestaurantId,
+                    PriceRangeId = r.PriceRangeId,
                     Name = r.Name,
+                    PriceRange = r.PriceRange,
                     Address = r.Address,
-                    Latitude = (double)r.Latitude,
-                    Longitude = (double)r.Longitude,
+                    Latitude = r.Latitude,
+                    Longitude = r.Longitude,
                     GooglePlaceId = r.GooglePlaceId,
                     Phone = r.Phone,
                     Website = r.Website,
                     CoverImageUrl = r.CoverImageUrl,
                     GoogleRating = r.GoogleRating,
-                    PriceRangeId = r.PriceRangeId,
-                    CreatedAt = r.CreatedAt,
-                    Status = r.Status,
-                    PriceRange = r.PriceRange,
-                    Categories = categories.ToList(),
-                    Features = r.Features?.ToList() ?? new List<Feature>(),
-                    Reviews = r.Reviews?.ToList() ?? new List<Review>(),
-                    OpeningHours = openingHourDto2List
+                    Categories = categories.ToList()
                 });
             }
-            return result;
+
+            return new PaginationResult<List<GetCategoryIdByRestaurantIdDto>>
+            {
+                TotalItems = restaurantsPaged.TotalItems,
+                TotalPages = restaurantsPaged.TotalPages,
+                CurrentPage = restaurantsPaged.CurrentPage,
+                PageSize = restaurantsPaged.PageSize,
+                Items = dtoList
+            };
         }
 
         public async Task<List<RestaurantResponseDto>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName)

@@ -23,7 +23,7 @@ namespace RestaurantService.API.Repository
         Task<Category> GetOrCreateCategoryByNameAsync(string name, string sourceType = "Google");
         Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name);
         Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize);
-        Task<List<Restaurant>> SearchByNameAndCategoryAsync(string name, string categoryName);
+        Task<PaginationResult<List<Restaurant>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize);
         Task<List<Restaurant>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName);
 
 
