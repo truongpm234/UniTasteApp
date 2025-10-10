@@ -20,7 +20,7 @@ public interface IRestaurantService
     Task<Category> GetOrCreateCategoryByNameAsync(string name, string sourceType = "Google");
     Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name);
     Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchWithPagingAsync(string name, int currentPage, int pageSize);
-    Task<List<RestaurantResponseDto>> SearchByNameAndCategoryAsync(string name, string categoryName);
+    Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize);
     Task<List<RestaurantResponseDto>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName);
 
 }

@@ -248,7 +248,7 @@ namespace RestaurantService.API.Repository
                 Items = restaurants
             };
         }
-        public async Task<List<Restaurant>> SearchByNameAndCategoryAsync(string name, string categoryName)
+        public async Task<PaginationResult<List<Restaurant>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize)
         {
             var query = from r in _context.Restaurants
                         join rc in _context.RestaurantCategories on r.RestaurantId equals rc.RestaurantId
@@ -257,13 +257,35 @@ namespace RestaurantService.API.Repository
                               && c.Name.ToLower().Contains(categoryName.ToLower())
                         select r;
 
-            return await query
+            query = query
                 .Include(r => r.Categories)
-                .Include(r => r.Features)
                 .Include(r => r.PriceRange)
-                .Include(r => r.Reviews)
-                .Distinct()
-                .ToListAsync();
+                .Distinct();
+
+            var totalItems = await query.CountAsync();
+            var totalPages = pageSize > 0 ? (int)Math.Ceiling((double)totalItems / pageSize) : 0;
+
+            List<Restaurant> items;
+            if (pageSize > 0 && currentPage > 0)
+            {
+                items = await query
+                    .Skip((currentPage - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+            }
+            else
+            {
+                items = await query.ToListAsync();
+            }
+
+            return new PaginationResult<List<Restaurant>>
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                Items = items
+            };
         }
 
         public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName)
