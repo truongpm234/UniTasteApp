@@ -35,5 +35,7 @@ public partial class User
 
     public virtual ICollection<UserAccessory> UserAccessories { get; set; } = new List<UserAccessory>();
 
+    public virtual UserPreference? UserPreference { get; set; }
+
     public virtual ICollection<UserPremium> UserPremia { get; set; } = new List<UserPremium>();
 }

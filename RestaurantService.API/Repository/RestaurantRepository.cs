@@ -122,6 +122,32 @@ namespace RestaurantService.API.Repository
             await _context.SaveChangesAsync();
             return restaurant;
         }
+        public async Task SyncCategoriesAsync(Restaurant restaurant, List<string> googleTypes)
+        {
+            // Lấy tất cả categoryId hiện tại của restaurant
+            var existingCategoryIds = await _context.RestaurantCategories
+                .Where(rc => rc.RestaurantId == restaurant.RestaurantId)
+                .Select(rc => rc.CategoryId)
+                .ToListAsync();
+
+            foreach (var type in googleTypes.Distinct())
+            {
+                // Tìm hoặc tạo category
+                var category = await GetOrCreateCategoryByNameAsync(type, "Google");
+                // Nếu chưa có thì thêm vào mapping
+                if (!existingCategoryIds.Contains(category.CategoryId))
+                {
+                    _context.RestaurantCategories.Add(new RestaurantCategory
+                    {
+                        RestaurantId = restaurant.RestaurantId,
+                        CategoryId = category.CategoryId
+                    });
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
+
         public async Task<Restaurant> MapGooglePlaceToRestaurantAsync(GooglePlace place)
         {
             if (place == null) throw new ArgumentNullException(nameof(place));
@@ -145,6 +171,7 @@ namespace RestaurantService.API.Repository
                 //    ? await _googlePlacesService.GetPhotoUrlAsync(place?.Photos?.First().PhotoReference, 800)
                 //    : "",
                 GoogleRating = place?.Rating ?? 0,
+                //Categories = new List<Category>(),
                 OpeningHours = openingHoursStr,
                 PriceRangeId = priceRangeId,
                 CreatedAt = DateTime.UtcNow,

@@ -58,6 +58,11 @@ namespace RestaurantService.API.Service
 
             return result;
         }
+        public async Task<List<Category>> GetCategoriesByRestaurantIdAsync(int restaurantId)
+        {
+            return await _restaurantRepo.GetCategoriesByRestaurantIdAsync(restaurantId);
+        }
+
         public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
         {
             return await _restaurantRepo.GetRestaurantsWithinRadiusAsync(latitude, longitude, radiusKm);
@@ -78,6 +83,10 @@ namespace RestaurantService.API.Service
         public async Task<Restaurant> UpdateAsync(Restaurant restaurant)
         {
             return await _restaurantRepo.UpdateAsync(restaurant);
+        }
+        public async Task SyncCategoriesAsync(Restaurant restaurant, List<string> googleTypes)
+        {
+            await _restaurantRepo.SyncCategoriesAsync(restaurant, googleTypes);
         }
         public async Task<int?> GetOrCreatePriceRangeIdAsync(int? priceLevel)
         {

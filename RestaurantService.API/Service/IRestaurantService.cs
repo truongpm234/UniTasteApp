@@ -8,10 +8,12 @@ public interface IRestaurantService
     Task<List<RestaurantResponseDto>> GetAllRestaurantFullAsync();
     Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm);
     Task<RestaurantResponseDto?> GetRestaurantByIdAsync(int id);
+    Task<List<Category>> GetCategoriesByRestaurantIdAsync(int restaurantId);
     Task<Restaurant> GetByGooglePlaceIdAsync(string googlePlaceId);
     Task<bool> ExistsByGooglePlaceIdAsync(string googlePlaceId);
     Task<Restaurant> CreateAsync(Restaurant restaurant);
     Task<Restaurant> UpdateAsync(Restaurant restaurant);
+    Task SyncCategoriesAsync(Restaurant restaurant, List<string> googleTypes);
     Task<int?> GetOrCreatePriceRangeIdAsync(int? priceLevel);
     Task<Category?> GetCategoryByIdAsync(int categoryId);
     Task<int?> GetCategoryIdAsync(string name, string? sourceType = null);

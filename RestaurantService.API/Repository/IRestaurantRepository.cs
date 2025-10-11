@@ -15,6 +15,7 @@ namespace RestaurantService.API.Repository
         Task<bool> ExistsByGooglePlaceIdAsync(string googlePlaceId);
         Task<Restaurant> CreateAsync(Restaurant restaurant);
         Task<Restaurant> UpdateAsync(Restaurant restaurant);
+        Task SyncCategoriesAsync(Restaurant restaurant, List<string> googleTypes);
         Task<int?> GetOrCreatePriceRangeIdAsync(int? priceLevel);
         Task<Category?> GetCategoryByIdAsync(int categoryId);
         Task<int?> GetCategoryIdAsync(string name, string? sourceType = null);

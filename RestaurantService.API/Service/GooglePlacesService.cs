@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RestaurantService.API.Data.DBContext;
 using RestaurantService.API.Models.DTO;
 using RestaurantService.API.Models.Entity;
 using RestaurantService.API.Models.GooglePlaces;
@@ -12,14 +13,16 @@ namespace RestaurantService.API.Service
         private readonly IConfiguration _configuration;
         private readonly IReviewRepository _reviewRepo;
         private readonly IRestaurantRepository _restaurantRepository;
+        private readonly Exe201RestaurantServiceDbContext _context;
         private readonly string _apiKey;
         private readonly string _baseUrl;
 
-        public GooglePlacesService(HttpClient httpClient, IConfiguration configuration, IRestaurantRepository restaurantRepository, IReviewRepository reviewRepo)
+        public GooglePlacesService(HttpClient httpClient, IConfiguration configuration, IRestaurantRepository restaurantRepository, IReviewRepository reviewRepo, Exe201RestaurantServiceDbContext context)
         {
             _httpClient = httpClient;
             _configuration = configuration;
             _restaurantRepository = restaurantRepository;
+            _context = context;
             _apiKey = _configuration["GooglePlaces:ApiKey"];
             _baseUrl = _configuration["GooglePlaces:BaseUrl"];
             _reviewRepo = reviewRepo;
@@ -107,19 +110,23 @@ namespace RestaurantService.API.Service
         public async Task<List<GooglePlaceDTO>> SearchAndImportNearbyAsync(GooglePlacesSearchRequest request)
         {
             var places = await SearchNearbyRestaurantsAsync(request);
+
+            var dtos = new List<GooglePlaceDTO>();
+
             foreach (var place in places)
             {
+                // 1. Get or Create restaurant
                 var restaurant = await _restaurantRepository.GetByGooglePlaceIdAsync(place.PlaceId);
 
                 if (restaurant == null)
                 {
-                    // Create new, always map cover from photo_reference
+                    // Create new Restaurant
                     restaurant = await MapGooglePlaceToRestaurantAsync(place);
-                    await _restaurantRepository.CreateAsync(restaurant);
+                    restaurant = await _restaurantRepository.CreateAsync(restaurant);
                 }
                 else
                 {
-                    // Update missing or changed fields
+                    // Update restaurant info if needed
                     bool needUpdate = false;
                     if (string.IsNullOrEmpty(restaurant.Address) && !string.IsNullOrEmpty(place.FormattedAddress))
                     { restaurant.Address = place.FormattedAddress; needUpdate = true; }
@@ -131,8 +138,6 @@ namespace RestaurantService.API.Service
                     { restaurant.Phone = place.FormattedPhoneNumber; needUpdate = true; }
                     if (string.IsNullOrEmpty(restaurant.Website) && !string.IsNullOrEmpty(place.Website))
                     { restaurant.Website = place.Website; needUpdate = true; }
-
-                    // Always update CoverImageUrl if photo_reference changed or db null
                     if (place.Photos != null && place.Photos.Any())
                     {
                         var newCover = await GetPhotoUrlAsync(place.Photos.First().PhotoReference, 800);
@@ -142,7 +147,6 @@ namespace RestaurantService.API.Service
                             needUpdate = true;
                         }
                     }
-
                     if ((restaurant.GoogleRating == null || restaurant.GoogleRating == 0) && place.Rating != null)
                     { restaurant.GoogleRating = place.Rating; needUpdate = true; }
                     if (string.IsNullOrEmpty(restaurant.OpeningHours) && place.OpeningHours?.WeekdayText?.Any() == true)
@@ -153,34 +157,71 @@ namespace RestaurantService.API.Service
                         await _restaurantRepository.UpdateAsync(restaurant);
                 }
 
-                // Đồng bộ category, openinghour, review (giữ nguyên code cũ)
+                // 2. Đồng bộ Category (RestaurantCategory mapping)
                 if (place.Types != null)
                 {
+                    // Lấy list category id đã có cho restaurant
+                    var existedCategories = await _restaurantRepository.GetCategoriesByRestaurantIdAsync(restaurant.RestaurantId);
+                    var existedCategoryIds = existedCategories.Select(x => x.CategoryId).ToList();
+
                     foreach (var type in place.Types)
                     {
                         var category = await _restaurantRepository.GetOrCreateCategoryByNameAsync(type, "Google");
-                        if (!restaurant.Categories.Any(c => c.CategoryId == category.CategoryId))
+                        if (!existedCategoryIds.Contains(category.CategoryId))
                         {
-                            restaurant.Categories.Add(category);
+                            _context.RestaurantCategories.Add(new RestaurantCategory
+                            {
+                                RestaurantId = restaurant.RestaurantId,
+                                CategoryId = category.CategoryId
+                            });
                         }
                     }
-                    await _restaurantRepository.UpdateAsync(restaurant);
+                    await _context.SaveChangesAsync();
                 }
 
+                // 3. Đồng bộ OpeningHours nếu có thay đổi
                 if (place.OpeningHours?.WeekdayText?.Any() == true)
                 {
-                    restaurant.OpeningHours = string.Join("; ", place.OpeningHours.WeekdayText);
-                    await _restaurantRepository.UpdateAsync(restaurant);
+                    var newOpeningHours = string.Join("; ", place.OpeningHours.WeekdayText);
+                    if (restaurant.OpeningHours != newOpeningHours)
+                    {
+                        restaurant.OpeningHours = newOpeningHours;
+                        await _restaurantRepository.UpdateAsync(restaurant);
+                    }
                 }
 
+                // 4. Đồng bộ reviews Google
                 var reviews = await GetGoogleReviewsAsync(place.PlaceId);
                 await _reviewRepo.AddOrUpdateReviewsAsync(restaurant.RestaurantId, reviews);
-            }
 
-            var tasks = places.Select(place => MapGooglePlaceToDto(place)).ToList();
-            var result = await Task.WhenAll(tasks);
-            return result.ToList();
+                // 5. Map lại DTO từ database (đảm bảo trả đúng PriceRangeId và CategoryIds)
+                // (Có thể gọi lại hàm MapGooglePlaceToDto, hoặc tự build)
+                var categories = await _restaurantRepository.GetCategoriesByRestaurantIdAsync(restaurant.RestaurantId);
+                var dto = new GooglePlaceDTO
+                {
+                    PlaceId = place.PlaceId,
+                    Name = place.Name ?? "Chưa cập nhật",
+                    FormattedAddress = place.FormattedAddress ?? place.Vicinity ?? "Chưa cập nhật",
+                    Latitude = place.Geometry?.Location?.Lat ?? 0,
+                    Longitude = place.Geometry?.Location?.Lng ?? 0,
+                    Website = place.Website ?? "Chưa cập nhật",
+                    Phone = place.FormattedPhoneNumber ?? "Chưa cập nhật",
+                    PriceLevel = place.PriceLevel?.ToString() ?? "Chưa cập nhật",
+                    Rating = place.Rating ?? 0,
+                    OpeningHours = (place.OpeningHours?.WeekdayText?.Count > 0)
+                        ? string.Join("; ", place.OpeningHours.WeekdayText)
+                        : "Chưa cập nhật",
+                    Types = place.Types ?? new List<string>(),
+                    CoverImageUrl = restaurant.CoverImageUrl,
+                    Reviews = reviews,
+                    PriceRangeId = restaurant.PriceRangeId,
+                    CategoryIds = categories.Select(x => x.CategoryId).ToList()
+                };
+                dtos.Add(dto);
+            }
+            return dtos;
         }
+
 
         public async Task<GooglePlaceDTO> MapGooglePlaceToDto(GooglePlace place)
         {
@@ -189,6 +230,33 @@ namespace RestaurantService.API.Service
             string coverImageUrl = null;
             if (place.Photos != null && place.Photos.Any())
                 coverImageUrl = await GetPhotoUrlAsync(place.Photos.First().PhotoReference, 800);
+
+            int? priceRangeId = null;
+            List<int> categoryIds = new List<int>();
+
+            var restaurant = await _restaurantRepository.GetByGooglePlaceIdAsync(place.PlaceId);
+            if (restaurant != null)
+            {
+                priceRangeId = restaurant.PriceRangeId;
+                var cats = await _restaurantRepository.GetCategoriesByRestaurantIdAsync(restaurant.RestaurantId);
+                categoryIds = cats.Select(c => c.CategoryId).ToList();
+            }
+            else
+            {
+                // fallback nếu chưa có, tự map lại
+                priceRangeId = place.PriceLevel != null
+                    ? await _restaurantRepository.GetOrCreatePriceRangeIdAsync(place.PriceLevel)
+                    : null;
+
+                // map lại từ list type (có thể trả về ID giả lập nếu cần)
+                // Nếu muốn lấy CategoryId thực sự thì phải gọi GetOrCreateCategoryByNameAsync cho từng type
+                foreach (var type in place.Types ?? new List<string>())
+                {
+                    var cat = await _restaurantRepository.GetOrCreateCategoryByNameAsync(type, "Google");
+                    if (!categoryIds.Contains(cat.CategoryId))
+                        categoryIds.Add(cat.CategoryId);
+                }
+            }
 
             return new GooglePlaceDTO
             {
@@ -206,7 +274,9 @@ namespace RestaurantService.API.Service
                     ? string.Join("; ", place.OpeningHours.WeekdayText)
                     : "Chưa cập nhật",
                 Types = place.Types,
-                CoverImageUrl = coverImageUrl
+                CoverImageUrl = coverImageUrl,
+                PriceRangeId = priceRangeId,
+                CategoryIds = categoryIds
             };
         }
 
