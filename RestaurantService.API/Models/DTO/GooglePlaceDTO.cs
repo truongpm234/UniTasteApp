@@ -17,5 +17,7 @@ namespace RestaurantService.API.Models.DTO
         public List<string> Types { get; set; }
         public string CoverImageUrl { get; set; }
         public List<GoogleReview> Reviews { get; set; }
+        public int? PriceRangeId { get; set; }
+        public List<int> CategoryIds { get; set; }
     }
 }

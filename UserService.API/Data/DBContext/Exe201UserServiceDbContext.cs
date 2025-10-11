@@ -28,6 +28,8 @@ public partial class Exe201UserServiceDbContext : DbContext
 
     public virtual DbSet<UserAccessory> UserAccessories { get; set; }
 
+    public virtual DbSet<UserPreference> UserPreferences { get; set; }
+
     public virtual DbSet<UserPremium> UserPremia { get; set; }
 
     private string GetConnectionString()
@@ -130,6 +132,25 @@ public partial class Exe201UserServiceDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UserAccessories)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__UserAcces__UserI__45F365D3");
+        });
+
+        modelBuilder.Entity<UserPreference>(entity =>
+        {
+            entity.HasKey(e => e.UserPreferenceId);
+            entity.ToTable("UserPreference");
+
+            entity.Property(e => e.PreferredPlaceTypes).HasMaxLength(200);
+            entity.Property(e => e.PreferredPriceRange).HasMaxLength(50);
+            entity.Property(e => e.PreferredLocation).HasMaxLength(200);
+            entity.Property(e => e.GoingWith).HasMaxLength(100);
+            entity.Property(e => e.Purpose).HasMaxLength(100);
+            entity.Property(e => e.RequiredFeatures).HasMaxLength(300);
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+            entity.HasOne(e => e.User)
+                .WithOne()
+                .HasForeignKey<UserPreference>(e => e.UserId)
+                .HasConstraintName("FK_UserPreference_User");
         });
 
         modelBuilder.Entity<UserPremium>(entity =>
