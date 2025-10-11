@@ -9,6 +9,7 @@ namespace RestaurantService.API.Service
         Task<List<GooglePlace>> SearchNearbyRestaurantsAsync(GooglePlacesSearchRequest request);
         string BuildNearbySearchUrl(GooglePlacesSearchRequest request, string nextPageToken = null);
         Task<string> GetPhotoUrlAsync(string photoReference, int maxWidth = 400);
+        Task<List<GooglePlaceDTO>> ImportDataAsync(GooglePlacesSearchRequest request);
         Task<GooglePlaceDTO> MapGooglePlaceToDto(GooglePlace place);
         Task<List<GooglePlaceDTO>> SearchAndImportNearbyAsync(GooglePlacesSearchRequest request);
         Task<List<GoogleReview>> GetGoogleReviewsAsync(string googlePlaceId);

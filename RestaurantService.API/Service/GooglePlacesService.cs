@@ -107,6 +107,122 @@ namespace RestaurantService.API.Service
             return placesWithDetails.Where(x => x != null).ToList();
         }
 
+        public async Task<List<GooglePlaceDTO>> ImportDataAsync(GooglePlacesSearchRequest request)
+        {
+            // 1. Lấy danh sách địa điểm gần đó từ Google Places
+            var places = await SearchNearbyRestaurantsAsync(request);
+            var dtos = new List<GooglePlaceDTO>();
+
+            foreach (var place in places)
+            {
+                // 2. Lấy hoặc tạo mới restaurant trong DB
+                var restaurant = await _restaurantRepository.GetByGooglePlaceIdAsync(place.PlaceId);
+                bool isNew = false;
+
+                if (restaurant == null)
+                {
+                    restaurant = await MapGooglePlaceToRestaurantAsync(place);
+                    restaurant = await _restaurantRepository.CreateAsync(restaurant);
+                    isNew = true;
+                }
+                else
+                {
+                    // Cập nhật các trường còn thiếu hoặc thay đổi
+                    bool needUpdate = false;
+                    if (string.IsNullOrEmpty(restaurant.Address) && !string.IsNullOrEmpty(place.FormattedAddress))
+                    { restaurant.Address = place.FormattedAddress; needUpdate = true; }
+                    if (restaurant.Latitude == null && place.Geometry?.Location?.Lat != null)
+                    { restaurant.Latitude = place.Geometry.Location.Lat; needUpdate = true; }
+                    if (restaurant.Longitude == null && place.Geometry?.Location?.Lng != null)
+                    { restaurant.Longitude = place.Geometry.Location.Lng; needUpdate = true; }
+                    if (string.IsNullOrEmpty(restaurant.Phone) && !string.IsNullOrEmpty(place.FormattedPhoneNumber))
+                    { restaurant.Phone = place.FormattedPhoneNumber; needUpdate = true; }
+                    if (string.IsNullOrEmpty(restaurant.Website) && !string.IsNullOrEmpty(place.Website))
+                    { restaurant.Website = place.Website; needUpdate = true; }
+                    if (place.Photos != null && place.Photos.Any())
+                    {
+                        var newCover = await GetPhotoUrlAsync(place.Photos.First().PhotoReference, 800);
+                        if (string.IsNullOrEmpty(restaurant.CoverImageUrl) || restaurant.CoverImageUrl != newCover)
+                        {
+                            restaurant.CoverImageUrl = newCover;
+                            needUpdate = true;
+                        }
+                    }
+                    if ((restaurant.GoogleRating == null || restaurant.GoogleRating == 0) && place.Rating != null)
+                    { restaurant.GoogleRating = place.Rating; needUpdate = true; }
+                    if (string.IsNullOrEmpty(restaurant.OpeningHours) && place.OpeningHours?.WeekdayText?.Any() == true)
+                    { restaurant.OpeningHours = string.Join("; ", place.OpeningHours.WeekdayText); needUpdate = true; }
+                    if ((restaurant.PriceRangeId == null || restaurant.PriceRangeId == 1) && place.PriceLevel != null)
+                    { restaurant.PriceRangeId = await _restaurantRepository.GetOrCreatePriceRangeIdAsync(place.PriceLevel); needUpdate = true; }
+                    if (needUpdate)
+                        await _restaurantRepository.UpdateAsync(restaurant);
+                }
+
+                // 3. Mapping Categories (RestaurantCategory table)
+                List<int> categoryIds = new List<int>();
+                if (place.Types != null)
+                {
+                    var existedCategories = await _restaurantRepository.GetCategoriesByRestaurantIdAsync(restaurant.RestaurantId);
+                    var existedCategoryIds = existedCategories.Select(x => x.CategoryId).ToList();
+
+                    foreach (var type in place.Types)
+                    {
+                        var category = await _restaurantRepository.GetOrCreateCategoryByNameAsync(type, "Google");
+                        if (!existedCategoryIds.Contains(category.CategoryId))
+                        {
+                            _context.RestaurantCategories.Add(new RestaurantCategory
+                            {
+                                RestaurantId = restaurant.RestaurantId,
+                                CategoryId = category.CategoryId
+                            });
+                            existedCategoryIds.Add(category.CategoryId); // tránh trùng lặp khi lặp type
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                    categoryIds = existedCategoryIds;
+                }
+
+                // 4. Đồng bộ OpeningHours nếu có thay đổi
+                if (place.OpeningHours?.WeekdayText?.Any() == true)
+                {
+                    var newOpeningHours = string.Join("; ", place.OpeningHours.WeekdayText);
+                    if (restaurant.OpeningHours != newOpeningHours)
+                    {
+                        restaurant.OpeningHours = newOpeningHours;
+                        await _restaurantRepository.UpdateAsync(restaurant);
+                    }
+                }
+
+                // 5. Lưu Google reviews
+                var reviews = await GetGoogleReviewsAsync(place.PlaceId);
+                await _reviewRepo.AddOrUpdateReviewsAsync(restaurant.RestaurantId, reviews);
+
+                // 6. Map DTO trả về
+                var dto = new GooglePlaceDTO
+                {
+                    PlaceId = place.PlaceId,
+                    Name = place.Name ?? "Chưa cập nhật",
+                    FormattedAddress = place.FormattedAddress ?? place.Vicinity ?? "Chưa cập nhật",
+                    Latitude = place.Geometry?.Location?.Lat ?? 0,
+                    Longitude = place.Geometry?.Location?.Lng ?? 0,
+                    Website = place.Website ?? "Chưa cập nhật",
+                    Phone = place.FormattedPhoneNumber ?? "Chưa cập nhật",
+                    PriceLevel = place.PriceLevel?.ToString() ?? "Chưa cập nhật",
+                    Rating = place.Rating ?? 0,
+                    OpeningHours = (place.OpeningHours?.WeekdayText?.Count > 0)
+                        ? string.Join("; ", place.OpeningHours.WeekdayText)
+                        : "Chưa cập nhật",
+                    Types = place.Types ?? new List<string>(),
+                    CoverImageUrl = restaurant.CoverImageUrl,
+                    Reviews = reviews,
+                    PriceRangeId = restaurant.PriceRangeId,
+                    CategoryIds = categoryIds
+                };
+                dtos.Add(dto);
+            }
+            return dtos;
+        }
+
         public async Task<List<GooglePlaceDTO>> SearchAndImportNearbyAsync(GooglePlacesSearchRequest request)
         {
             var places = await SearchNearbyRestaurantsAsync(request);
