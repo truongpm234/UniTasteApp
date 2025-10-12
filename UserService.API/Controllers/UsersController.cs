@@ -41,6 +41,7 @@ namespace UserService.API.Controllers
             return Ok(new
             {
                 token,
+                userId = user.UserId,
                 fullName = user.FullName,
                 email = user.Email
             });

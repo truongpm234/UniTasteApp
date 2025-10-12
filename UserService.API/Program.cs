@@ -43,34 +43,22 @@ namespace UserService.API
             builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 
-            Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnectionStringDB"));
-
-            // config firebase
+            // --- Firebase Configuration Start ---
             builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection("FirebaseSettings"));
 
-            // Lấy config
-            var firebaseSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<FirebaseSettings>>().Value;
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var firebaseSettings = serviceProvider.GetRequiredService<IOptions<FirebaseSettings>>().Value;
             var credentialsPath = Path.Combine(Directory.GetCurrentDirectory(), firebaseSettings.CredentialsPath);
-
-            // Log đường dẫn file credentials và bucket name
-            Console.WriteLine($"[Firebase] Credentials path: {credentialsPath}");
-            Console.WriteLine($"[Firebase] Bucket name: {firebaseSettings.BucketName}");
 
             if (File.Exists(credentialsPath))
             {
-                // Log file tồn tại, log vài dòng đầu file cho chắc
-                var json = File.ReadAllText(credentialsPath);
-                Console.WriteLine($"[Firebase] Credentials file exists: {credentialsPath}");
-                Console.WriteLine($"[Firebase] First 200 chars: {json.Substring(0, Math.Min(200, json.Length))}");
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
             }
             else
             {
-                Console.WriteLine($"[Firebase] Credentials file NOT FOUND at: {credentialsPath}");
-                throw new FileNotFoundException($"KHÔNG TÌM THẤY file Service Account Key tại: {credentialsPath}");
+                throw new FileNotFoundException($"Service Account Key file not found at: {credentialsPath}");
             }
 
-            
             builder.Services.AddSingleton(StorageClient.Create());
 
             // Dependency Injection
