@@ -42,16 +42,46 @@ namespace UserService.API
                 options.UseSqlServer(connStr);
             });
 
-            // === Firebase credential (CHỈ ĐỌC FILE, KHÔNG DÙNG ENV) ===
+            // === Firebase credential (ĐỌC TỪ ENV) ===
             var firebaseSection = builder.Configuration.GetSection("FirebaseSettings");
-            var credentialsPath = firebaseSection["CredentialsPath"]; // "Credentials/unitaste-exe201-793abf881624.json"
-            if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
+            var bucketName = firebaseSection["BucketName"];
+
+            // Thử đọc credentials từ environment variable trước
+            var firebaseCredentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS_JSON");
+
+            Console.WriteLine($"[DEBUG] FIREBASE_CREDENTIALS_JSON exists: {!string.IsNullOrEmpty(firebaseCredentialsJson)}");
+            Console.WriteLine($"[DEBUG] FIREBASE_CREDENTIALS_JSON length: {firebaseCredentialsJson?.Length ?? 0}");
+
+            if (!string.IsNullOrEmpty(firebaseCredentialsJson))
             {
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+                try
+                {
+                    // Tạo file tạm thời từ JSON string
+                    var tempPath = Path.Combine(Path.GetTempPath(), "firebase-credentials.json");
+                    File.WriteAllText(tempPath, firebaseCredentialsJson);
+                    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tempPath);
+                    Console.WriteLine($"[DEBUG] Firebase credentials written to: {tempPath}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERROR] Failed to write Firebase credentials: {ex.Message}");
+                    throw;
+                }
             }
             else
             {
-                throw new Exception("Firebase credentials file not found! Path: " + credentialsPath);
+                Console.WriteLine("[WARNING] FIREBASE_CREDENTIALS_JSON not found in environment variables");
+                // Fallback: đọc từ file local (chỉ dùng khi dev)
+                var credentialsPath = firebaseSection["CredentialsPath"];
+                if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
+                {
+                    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+                    Console.WriteLine($"[DEBUG] Using local credentials file: {credentialsPath}");
+                }
+                else
+                {
+                    throw new Exception("Firebase credentials not found! Please set FIREBASE_CREDENTIALS_JSON environment variable.");
+                }
             }
 
             // Thêm các service còn lại
