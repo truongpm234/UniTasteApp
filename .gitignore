@@ -38,7 +38,7 @@ npm-debug.log*
 # appsettings.Development.json
 # appsettings.*.json
 # secrets.json
-Credentials/*
+Credentials/unitaste-exe201-793abf881624.json
 # NuGet
 *.nupkg
 packages/
