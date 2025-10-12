@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using UserService.API.Models.DTO;
 using UserService.API.Models.Entity;
 using UserService.API.Repository;
-
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace UserService.API.Services
@@ -140,7 +139,7 @@ namespace UserService.API.Services
 
         public async Task<UserProfileDto?> GetUserProfileAsync(int userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null) return null;
             return new UserProfileDto
             {
@@ -155,7 +154,7 @@ namespace UserService.API.Services
 
         public async Task<bool> UpdateUserProfileAsync(int userId, UpdateUserProfileDto dto)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null) return false;
 
             if (dto.FullName != null)
@@ -172,6 +171,46 @@ namespace UserService.API.Services
             await _userRepository.UpdateAsync(user);
             return true;
         }
+
+        public async Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+                return (false, "Người dùng không tồn tại.");
+
+            if (user.PasswordHash != oldPassword) 
+                return (false, "Mật khẩu cũ không đúng.");
+
+            if (oldPassword == newPassword)
+                return (false, "Mật khẩu mới không được trùng với mật khẩu cũ.");
+
+            if (!IsStrongPassword(newPassword))
+                return (false, "Mật khẩu mới quá yếu (ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt).");
+
+            user.PasswordHash = newPassword;
+
+            await _userRepository.UpdateAsync(user);
+            return (true, string.Empty);
+        }
+
+        // Hàm kiểm tra độ mạnh mật khẩu
+        public bool IsStrongPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password) || password.Length < 8)
+                return false;
+            bool hasUpper = false, hasLower = false, hasDigit = false, hasSpecial = false;
+
+            foreach (var c in password)
+            {
+                if (char.IsUpper(c)) hasUpper = true;
+                else if (char.IsLower(c)) hasLower = true;
+                else if (char.IsDigit(c)) hasDigit = true;
+                else hasSpecial = true;
+            }
+
+            return hasUpper && hasLower && hasDigit && hasSpecial;
+        }
+
 
     }
 }

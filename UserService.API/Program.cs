@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using UserService.API.Data.DBContext;
 using UserService.API.Repository;
 using UserService.API.Services;
+using Google.Cloud.Storage.V1;
 
 namespace UserService.API
 {
@@ -29,17 +30,36 @@ namespace UserService.API
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
             });
+
             builder.Configuration.AddEnvironmentVariables();
             builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddEnvironmentVariables();
+
             builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 
             Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnectionStringDB"));
 
+            // config firebase
+            var jsonFileName = "unitaste-exe201-firebase.json";
+            var credentialsPath = Path.Combine(Directory.GetCurrentDirectory(), "Credentials", jsonFileName);
+
+            if (File.Exists(credentialsPath))
+            {
+                // Thiết lập biến môi trường để Google.Cloud.Storage.V1 tự động nhận diện
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+            }
+            else
+            {
+                throw new FileNotFoundException($"KHÔNG TÌM THẤY file Service Account Key tại: {credentialsPath}");
+            }
+
+            // 2. Đăng ký StorageClient và Dịch vụ Tùy chỉnh (Dependency Injection)
+            builder.Services.AddSingleton(StorageClient.Create());
+            builder.Services.AddSingleton<FirebaseStorageService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();

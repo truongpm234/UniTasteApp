@@ -14,6 +14,8 @@ namespace UserService.API.Services
         Task SendRegisterOtpEmailAsync(string email, string fullName, string otpCode);
         Task<UserProfileDto?> GetUserProfileAsync(int userId);
         Task<bool> UpdateUserProfileAsync(int userId, UpdateUserProfileDto dto);
+        Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+        bool IsStrongPassword(string password);
 
 
     }

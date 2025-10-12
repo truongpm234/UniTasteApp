@@ -145,8 +145,10 @@ public partial class Exe201UserServiceDbContext : DbContext
             entity.Property(e => e.GoingWith).HasMaxLength(100);
             entity.Property(e => e.Purpose).HasMaxLength(100);
             entity.Property(e => e.RequiredFeatures).HasMaxLength(300);
-
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+            entity.Property(e => e.VenueAtmosphere).HasMaxLength(255);
+            entity.Property(e => e.CuisineType).HasMaxLength(255);
+            entity.Property(e => e.VisitTime).HasMaxLength(200);
             entity.HasOne(e => e.User)
                 .WithOne()
                 .HasForeignKey<UserPreference>(e => e.UserId)

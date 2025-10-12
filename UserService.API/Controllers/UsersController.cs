@@ -166,5 +166,15 @@ namespace UserService.API.Controllers
             return Ok("Profile updated successfully");
         }
 
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var (success, errorMsg) = await _userService.ChangePasswordAsync(dto.UserId, dto.OldPassword, dto.NewPassword);
+            if (!success)
+                return BadRequest(errorMsg);
+            return Ok("Đổi mật khẩu thành công.");
+        }
+
     }
 }

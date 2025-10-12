@@ -15,6 +15,9 @@ namespace UserService.API.Models.Entity
         public string? Note { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public string? VenueAtmosphere { get; set; }   
+        public string? CuisineType { get; set; }       
+        public string? VisitTime { get; set; }
         public virtual User? User { get; set; }
     }
 }

@@ -79,7 +79,7 @@ namespace UserService.API.Repository
             return code;
         }
 
-        public async Task<User?> GetByIdAsync(int userId)
+        public async Task<User?> GetUserByIdAsync(int userId)
         {
             return await _context.Users.FindAsync(userId);
         }

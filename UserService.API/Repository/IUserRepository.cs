@@ -13,7 +13,7 @@ namespace UserService.API.Repository
         Task SaveChangesAsync();
         Task<User?> GetByEmailAsync(string email);
         string GenerateOtpCode(int length = 6);
-        Task<User?> GetByIdAsync(int userId);
+        Task<User?> GetUserByIdAsync(int userId);
         Task UpdateAsync(User user);
 
     }
