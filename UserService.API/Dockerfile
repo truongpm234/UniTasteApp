@@ -9,4 +9,5 @@ RUN dotnet publish "UserService.API.csproj" -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+COPY --from=build /src/UserService.API/Credentials ./Credentials
 ENTRYPOINT ["dotnet", "UserService.API.dll"]

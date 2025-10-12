@@ -18,14 +18,13 @@ namespace UserService.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Config
             builder.Configuration
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
-            // Kestrel for Render (PORT env)
+            // Cấu hình Kestrel cho Render (PORT env)
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 var port = Environment.GetEnvironmentVariable("PORT");
@@ -35,7 +34,7 @@ namespace UserService.API
                 }
             });
 
-            // DbContext
+            // Cấu hình DbContext
             builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
             {
                 var connStr = Environment.GetEnvironmentVariable("DefaultConnectionStringDB")
@@ -43,12 +42,9 @@ namespace UserService.API
                 options.UseSqlServer(connStr);
             });
 
-            // Get FirebaseSettings from config
+            // === Firebase credential (CHỈ ĐỌC FILE, KHÔNG DÙNG ENV) ===
             var firebaseSection = builder.Configuration.GetSection("FirebaseSettings");
-            var firebaseBucket = firebaseSection["BucketName"];
-            var credentialsPath = firebaseSection["CredentialsPath"];
-
-            // Use secret file for credentials
+            var credentialsPath = firebaseSection["CredentialsPath"]; // "Credentials/unitaste-exe201-793abf881624.json"
             if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
             {
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
@@ -58,7 +54,7 @@ namespace UserService.API
                 throw new Exception("Firebase credentials file not found! Path: " + credentialsPath);
             }
 
-            // Add services
+            // Thêm các service còn lại
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -129,4 +125,23 @@ namespace UserService.API
                 });
             });
 
-            var app = builder.
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+            app.UseCors("AllowAllOrigins");
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.MapControllers();
+
+            // Luôn enable swagger cho dễ test
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            app.Run();
+        }
+    }
+}
