@@ -12,6 +12,8 @@ namespace UserService.API.Services
         Task<bool> ResetPasswordAsync(string token, string newPassword);
         string GenerateOtpCode(int length = 6);
         Task SendRegisterOtpEmailAsync(string email, string fullName, string otpCode);
+        Task<UserProfileDto?> GetUserProfileAsync(int userId);
+        Task<bool> UpdateUserProfileAsync(int userId, UpdateUserProfileDto dto);
 
 
     }

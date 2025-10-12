@@ -75,9 +75,21 @@ namespace UserService.API.Repository
             var random = new Random();
             string code = "";
             for (int i = 0; i < length; i++)
-                code += random.Next(0, 10); // mỗi lần lấy 1 số từ 0-9
+                code += random.Next(0, 10); 
             return code;
         }
+
+        public async Task<User?> GetByIdAsync(int userId)
+        {
+            return await _context.Users.FindAsync(userId);
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
 
     }
 }

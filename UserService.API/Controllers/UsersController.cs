@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -54,7 +55,7 @@ namespace UserService.API.Controllers
                 _config["Jwt:Audience"],
                 new Claim[]
                 {
-            new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()), 
+            new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()),
             new(ClaimTypes.Email, systemUserAccount.Email),
             new(ClaimTypes.Role, systemUserAccount.RoleId.ToString()),
                 },
@@ -105,19 +106,19 @@ namespace UserService.API.Controllers
                 return BadRequest(new { error = "OTP is invalid or expired" });
             }
 
- 
-                // Chuẩn bị thông tin để lưu vào DB
-                var registerRequest = new RegisterRequest
-                {
-                    Email = pending.Email,
-                    FullName = pending.FullName,
-                    PasswordHash = pending.PasswordHash,
-                    BirthDate = DateOnly.FromDateTime(pending.BirthDate)
-                };
-                var user = await _userService.RegisterAsync(registerRequest);           
-                RegisterOtpMemory.Pending.Remove(req.Email);
 
-                return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
+            // Chuẩn bị thông tin để lưu vào DB
+            var registerRequest = new RegisterRequest
+            {
+                Email = pending.Email,
+                FullName = pending.FullName,
+                PasswordHash = pending.PasswordHash,
+                BirthDate = DateOnly.FromDateTime(pending.BirthDate)
+            };
+            var user = await _userService.RegisterAsync(registerRequest);
+            RegisterOtpMemory.Pending.Remove(req.Email);
+
+            return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
         }
 
 
@@ -147,20 +148,23 @@ namespace UserService.API.Controllers
             return Ok(new { status = "true", message = "Password changed successfully." });
         }
 
-    }
+        [Authorize]
+        [HttpGet("get-profile-user-by-id/{userId}")]
+        public async Task<IActionResult> GetProfile(int userId)
+        {
+            var profile = await _userService.GetUserProfileAsync(userId);
+            if (profile == null) return NotFound("User not found");
+            return Ok(profile);
+        }
 
-    public class RequestResetPasswordDto
-    {
-        public string Email { get; set; }
-    }
-    public class RegisterVerifyRequest
-    {
-        public string Email { get; set; }
-        public string OtpCode { get; set; }
-    }
-    public class ConfirmResetPasswordDto
-    {
-        public string Token { get; set; }
-        public string NewPassword { get; set; }
+        [Authorize]
+        [HttpPut("update-profile-user-by-id/{userId}")]
+        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
+        {
+            var result = await _userService.UpdateUserProfileAsync(userId, dto);
+            if (!result) return NotFound("User not found");
+            return Ok("Profile updated successfully");
+        }
+
     }
 }

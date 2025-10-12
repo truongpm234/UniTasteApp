@@ -27,7 +27,7 @@ namespace RestaurantService.API.Controllers
                 Latitude = latitude,
                 Longitude = longitude,
                 Radius = radius,
-                Type = type,    //cafe, restaurant, food, bar, meal_takeaway, meal_delivery
+                Type = type,
                 Keyword = keyword
             };
             var results = await _googlePlacesService.SearchNearbyRestaurantsAsync(request);
@@ -69,11 +69,9 @@ namespace RestaurantService.API.Controllers
                 Keyword = keyword
             };
 
-            // 1. Lấy dữ liệu từ Google API, trả về ngay cho UI
             var allPlaces = await _googlePlacesService.SearchNearbyRestaurantsAsync(request);
             var pagedPlaces = allPlaces.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
 
-            // Lấy đúng categoryIds và priceRangeId thực tế (ưu tiên lấy từ DB)
             var pagedDtos = new List<GooglePlaceDTO>();
             foreach (var place in pagedPlaces)
             {
@@ -89,7 +87,6 @@ namespace RestaurantService.API.Controllers
                 }
                 else
                 {
-                    // Nếu chưa import thì mapping từ types
                     if (place.Types != null)
                     {
                         foreach (var typeName in place.Types)
@@ -137,7 +134,6 @@ namespace RestaurantService.API.Controllers
                 Items = pagedDtos
             };
 
-            // Task import ngầm như cũ (nếu muốn)
             _ = Task.Run(async () =>
             {
                 using (var scope = HttpContext.RequestServices.CreateScope())
@@ -149,47 +145,5 @@ namespace RestaurantService.API.Controllers
 
             return Ok(response);
         }
-
-
-        //    [HttpPost("search-import-nearby-with-paging")]
-        //    public async Task<IActionResult> SearchImportNearby(
-        //[FromQuery] double latitude,
-        //[FromQuery] double longitude,
-        //[FromQuery] int radius = 5000,
-        //[FromQuery] string type = "restaurant",
-        //[FromQuery] string keyword = "",
-        //[FromQuery] int currentPage = 1,
-        //[FromQuery] int pageSize = 5)
-        //    {
-        //        var request = new GooglePlacesSearchRequest
-        //        {
-        //            Latitude = latitude,
-        //            Longitude = longitude,
-        //            Radius = radius,
-        //            Type = type,
-        //            Keyword = keyword
-        //        };
-
-        //        // 1. Import data từ Google Place và lưu vào DB, đồng bộ hết luôn ở đây!
-        //        var allDtos = await _googlePlacesService.ImportDataAsync(request); // HÀM NÀY ĐÃ LƯU DB ĐỦ
-
-        //        // 2. Paging
-        //        var pagedDtos = allDtos
-        //            .Skip((currentPage - 1) * pageSize)
-        //            .Take(pageSize)
-        //            .ToList();
-
-        //        var response = new
-        //        {
-        //            TotalItems = allDtos.Count,
-        //            TotalPages = (int)Math.Ceiling((double)allDtos.Count / pageSize),
-        //            CurrentPage = currentPage,
-        //            PageSize = pageSize,
-        //            Items = pagedDtos
-        //        };
-
-        //        return Ok(response);
-        //    }
-
     }
 }

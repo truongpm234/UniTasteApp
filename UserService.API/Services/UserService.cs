@@ -138,5 +138,40 @@ namespace UserService.API.Services
             return _userRepository.GenerateOtpCode(length);
         }
 
+        public async Task<UserProfileDto?> GetUserProfileAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return null;
+            return new UserProfileDto
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                AvatarUrl = user.AvatarUrl,
+                Bio = user.Bio,
+                Gender = user.Gender,
+                BirthDate = user.BirthDate
+            };
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(int userId, UpdateUserProfileDto dto)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return false;
+
+            if (dto.FullName != null)
+                user.FullName = dto.FullName;
+            if (dto.AvatarUrl != null)
+                user.AvatarUrl = dto.AvatarUrl;
+            if (dto.Bio != null)
+                user.Bio = dto.Bio;
+            if (dto.Gender != null)
+                user.Gender = dto.Gender;
+            if (dto.BirthDate != null)
+                user.BirthDate = dto.BirthDate;
+
+            await _userRepository.UpdateAsync(user);
+            return true;
+        }
+
     }
 }
