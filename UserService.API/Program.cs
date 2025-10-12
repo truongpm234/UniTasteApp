@@ -167,7 +167,6 @@ namespace UserService.API
             app.UseAuthorization();
             app.MapControllers();
 
-            // Luôn enable swagger cho dễ test
             app.UseSwagger();
             app.UseSwaggerUI();
 

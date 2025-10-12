@@ -161,43 +161,26 @@ namespace UserService.API.Controllers
         }
 
         [Authorize]
-        [HttpPut("update-profile-user-by-id/{userId}")]
-        public async Task<IActionResult> UpdateProfile(
-    int userId,
-    [FromForm] UpdateUserProfileDto dto,
-    IFormFile? avatarFile = null)
+        [HttpPost("upload-avatar")]
+        [Consumes("multipart/form-data")]  
+        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)  // Bỏ [FromForm]
         {
-            string? avatarUrl = null;
+            if (avatarFile == null || avatarFile.Length == 0)
+                return BadRequest("No file uploaded.");
 
-            // Ưu tiên: Nếu có file -> upload lấy url
-            if (avatarFile != null && avatarFile.Length > 0)
-            {
-                try
-                {
-                    avatarUrl = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
-                }
-                catch (Exception ex)
-                {
-                    // Trả lỗi rõ ràng cho FE biết lỗi gì
-                    return BadRequest($"Lỗi upload file: {ex.Message}");
-                }
-            }
-            // Nếu không có file, nhưng có url nhập vào -> lấy luôn url đó
-            else if (!string.IsNullOrWhiteSpace(dto.AvatarUrl))
-            {
-                avatarUrl = dto.AvatarUrl;
-            }
+            var url = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
+            return Ok(new { avatarUrl = url });
+        }
 
-            // Nếu có avatarUrl (từ file hoặc link), truyền vào DTO để cập nhật
-            if (avatarUrl != null)
-                dto.AvatarUrl = avatarUrl;
-            else
-                dto.AvatarUrl = null; // Giữ nguyên hoặc không update
-
+        [Authorize]
+        [HttpPut("update-profile-user-by-id/{userId}")]
+        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
+        {
             var result = await _userService.UpdateUserProfileAsync(userId, dto);
             if (!result) return NotFound("User not found");
             return Ok("Profile updated successfully");
         }
+
 
         [Authorize]
         [HttpPost("change-password")]
