@@ -19,11 +19,13 @@ namespace UserService.API.Controllers
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
-        public UsersController(IConfiguration config, IUserService userService, IEmailService emailService)
+        private readonly IFirebaseStorageService _firebaseStorageService;
+        public UsersController(IConfiguration config, IUserService userService, IEmailService emailService, IFirebaseStorageService firebaseStorageService)
         {
             _config = config;
             _userService = userService;
             _emailService = emailService;
+            _firebaseStorageService = firebaseStorageService;
         }
 
         [HttpPost("Login")]
@@ -159,8 +161,38 @@ namespace UserService.API.Controllers
 
         [Authorize]
         [HttpPut("update-profile-user-by-id/{userId}")]
-        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
+        public async Task<IActionResult> UpdateProfile(
+    int userId,
+    [FromForm] UpdateUserProfileDto dto,
+    IFormFile? avatarFile = null)
         {
+            string? avatarUrl = null;
+
+            // Ưu tiên: Nếu có file -> upload lấy url
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                try
+                {
+                    avatarUrl = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
+                }
+                catch (Exception ex)
+                {
+                    // Trả lỗi rõ ràng cho FE biết lỗi gì
+                    return BadRequest($"Lỗi upload file: {ex.Message}");
+                }
+            }
+            // Nếu không có file, nhưng có url nhập vào -> lấy luôn url đó
+            else if (!string.IsNullOrWhiteSpace(dto.AvatarUrl))
+            {
+                avatarUrl = dto.AvatarUrl;
+            }
+
+            // Nếu có avatarUrl (từ file hoặc link), truyền vào DTO để cập nhật
+            if (avatarUrl != null)
+                dto.AvatarUrl = avatarUrl;
+            else
+                dto.AvatarUrl = null; // Giữ nguyên hoặc không update
+
             var result = await _userService.UpdateUserProfileAsync(userId, dto);
             if (!result) return NotFound("User not found");
             return Ok("Profile updated successfully");

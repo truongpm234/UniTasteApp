@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Google.Cloud.Storage.V1;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
 using UserService.API.Data.DBContext;
+using UserService.API.Models.DTO;
 using UserService.API.Repository;
 using UserService.API.Services;
-using Google.Cloud.Storage.V1;
 
 namespace UserService.API
 {
@@ -44,22 +46,35 @@ namespace UserService.API
             Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnectionStringDB"));
 
             // config firebase
-            var jsonFileName = "unitaste-exe201-firebase.json";
-            var credentialsPath = Path.Combine(Directory.GetCurrentDirectory(), "Credentials", jsonFileName);
+            builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection("FirebaseSettings"));
+
+            // Lấy config
+            var firebaseSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<FirebaseSettings>>().Value;
+            var credentialsPath = Path.Combine(Directory.GetCurrentDirectory(), firebaseSettings.CredentialsPath);
+
+            // Log đường dẫn file credentials và bucket name
+            Console.WriteLine($"[Firebase] Credentials path: {credentialsPath}");
+            Console.WriteLine($"[Firebase] Bucket name: {firebaseSettings.BucketName}");
 
             if (File.Exists(credentialsPath))
             {
-                // Thiết lập biến môi trường để Google.Cloud.Storage.V1 tự động nhận diện
+                // Log file tồn tại, log vài dòng đầu file cho chắc
+                var json = File.ReadAllText(credentialsPath);
+                Console.WriteLine($"[Firebase] Credentials file exists: {credentialsPath}");
+                Console.WriteLine($"[Firebase] First 200 chars: {json.Substring(0, Math.Min(200, json.Length))}");
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
             }
             else
             {
+                Console.WriteLine($"[Firebase] Credentials file NOT FOUND at: {credentialsPath}");
                 throw new FileNotFoundException($"KHÔNG TÌM THẤY file Service Account Key tại: {credentialsPath}");
             }
 
-            // 2. Đăng ký StorageClient và Dịch vụ Tùy chỉnh (Dependency Injection)
+            
             builder.Services.AddSingleton(StorageClient.Create());
-            builder.Services.AddSingleton<FirebaseStorageService>();
+
+            // Dependency Injection
+            builder.Services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
