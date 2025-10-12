@@ -9,23 +9,6 @@ out/
 *.suo
 *.userosscache
 
-# Rider IDE
-.idea/
-
-# Mac OS, Linux
-.DS_Store
-*.swp
-*.swo
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Publish directory
-publish/
-artifacts/
-
 # Logs
 *.log
 
@@ -34,32 +17,12 @@ node_modules/
 npm-debug.log*
 
 # Secrets and user configs
-# appsettings.json
-# appsettings.Development.json
-appsettings.*.json
-# secrets.json
-Credentials/unitaste-exe201-793abf881624.json
-# NuGet
+appsettings.json
+UserService.API/Credentials/*.json
 *.nupkg
 packages/
 .nuget/
 
-# Test results
-TestResults/
-*.coverage
-*.coveragexml
-
 # Entity Framework migrations snapshot (nếu muốn)
 *Migrations/*.Designer.cs
 *Migrations/*ModelSnapshot.cs
-
-# Others
-*.db
-*.sqlite
-*.bak
-*.cache
-*.pdb
-
-# VS Code
-.vscode/
-.history/

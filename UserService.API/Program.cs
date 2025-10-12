@@ -1,7 +1,6 @@
 ﻿using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -18,6 +17,15 @@ namespace UserService.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Config
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
+            // Kestrel for Render (PORT env)
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 var port = Environment.GetEnvironmentVariable("PORT");
@@ -26,79 +34,76 @@ namespace UserService.API
                     serverOptions.ListenAnyIP(int.Parse(port));
                 }
             });
-            // Add services to the container.
+
+            // DbContext
+            builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
+            {
+                var connStr = Environment.GetEnvironmentVariable("DefaultConnectionStringDB")
+                                ?? builder.Configuration.GetConnectionString("DefaultConnectionStringDB");
+                options.UseSqlServer(connStr);
+            });
+
+            // Get FirebaseSettings from config
+            var firebaseSection = builder.Configuration.GetSection("FirebaseSettings");
+            var firebaseBucket = firebaseSection["BucketName"];
+            var credentialsPath = firebaseSection["CredentialsPath"];
+
+            // Use secret file for credentials
+            if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
+            {
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+            }
+            else
+            {
+                throw new Exception("Firebase credentials file not found! Path: " + credentialsPath);
+            }
+
+            // Add services
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
             });
 
-            builder.Configuration.AddEnvironmentVariables();
-            builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables();
-
-            builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
-
-            // --- Firebase Configuration Start ---
-            builder.Services.Configure<FirebaseSettings>(builder.Configuration.GetSection("FirebaseSettings"));
-
-            var serviceProvider = builder.Services.BuildServiceProvider();
-            var firebaseSettings = serviceProvider.GetRequiredService<IOptions<FirebaseSettings>>().Value;
-            var credentialsPath = Path.Combine(Directory.GetCurrentDirectory(), firebaseSettings.CredentialsPath);
-
-            if (File.Exists(credentialsPath))
-            {
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
-            }
-            else
-            {
-                throw new FileNotFoundException($"Service Account Key file not found at: {credentialsPath}");
-            }
-
+            builder.Services.Configure<FirebaseSettings>(firebaseSection);
             builder.Services.AddSingleton(StorageClient.Create());
-
-            // Dependency Injection
             builder.Services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            // JWT Authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+                        )
+                    };
+                });
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAllOrigins", builder =>
+                options.AddPolicy("AllowAllOrigins", policy =>
                 {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                 });
             });
 
+            // Swagger + JWT config
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(option =>
             {
-                ////JWT Config
                 option.DescribeAllParametersInCamelCase();
-                option.ResolveConflictingActions(conf => conf.First());    
+                option.ResolveConflictingActions(conf => conf.First());
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
@@ -109,36 +114,19 @@ namespace UserService.API
                     Scheme = "Bearer"
                 });
                 option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
-            },
-            new string[]{}
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
             });
-            var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-            app.UseCors("AllowAllOrigins");
-            app.UseAuthentication();
-            app.UseAuthorization();
-           
-            app.MapControllers();
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            app.Run();
-        }
-    }
-}
+            var app = builder.
