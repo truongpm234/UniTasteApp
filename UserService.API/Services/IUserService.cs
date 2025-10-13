@@ -16,6 +16,10 @@ namespace UserService.API.Services
         Task<bool> UpdateUserProfileAsync(int userId, UpdateUserProfileDto dto);
         Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
         bool IsStrongPassword(string password);
+        Task<Dictionary<int, int>> CountUserRegisterByMonthAsync(int year);
+        Task<int> CountAccountActiveAsync();
+        Task<int> CountAccountInactiveAsync();
+
 
 
     }

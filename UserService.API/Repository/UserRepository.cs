@@ -90,6 +90,26 @@ namespace UserService.API.Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Dictionary<int, int>> CountUserRegisterByMonthAsync(int year)
+        {
+            return await _context.Users
+                .Where(u => u.CreatedAt.HasValue && u.CreatedAt.Value.Year == year)
+                .GroupBy(u => u.CreatedAt.Value.Month)
+                .Select(g => new { Month = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.Month, g => g.Count);
+        }
+
+        public async Task<int> CountAccountActiveAsync()
+        {
+            return await _context.Users.CountAsync(u => u.Status == "Active");
+        }
+
+        public async Task<int> CountAccountInactiveAsync()
+        {
+            return await _context.Users.CountAsync(u => u.Status == "Inactive");
+        }
+
+
 
     }
 }

@@ -15,6 +15,10 @@ namespace UserService.API.Repository
         string GenerateOtpCode(int length = 6);
         Task<User?> GetUserByIdAsync(int userId);
         Task UpdateAsync(User user);
+        Task<Dictionary<int, int>> CountUserRegisterByMonthAsync(int year);
+        Task<int> CountAccountActiveAsync();
+        Task<int> CountAccountInactiveAsync();
+
 
     }
 }
