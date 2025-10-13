@@ -160,22 +160,48 @@ namespace UserService.API.Controllers
             return Ok(profile);
         }
 
-        [Authorize]
-        [HttpPost("upload-avatar")]
-        [Consumes("multipart/form-data")]  
-        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
-        {
-            if (avatarFile == null || avatarFile.Length == 0)
-                return BadRequest("No file uploaded.");
+        //[Authorize]
+        //[HttpPost("upload-avatar")]
+        //[Consumes("multipart/form-data")]  
+        //public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
+        //{
+        //    if (avatarFile == null || avatarFile.Length == 0)
+        //        return BadRequest("No file uploaded.");
 
-            var url = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
-            return Ok(new { avatarUrl = url });
-        }
+        //    var url = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
+        //    return Ok(new { avatarUrl = url });
+        //}
 
+        //[Authorize]
+        //[HttpPut("update-profile-user-by-id/{userId}")]
+        //public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
+        //{
+        //    var result = await _userService.UpdateUserProfileAsync(userId, dto);
+        //    if (!result) return NotFound("User not found");
+        //    return Ok("Profile updated successfully");
+        //}
         [Authorize]
         [HttpPut("update-profile-user-by-id/{userId}")]
-        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateProfile(int userId, [FromForm] UpdateUserProfileForm form)
         {
+            string? avatarUrl = null;
+            if (form.AvatarFile != null && form.AvatarFile.Length > 0)
+            {
+                avatarUrl = await _firebaseStorageService.UploadFileAsync(form.AvatarFile, "avatars");
+            }
+
+            // 2. Tạo DTO cho update
+            var dto = new UpdateUserProfileDto
+            {
+                FullName = form.FullName,
+                Bio = form.Bio,
+                Gender = form.Gender,
+                BirthDate = form.BirthDate,
+                PhoneNumber = form.PhoneNumber,
+                AvatarUrl = avatarUrl
+            };
+
             var result = await _userService.UpdateUserProfileAsync(userId, dto);
             if (!result) return NotFound("User not found");
             return Ok("Profile updated successfully");
@@ -191,6 +217,38 @@ namespace UserService.API.Controllers
                 return BadRequest(errorMsg);
             return Ok("Đổi mật khẩu thành công.");
         }
+        [Authorize]
+        [HttpGet("count-register-by-month/{year}")]
+        public async Task<IActionResult> CountRegisterByMonth(int year)
+        {
+            var result = await _userService.CountUserRegisterByMonthAsync(year);
+
+            // Đảm bảo có đủ 12 tháng, gán 0 nếu không có dữ liệu
+            var fullResult = Enumerable.Range(1, 12)
+                .ToDictionary(m => m, m => result.ContainsKey(m) ? result[m] : 0);
+
+            return Ok(new
+            {
+                year,
+                data = fullResult
+            });
+        }
+
+        [HttpGet("count-active")]
+        public async Task<IActionResult> CountActiveAccounts()
+        {
+            var count = await _userService.CountAccountActiveAsync();
+            return Ok(new { status = "Active", total = count });
+        }
+
+        [HttpGet("count-inactive")]
+        public async Task<IActionResult> CountInactiveAccounts()
+        {
+            var count = await _userService.CountAccountInactiveAsync();
+            return Ok(new { status = "Inactive", total = count });
+        }
+
+
 
     }
 }

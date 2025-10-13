@@ -167,7 +167,8 @@ namespace UserService.API.Services
                 user.Gender = dto.Gender;
             if (dto.BirthDate != null)
                 user.BirthDate = dto.BirthDate;
-
+            if (dto.PhoneNumber != null)
+                user.PhoneNumber = dto.PhoneNumber;
             await _userRepository.UpdateAsync(user);
             return true;
         }
@@ -210,6 +211,22 @@ namespace UserService.API.Services
 
             return hasUpper && hasLower && hasDigit && hasSpecial;
         }
+
+        public async Task<Dictionary<int, int>> CountUserRegisterByMonthAsync(int year)
+        {
+            return await _userRepository.CountUserRegisterByMonthAsync(year);
+        }
+
+        public async Task<int> CountAccountActiveAsync()
+        {
+            return await _userRepository.CountAccountActiveAsync();
+        }
+
+        public async Task<int> CountAccountInactiveAsync()
+        {
+            return await _userRepository.CountAccountInactiveAsync();
+        }
+
 
 
     }
