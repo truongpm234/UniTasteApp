@@ -180,6 +180,18 @@ namespace UserService.API.Controllers
         //    if (!result) return NotFound("User not found");
         //    return Ok("Profile updated successfully");
         //}
+
+        [Authorize]
+        [HttpPost("create-user-preference")]
+        public async Task<IActionResult> CreateUserPreference([FromBody] CreateUserPreferenceDto dto)
+        {
+            if (dto.UserId == 0)
+                return BadRequest("UserId is required!");
+
+            var result = await _userService.CreateUserPreferenceAsync(dto);
+            return Ok(result);
+        }
+
         [Authorize]
         [HttpPut("update-profile-user-by-id/{userId}")]
         [Consumes("multipart/form-data")]

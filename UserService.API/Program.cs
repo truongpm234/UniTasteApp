@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using UserService.API.Data.DBContext;
 using UserService.API.Models.DTO;
 using UserService.API.Repository;
+using UserService.API.Service;
 using UserService.API.Services;
 
 namespace UserService.API
@@ -97,6 +98,7 @@ namespace UserService.API
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
+            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
             // JWT Authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

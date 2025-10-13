@@ -227,6 +227,25 @@ namespace UserService.API.Services
             return await _userRepository.CountAccountInactiveAsync();
         }
 
+        public async Task<UserPreference> CreateUserPreferenceAsync(CreateUserPreferenceDto dto)
+        {
+            var entity = new UserPreference
+            {
+                UserId = dto.UserId,
+                PreferredPlaceTypes = dto.PreferredPlaceTypes,
+                PreferredPriceRange = dto.PreferredPriceRange,
+                PreferredLocation = dto.PreferredLocation,
+                GoingWith = dto.GoingWith,
+                Purpose = dto.Purpose,
+                RequiredFeatures = dto.RequiredFeatures,
+                Note = dto.Note,
+                VenueAtmosphere = dto.VenueAtmosphere,
+                CuisineType = dto.CuisineType,
+                VisitTime = dto.VisitTime,
+                CreatedAt = DateTime.UtcNow
+            };
+            return await _userRepository.CreateUserPreferenceAsync(entity);
+        }
 
 
     }

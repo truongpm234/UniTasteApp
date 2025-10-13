@@ -18,6 +18,7 @@ namespace UserService.API.Repository
         Task<Dictionary<int, int>> CountUserRegisterByMonthAsync(int year);
         Task<int> CountAccountActiveAsync();
         Task<int> CountAccountInactiveAsync();
+        Task<UserPreference> CreateUserPreferenceAsync(UserPreference userPreference);
 
 
     }

@@ -148,7 +148,7 @@ public partial class Exe201UserServiceDbContext : DbContext
             entity.Property(e => e.CuisineType).HasMaxLength(255);
             entity.Property(e => e.VisitTime).HasMaxLength(200);
             entity.HasOne(e => e.User)
-                .WithOne()
+                .WithOne(u => u.UserPreference)
                 .HasForeignKey<UserPreference>(e => e.UserId)
                 .HasConstraintName("FK_UserPreference_User");
         });

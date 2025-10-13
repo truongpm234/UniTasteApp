@@ -109,6 +109,13 @@ namespace UserService.API.Repository
             return await _context.Users.CountAsync(u => u.Status == "Inactive");
         }
 
+        public async Task<UserPreference> CreateUserPreferenceAsync(UserPreference userPreference)
+        {
+            userPreference.CreatedAt = DateTime.UtcNow;
+            await _context.UserPreferences.AddAsync(userPreference);
+            await _context.SaveChangesAsync();
+            return userPreference;
+        }
 
 
     }
