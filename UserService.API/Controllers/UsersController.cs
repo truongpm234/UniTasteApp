@@ -163,7 +163,7 @@ namespace UserService.API.Controllers
         [Authorize]
         [HttpPost("upload-avatar")]
         [Consumes("multipart/form-data")]  
-        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)  // Bỏ [FromForm]
+        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
         {
             if (avatarFile == null || avatarFile.Length == 0)
                 return BadRequest("No file uploaded.");

@@ -103,11 +103,8 @@ public partial class Exe201UserServiceDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C00A9CCBD");
-
             entity.ToTable("User");
-
             entity.HasIndex(e => e.Email, "UQ__User__A9D1053489C3FC0C").IsUnique();
-
             entity.Property(e => e.AvatarUrl).HasMaxLength(250);
             entity.Property(e => e.Bio).HasMaxLength(500);
             entity.Property(e => e.Email).HasMaxLength(100);
@@ -117,6 +114,7 @@ public partial class Exe201UserServiceDbContext : DbContext
             entity.Property(e => e.Status).HasMaxLength(20);
             entity.Property(e => e.RoleId);
             entity.Property(e => e.RoleName).HasMaxLength(50);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
         });
 
         modelBuilder.Entity<UserAccessory>(entity =>
