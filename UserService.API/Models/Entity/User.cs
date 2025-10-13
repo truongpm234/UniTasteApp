@@ -29,6 +29,8 @@ public partial class User
 
     public string? RoleName { get; set; }
 
+    public string? PhoneNumber { get; set; }
+
     public virtual ICollection<AiLog> AiLogs { get; set; } = new List<AiLog>();
 
     public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();

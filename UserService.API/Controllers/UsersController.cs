@@ -163,7 +163,7 @@ namespace UserService.API.Controllers
         [Authorize]
         [HttpPost("upload-avatar")]
         [Consumes("multipart/form-data")]  
-        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)  // Bỏ [FromForm]
+        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
         {
             if (avatarFile == null || avatarFile.Length == 0)
                 return BadRequest("No file uploaded.");
@@ -191,6 +191,38 @@ namespace UserService.API.Controllers
                 return BadRequest(errorMsg);
             return Ok("Đổi mật khẩu thành công.");
         }
+        [Authorize]
+        [HttpGet("count-register-by-month/{year}")]
+        public async Task<IActionResult> CountRegisterByMonth(int year)
+        {
+            var result = await _userService.CountUserRegisterByMonthAsync(year);
+
+            // Đảm bảo có đủ 12 tháng, gán 0 nếu không có dữ liệu
+            var fullResult = Enumerable.Range(1, 12)
+                .ToDictionary(m => m, m => result.ContainsKey(m) ? result[m] : 0);
+
+            return Ok(new
+            {
+                year,
+                data = fullResult
+            });
+        }
+
+        [HttpGet("count-active")]
+        public async Task<IActionResult> CountActiveAccounts()
+        {
+            var count = await _userService.CountAccountActiveAsync();
+            return Ok(new { status = "Active", total = count });
+        }
+
+        [HttpGet("count-inactive")]
+        public async Task<IActionResult> CountInactiveAccounts()
+        {
+            var count = await _userService.CountAccountInactiveAsync();
+            return Ok(new { status = "Inactive", total = count });
+        }
+
+
 
     }
 }
