@@ -160,26 +160,26 @@ namespace UserService.API.Controllers
             return Ok(profile);
         }
 
-        //[Authorize]
-        //[HttpPost("upload-avatar")]
-        //[Consumes("multipart/form-data")]  
-        //public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
-        //{
-        //    if (avatarFile == null || avatarFile.Length == 0)
-        //        return BadRequest("No file uploaded.");
+        [Authorize]
+        [HttpPost("upload-avatar")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
+        {
+            if (avatarFile == null || avatarFile.Length == 0)
+                return BadRequest("No file uploaded.");
 
-        //    var url = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
-        //    return Ok(new { avatarUrl = url });
-        //}
+            var url = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
+            return Ok(new { avatarUrl = url });
+        }
 
-        //[Authorize]
-        //[HttpPut("update-profile-user-by-id/{userId}")]
-        //public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
-        //{
-        //    var result = await _userService.UpdateUserProfileAsync(userId, dto);
-        //    if (!result) return NotFound("User not found");
-        //    return Ok("Profile updated successfully");
-        //}
+        [Authorize]
+        [HttpPut("update-profile-user-by-id/{userId}")]
+        public async Task<IActionResult> UpdateProfile(int userId, [FromBody] UpdateUserProfileDto dto)
+        {
+            var result = await _userService.UpdateUserProfileAsync(userId, dto);
+            if (!result) return NotFound("User not found");
+            return Ok("Profile updated successfully");
+        }
 
         [Authorize]
         [HttpPost("create-user-preference")]
@@ -201,7 +201,7 @@ namespace UserService.API.Controllers
         }
 
         [Authorize]
-        [HttpPut("update-profile-user-by-id/{userId}")]
+        [HttpPut("update-profile-user-by-userid/{userId}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateProfile(int userId, [FromForm] UpdateUserProfileForm form)
         {
