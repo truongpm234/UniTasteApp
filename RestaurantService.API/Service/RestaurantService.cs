@@ -19,6 +19,7 @@ namespace RestaurantService.API.Service
         {
             return await _restaurantRepo.GetAllRestaurantAsync();
         }
+<<<<<<< HEAD
 
         public async Task<List<RestaurantResponseDto>> GetAllRestaurantFullAsync()
         {
@@ -63,6 +64,8 @@ namespace RestaurantService.API.Service
             return await _restaurantRepo.GetCategoriesByRestaurantIdAsync(restaurantId);
         }
 
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
         {
             return await _restaurantRepo.GetRestaurantsWithinRadiusAsync(latitude, longitude, radiusKm);
@@ -111,6 +114,7 @@ namespace RestaurantService.API.Service
             return await _restaurantRepo.GetOrCreateCategoryByNameAsync(name, sourceType);
         }
 
+<<<<<<< HEAD
         public async Task<RestaurantResponseDto?> GetRestaurantByIdAsync(int id)
         {
             var restaurant = await _restaurantRepo.GetRestaurantByIdAsync(id);
@@ -145,12 +149,20 @@ namespace RestaurantService.API.Service
         }
 
 
+=======
+        public async Task<Restaurant> GetRestaurantByIdAsync(int id)
+        {
+            return await _restaurantRepo.GetRestaurantByIdAsync(id);
+        }
+
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         public async Task<Restaurant> MapGooglePlaceToRestaurantAsync(GooglePlace place)
         {
             return await _restaurantRepo.MapGooglePlaceToRestaurantAsync(place);
         }
         public async Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name)
         {
+<<<<<<< HEAD
 
             return await _restaurantRepo.SearchRestaurantsByNameAsync(name);
         }
@@ -262,6 +274,10 @@ namespace RestaurantService.API.Service
             }
             return result;
         }
+=======
+            return await _restaurantRepo.SearchRestaurantsByNameAsync(name);
+        }
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
 
     }
 

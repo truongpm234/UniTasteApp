@@ -12,6 +12,7 @@ namespace UserService.API.Services
         Task<bool> ResetPasswordAsync(string token, string newPassword);
         string GenerateOtpCode(int length = 6);
         Task SendRegisterOtpEmailAsync(string email, string fullName, string otpCode);
+<<<<<<< HEAD
         Task<UserProfileDto?> GetUserProfileAsync(int userId);
         Task<bool> UpdateUserProfileAsync(int userId, UpdateUserProfileDto dto);
         Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
@@ -21,6 +22,8 @@ namespace UserService.API.Services
         Task<int> CountAccountInactiveAsync();
         Task<List<User>> GetAllUsersAsync();
 
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
 
 
     }

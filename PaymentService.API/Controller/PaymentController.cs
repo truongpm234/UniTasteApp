@@ -72,6 +72,7 @@ namespace PaymentService.API.Controllers
         {
             return Content("Payment Cancelled!");
         }
+<<<<<<< HEAD
 
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllTransactions()
@@ -81,6 +82,10 @@ namespace PaymentService.API.Controllers
         }
 
     }
+=======
+    }
+
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
     // DTO cho request body
     public class CreatePaymentDto
     {

@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 ﻿using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+=======
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -90,10 +94,24 @@ namespace UserService.API
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
             });
+<<<<<<< HEAD
 
             builder.Services.Configure<FirebaseSettings>(firebaseSection);
             builder.Services.AddSingleton(StorageClient.Create());
             builder.Services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
+=======
+            builder.Configuration.AddEnvironmentVariables();
+            builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
+            builder.Services.AddDbContext<Exe201UserServiceDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
+
+            Console.WriteLine("Connection string: " + builder.Configuration.GetConnectionString("DefaultConnectionStringDB"));
+
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
@@ -118,9 +136,17 @@ namespace UserService.API
 
             builder.Services.AddCors(options =>
             {
+<<<<<<< HEAD
                 options.AddPolicy("AllowAllOrigins", policy =>
                 {
                     policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+=======
+                options.AddPolicy("AllowAllOrigins", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
                 });
             });
 
@@ -165,11 +191,18 @@ namespace UserService.API
             app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
+<<<<<<< HEAD
             app.MapControllers();
 
             app.UseSwagger();
             app.UseSwaggerUI();
 
+=======
+           
+            app.MapControllers();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
             app.Run();
         }
     }

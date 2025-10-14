@@ -24,6 +24,7 @@ namespace RestaurantService.API.Repository
     .Include(r => r.Reviews)
     .ToListAsync();
 
+<<<<<<< HEAD
         }
         public async Task<List<Category>> GetCategoriesByRestaurantIdAsync(int restaurantId)
         {
@@ -84,6 +85,32 @@ namespace RestaurantService.API.Repository
                 .ToListAsync();
         }
 
+=======
+        }
+
+        public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm)
+        {
+            // Haversine Formula in LINQ
+            const double EarthRadius = 6371; // km
+
+            return await _context.Restaurants
+                .Where(r =>
+                    EarthRadius * 2 * Math.Asin(
+                        Math.Sqrt(
+                            Math.Pow(Math.Sin((double)((latitude - r.Latitude) * Math.PI / 360)), 2) +
+                            Math.Cos(latitude * Math.PI / 180) * Math.Cos((double)(r.Latitude * Math.PI / 180)) *
+                            Math.Pow(Math.Sin((double)((longitude - r.Longitude) * Math.PI / 360)), 2)
+                        )
+                    ) <= radiusKm
+                )
+                .Include(r => r.Categories)
+                .Include(r => r.Features)
+                .Include(r => r.PriceRange)
+                .Include(r => r.Reviews)
+                .ToListAsync();
+        }
+
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         public async Task<Restaurant> GetRestaurantByIdAsync(int id)
         {
             return await _context.Restaurants
@@ -249,6 +276,7 @@ namespace RestaurantService.API.Repository
                 .Where(r => r.Name != null && EF.Functions.Like(r.Name.ToLower(), $"%{name.ToLower()}%"))
                 .ToListAsync();
         }
+<<<<<<< HEAD
         public async Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize)
         {
             var restaurants = await this.SearchRestaurantsByNameAsync(name) ?? new List<Restaurant>();
@@ -343,6 +371,9 @@ namespace RestaurantService.API.Repository
                 .Distinct()
                 .ToListAsync();
         }
+=======
+
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
 
     }
 }

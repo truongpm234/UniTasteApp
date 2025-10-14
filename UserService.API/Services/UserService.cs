@@ -137,6 +137,7 @@ namespace UserService.API.Services
             return _userRepository.GenerateOtpCode(length);
         }
 
+<<<<<<< HEAD
         public async Task<UserProfileDto?> GetUserProfileAsync(int userId)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
@@ -234,5 +235,7 @@ namespace UserService.API.Services
 
 
 
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
     }
 }

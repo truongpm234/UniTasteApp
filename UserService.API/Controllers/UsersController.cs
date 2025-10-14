@@ -19,13 +19,20 @@ namespace UserService.API.Controllers
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
+<<<<<<< HEAD
         private readonly IFirebaseStorageService _firebaseStorageService;
         public UsersController(IConfiguration config, IUserService userService, IEmailService emailService, IFirebaseStorageService firebaseStorageService)
+=======
+        public UsersController(IConfiguration config, IUserService userService, IEmailService emailService)
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         {
             _config = config;
             _userService = userService;
             _emailService = emailService;
+<<<<<<< HEAD
             _firebaseStorageService = firebaseStorageService;
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         }
 
         [HttpPost("Login")]
@@ -41,7 +48,10 @@ namespace UserService.API.Controllers
             return Ok(new
             {
                 token,
+<<<<<<< HEAD
                 userId = user.UserId,
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
                 fullName = user.FullName,
                 email = user.Email
             });
@@ -58,7 +68,11 @@ namespace UserService.API.Controllers
                 _config["Jwt:Audience"],
                 new Claim[]
                 {
+<<<<<<< HEAD
             new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()),
+=======
+            new(ClaimTypes.NameIdentifier, systemUserAccount.UserId.ToString()), 
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
             new(ClaimTypes.Email, systemUserAccount.Email),
             new(ClaimTypes.Role, systemUserAccount.RoleId.ToString()),
                 },
@@ -109,6 +123,7 @@ namespace UserService.API.Controllers
                 return BadRequest(new { error = "OTP is invalid or expired" });
             }
 
+<<<<<<< HEAD
 
             // Chuẩn bị thông tin để lưu vào DB
             var registerRequest = new RegisterRequest
@@ -122,6 +137,21 @@ namespace UserService.API.Controllers
             RegisterOtpMemory.Pending.Remove(req.Email);
 
             return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
+=======
+ 
+                // Chuẩn bị thông tin để lưu vào DB
+                var registerRequest = new RegisterRequest
+                {
+                    Email = pending.Email,
+                    FullName = pending.FullName,
+                    PasswordHash = pending.PasswordHash,
+                    BirthDate = DateOnly.FromDateTime(pending.BirthDate)
+                };
+                var user = await _userService.RegisterAsync(registerRequest);           
+                RegisterOtpMemory.Pending.Remove(req.Email);
+
+                return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         }
 
 
@@ -150,6 +180,7 @@ namespace UserService.API.Controllers
                 return Ok(new { status = "false", message = "Invalid or expired token!" });
             return Ok(new { status = "true", message = "Password changed successfully." });
         }
+<<<<<<< HEAD
 
         [Authorize]
         [HttpGet("get-profile-user-by-id/{userId}")]
@@ -258,5 +289,23 @@ namespace UserService.API.Controllers
 
 
 
+=======
+
+    }
+
+    public class RequestResetPasswordDto
+    {
+        public string Email { get; set; }
+    }
+    public class RegisterVerifyRequest
+    {
+        public string Email { get; set; }
+        public string OtpCode { get; set; }
+    }
+    public class ConfirmResetPasswordDto
+    {
+        public string Token { get; set; }
+        public string NewPassword { get; set; }
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
     }
 }

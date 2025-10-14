@@ -29,10 +29,13 @@ namespace PaymentService.API.Repositories
             await _context.Purchases.AddAsync(p);
             await _context.SaveChangesAsync();
         }
+<<<<<<< HEAD
         public async Task<List<PaymentTransaction>> GetAllTransactionsAsync()
         {
             return await _context.PaymentTransactions.ToListAsync();
         }
 
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
     }
 }

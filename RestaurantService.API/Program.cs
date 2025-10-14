@@ -49,6 +49,7 @@ namespace RestaurantService.API
                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 });
+<<<<<<< HEAD
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins", builder =>
@@ -58,6 +59,8 @@ namespace RestaurantService.API
                            .AllowAnyHeader();
                 });
             });
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
             builder.Services.AddSwaggerGen(option =>
             {
                 ////JWT Config
@@ -101,8 +104,11 @@ namespace RestaurantService.API
             }
 
             app.UseHttpsRedirection();
+<<<<<<< HEAD
             app.UseCors("AllowAllOrigins");
 
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSwagger();

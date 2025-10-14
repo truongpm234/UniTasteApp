@@ -15,12 +15,20 @@ public class RestaurantsController : ControllerBase
         _restaurantService = restaurantService;
     }
 
+<<<<<<< HEAD
     //[Authorize]
+=======
+    [Authorize]
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
     [HttpGet]
     [Route("get-all-restaurant")]
     public async Task<IActionResult> GetAllRestaurant()
     {
+<<<<<<< HEAD
         var restaurants = await _restaurantService.GetAllRestaurantFullAsync();
+=======
+        var restaurants = await _restaurantService.GetAllRestaurantAsync();
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
         int count = restaurants?.Count ?? 0;
 
         if (restaurants == null || restaurants.Count == 0)
@@ -34,7 +42,11 @@ public class RestaurantsController : ControllerBase
         });
     }
 
+<<<<<<< HEAD
     //[Authorize]
+=======
+    [Authorize]
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
     [HttpPost("find-by-location-10km")]
     public async Task<IActionResult> GetRestaurantsByLocation([FromBody] LocationRequestDto location)
     {
@@ -88,6 +100,7 @@ public class RestaurantsController : ControllerBase
         });
     }
 
+<<<<<<< HEAD
     [Authorize]
     [HttpGet("search-by-name-with-paging")]
     public async Task<IActionResult> SearchWithPagingAsync([FromQuery] string name, [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
@@ -129,4 +142,6 @@ public class RestaurantsController : ControllerBase
         });
     }
 
+=======
+>>>>>>> a1129b948ccc7d4674db9eb146672d75d5e673f0
 }
