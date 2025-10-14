@@ -272,5 +272,11 @@ namespace UserService.API.Services
             return await _userRepository.UpdateUserPreferenceAsync(userId, entityToUpdate);
         }
 
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _userRepository.GetAllUsersAsync();
+        }
+
+
     }
 }

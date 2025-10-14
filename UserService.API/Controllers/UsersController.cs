@@ -277,6 +277,13 @@ namespace UserService.API.Controllers
             return Ok(new { status = "Inactive", total = count });
         }
 
+        //[Authorize]
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
+        }
 
 
     }

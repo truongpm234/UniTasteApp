@@ -22,6 +22,8 @@ namespace UserService.API.Services
         Task<UserPreference> CreateUserPreferenceAsync(CreateUserPreferenceDto dto);
         Task<UserPreference?> GetUserPreferenceByUserIdAsync(int userId);
         Task<UserPreference?> UpdateUserPreferenceAsync(int userId, UpdateUserPreferenceDto dto);
+        Task<IEnumerable<User>> GetAllUsersAsync();
+
 
     }
 }

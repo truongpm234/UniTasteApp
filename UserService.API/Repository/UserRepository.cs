@@ -150,6 +150,11 @@ namespace UserService.API.Repository
             await _context.SaveChangesAsync();
             return entity;
         }
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
 
     }
 }
