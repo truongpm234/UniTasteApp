@@ -111,6 +111,12 @@ namespace UserService.API.Repository
 
         public async Task<UserPreference> CreateUserPreferenceAsync(UserPreference userPreference)
         {
+            var exist = await _context.UserPreferences.FirstOrDefaultAsync(x => x.UserId == userPreference.UserId);
+            if (exist != null)
+            {
+                throw new Exception("Người dùng này đã thiết lập thông tin UserPreference rồi.");
+            }
+
             userPreference.CreatedAt = DateTime.UtcNow;
             await _context.UserPreferences.AddAsync(userPreference);
             await _context.SaveChangesAsync();
