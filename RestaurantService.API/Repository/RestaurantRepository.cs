@@ -19,7 +19,6 @@ namespace RestaurantService.API.Repository
         {
             return await _context.Restaurants
     .Include(r => r.Categories)
-    .Include(r => r.Features)
     .Include(r => r.PriceRange)
     .Include(r => r.Reviews)
     .ToListAsync();
@@ -341,6 +340,17 @@ namespace RestaurantService.API.Repository
                 .Include(r => r.PriceRange)
                 .Include(r => r.Reviews)
                 .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15)  // AI
+        {
+            return await _context.Restaurants
+                .OrderBy(r =>
+                    Math.Pow((r.Latitude.Value - userLat), 2) +
+                    Math.Pow((r.Longitude.Value - userLng), 2)
+                )
+                .Take(limit)
                 .ToListAsync();
         }
 

@@ -193,6 +193,14 @@ namespace UserService.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("get-user-preference-by-userid/{userId}")]
+        public async Task<IActionResult> GetUserPreferenceByUserId(int userId)
+        {
+            var result = await _userService.GetUserPreferenceByUserIdAsync(userId);
+            return result != null ? Ok(result) : NotFound();
+        }
+
+        [Authorize]
         [HttpPut("update-profile-user-by-id/{userId}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateProfile(int userId, [FromForm] UpdateUserProfileForm form)

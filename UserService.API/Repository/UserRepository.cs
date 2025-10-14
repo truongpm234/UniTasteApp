@@ -117,6 +117,10 @@ namespace UserService.API.Repository
             return userPreference;
         }
 
+        public async Task<UserPreference?> GetUserPreferenceByUserIdAsync(int userId)
+        {
+            return await _context.UserPreferences.FirstOrDefaultAsync(x => x.UserId == userId);
+        }
 
     }
 }

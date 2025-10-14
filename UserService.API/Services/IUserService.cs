@@ -20,8 +20,7 @@ namespace UserService.API.Services
         Task<int> CountAccountActiveAsync();
         Task<int> CountAccountInactiveAsync();
         Task<UserPreference> CreateUserPreferenceAsync(CreateUserPreferenceDto dto);
-
-
+        Task<UserPreference?> GetUserPreferenceByUserIdAsync(int userId);
 
     }
 }

@@ -16,24 +16,25 @@ namespace RestaurantService.API.Controllers
         {
             _geminiAIService = geminiAIService;
         }
-        [HttpPost("chat")]
-        public async Task<IActionResult> Chat([FromQuery] string prompt)
-        {
-            if (string.IsNullOrEmpty(prompt))
-            {
-                return BadRequest("Prompt is required.");
-            }
-            try
-            {
-                var response = await _geminiAIService.getChatResponse(prompt);
-                return Ok(new ChatResponse { Response = response});
-            }
-            catch (Exception)
-            {
+        //[HttpPost("chat")]
+        //public async Task<IActionResult> Chat([FromQuery] string prompt)
+        //{
+        //    if (string.IsNullOrEmpty(prompt))
+        //    {
+        //        return BadRequest("Prompt is required.");
+        //    }
+        //    try
+        //    {
+        //        var response = await _geminiAIService.getChatResponse(prompt);
+        //        return Ok(new ChatResponse { Response = response});
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
+        //        throw;
+        //    }
             
-        }   
+        //}   
+
     }
 }

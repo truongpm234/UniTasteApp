@@ -247,6 +247,12 @@ namespace UserService.API.Services
             return await _userRepository.CreateUserPreferenceAsync(entity);
         }
 
+        public async Task<UserPreference?> GetUserPreferenceByUserIdAsync(int userId)
+        {
+            return await _userRepository.GetUserPreferenceByUserIdAsync(userId);
+        }
+
+
 
     }
 }

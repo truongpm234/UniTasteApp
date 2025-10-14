@@ -26,6 +26,7 @@ namespace RestaurantService.API.Repository
         Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize);
         Task<PaginationResult<List<Restaurant>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize);
         Task<List<Restaurant>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName);
+        Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15);  // AI
 
 
     }

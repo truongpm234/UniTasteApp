@@ -263,6 +263,11 @@ namespace RestaurantService.API.Service
             return result;
         }
 
+        public async Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15)
+        {
+            return await _restaurantRepo.GetNearestRestaurantsAsync(userLat, userLng, limit);
+        }  // AI
+
     }
 
 }

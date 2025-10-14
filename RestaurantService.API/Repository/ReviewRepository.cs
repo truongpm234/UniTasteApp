@@ -31,5 +31,21 @@ namespace RestaurantService.API.Repository
             }
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Review>> GetAllReviewsAsync()
+        {
+            return await _context.Reviews.ToListAsync();
+
+        }
+
+        public async Task<List<Review>> GetTopReviewsByRestaurantIdAsync(int restaurantId, int top = 4)   //AI
+        {
+            return await _context.Reviews
+                .Where(r => r.RestaurantId == restaurantId)
+                .OrderByDescending(r => r.Rating) // hoặc OrderByDescending(r => r.CreatedAt)
+                .Take(top)
+                .ToListAsync();
+        }
+
     }
 }

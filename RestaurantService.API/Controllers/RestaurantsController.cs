@@ -129,4 +129,12 @@ public class RestaurantsController : ControllerBase
         });
     }
 
+    [Authorize]
+    [HttpGet("get-nearest-restaurants")]
+    public async Task<IActionResult> GetNearestRestaurants(double lat, double lng, int limit = 15)
+    {
+        var data = await _restaurantService.GetNearestRestaurantsAsync(lat, lng, limit);
+        return Ok(data);
+    }
+
 }

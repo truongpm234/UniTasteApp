@@ -18,6 +18,16 @@ namespace RestaurantService.API.Service
             await _reviewRepository.AddOrUpdateReviewsAsync(restaurantId, googleReviews);
         }
 
+        public async Task<List<Review>> GetAllReviewsAsync()
+        {
+            return await _reviewRepository.GetAllReviewsAsync();
+        }
+
+        public async Task<List<Review>> GetTopReviewsByRestaurantIdAsync(int restaurantId, int top = 4)
+        {
+            return await _reviewRepository.GetTopReviewsByRestaurantIdAsync(restaurantId, top);
+        }   //AI
+
 
     }
 }

@@ -41,6 +41,18 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/reviews/google/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/google/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/reviews/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
