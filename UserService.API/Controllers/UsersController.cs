@@ -227,6 +227,15 @@ namespace UserService.API.Controllers
             return Ok("Profile updated successfully");
         }
 
+        [Authorize]
+        [HttpPut("update-user-preference/{userId}")]
+        public async Task<IActionResult> UpdateUserPreference(int userId, [FromBody] UpdateUserPreferenceDto dto)
+        {
+            var result = await _userService.UpdateUserPreferenceAsync(userId, dto);
+            if (result == null)
+                return NotFound("User preference not found to update.");
+            return Ok(result);
+        }
 
         [Authorize]
         [HttpPost("change-password")]

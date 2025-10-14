@@ -128,5 +128,28 @@ namespace UserService.API.Repository
             return await _context.UserPreferences.FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
+        public async Task<UserPreference?> UpdateUserPreferenceAsync(int userId, UserPreference update)
+        {
+            var entity = await _context.UserPreferences.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (entity == null)
+                return null;
+
+            // Cập nhật các trường mong muốn
+            entity.PreferredPlaceTypes = update.PreferredPlaceTypes;
+            entity.PreferredPriceRange = update.PreferredPriceRange;
+            entity.PreferredLocation = update.PreferredLocation;
+            entity.GoingWith = update.GoingWith;
+            entity.Purpose = update.Purpose;
+            entity.RequiredFeatures = update.RequiredFeatures;
+            entity.Note = update.Note;
+            entity.VenueAtmosphere = update.VenueAtmosphere;
+            entity.CuisineType = update.CuisineType;
+            entity.VisitTime = update.VisitTime;
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
     }
 }

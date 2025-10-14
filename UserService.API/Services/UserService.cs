@@ -252,7 +252,25 @@ namespace UserService.API.Services
             return await _userRepository.GetUserPreferenceByUserIdAsync(userId);
         }
 
+        public async Task<UserPreference?> UpdateUserPreferenceAsync(int userId, UpdateUserPreferenceDto dto)
+        {
+            var entityToUpdate = new UserPreference
+            {
+                PreferredPlaceTypes = dto.PreferredPlaceTypes,
+                PreferredPriceRange = dto.PreferredPriceRange,
+                PreferredLocation = dto.PreferredLocation,
+                GoingWith = dto.GoingWith,
+                Purpose = dto.Purpose,
+                RequiredFeatures = dto.RequiredFeatures,
+                Note = dto.Note,
+                VenueAtmosphere = dto.VenueAtmosphere,
+                CuisineType = dto.CuisineType,
+                VisitTime = dto.VisitTime
+            };
 
+            // Gọi đúng hàm repository với Entity
+            return await _userRepository.UpdateUserPreferenceAsync(userId, entityToUpdate);
+        }
 
     }
 }
