@@ -227,6 +227,11 @@ namespace UserService.API.Services
             return await _userRepository.CountAccountInactiveAsync();
         }
 
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _userRepository.GetAllUsersAsync();
+        }
+
 
 
     }

@@ -1,7 +1,8 @@
-﻿using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
+﻿using ApiGateway.Aggregators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 using System.Text;
 
 namespace ApiGateway
@@ -12,16 +13,23 @@ namespace ApiGateway
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Load Ocelot config
-            builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+            // ✅ Load ocelot.json TRƯỚC KHI truy cập Jwt config
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
-            // Add services
-            builder.Services.AddOcelot();
+            // ✅ Debug nếu cần
+            Console.WriteLine("✅ Jwt:Key = " + builder.Configuration["Jwt:Key"]);
+
+            // ✅ Add Ocelot + Aggregator
+            builder.Services.AddOcelot()
+                .AddSingletonDefinedAggregator<UserPaymentAggregator>();
+
+            // ✅ Swagger và Controllers
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
-            // 🔑 Add Authentication + JWT
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -37,13 +45,12 @@ namespace ApiGateway
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                     };
                 });
-            builder.Configuration.AddEnvironmentVariables();
 
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
-            // Swagger
+            // ✅ Swagger UI
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -52,15 +59,17 @@ namespace ApiGateway
 
             app.MapGet("/", () => "API Gateway is running!");
 
+            // ✅ Middleware pipeline
             app.UseHttpsRedirection();
-
-            // Middleware pipeline
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
-            // Ocelot Gateway
+            // ✅ Tạm thời bỏ qua xác thực SSL (cho dev)
+            System.Net.ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+
+            // ✅ Khởi động Ocelot
             app.UseOcelot().Wait();
 
             app.Run();

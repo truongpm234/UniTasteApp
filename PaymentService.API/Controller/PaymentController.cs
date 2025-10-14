@@ -72,8 +72,15 @@ namespace PaymentService.API.Controllers
         {
             return Content("Payment Cancelled!");
         }
-    }
 
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllTransactions()
+        {
+            var transactions = await _paymentRepository.GetAllTransactionsAsync();
+            return Ok(transactions);
+        }
+
+    }
     // DTO cho request body
     public class CreatePaymentDto
     {

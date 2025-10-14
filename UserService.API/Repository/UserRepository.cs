@@ -108,6 +108,11 @@ namespace UserService.API.Repository
         {
             return await _context.Users.CountAsync(u => u.Status == "Inactive");
         }
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
 
 
 
