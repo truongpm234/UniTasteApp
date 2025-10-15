@@ -25,7 +25,6 @@ namespace UserService.API
                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
-            // Cấu hình Kestrel cho Render (PORT env)
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 var port = Environment.GetEnvironmentVariable("PORT");
@@ -43,11 +42,9 @@ namespace UserService.API
                 options.UseSqlServer(connStr);
             });
 
-            // === Firebase credential (ĐỌC TỪ ENV) ===
             var firebaseSection = builder.Configuration.GetSection("FirebaseSettings");
             var bucketName = firebaseSection["BucketName"];
 
-            // Thử đọc credentials từ environment variable trước
             var firebaseCredentialsJson = Environment.GetEnvironmentVariable("FIREBASE_CREDENTIALS_JSON");
 
             Console.WriteLine($"[DEBUG] FIREBASE_CREDENTIALS_JSON exists: {!string.IsNullOrEmpty(firebaseCredentialsJson)}");
@@ -57,7 +54,6 @@ namespace UserService.API
             {
                 try
                 {
-                    // Tạo file tạm thời từ JSON string
                     var tempPath = Path.Combine(Path.GetTempPath(), "firebase-credentials.json");
                     File.WriteAllText(tempPath, firebaseCredentialsJson);
                     Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tempPath);
@@ -72,7 +68,6 @@ namespace UserService.API
             else
             {
                 Console.WriteLine("[WARNING] FIREBASE_CREDENTIALS_JSON not found in environment variables");
-                // Fallback: đọc từ file local (chỉ dùng khi dev)
                 var credentialsPath = firebaseSection["CredentialsPath"];
                 if (!string.IsNullOrEmpty(credentialsPath) && File.Exists(credentialsPath))
                 {
@@ -85,7 +80,6 @@ namespace UserService.API
                 }
             }
 
-            // Thêm các service còn lại
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;

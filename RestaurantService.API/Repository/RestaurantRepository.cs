@@ -314,7 +314,8 @@ namespace RestaurantService.API.Repository
             };
         }
 
-        public async Task<List<Restaurant>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName)
+        public async Task<PaginationResult<List<Restaurant>>> GetRestaurantsWithinRadiusAndCategoryAsync(
+    double latitude, double longitude, double radiusKm, string categoryName, int currentPage, int pageSize)
         {
             const double EarthRadius = 6371;
 
@@ -334,13 +335,29 @@ namespace RestaurantService.API.Repository
                             && c.Name.ToLower().Contains(categoryName.ToLower())
                         select r;
 
-            return await query
+            query = query
                 .Include(r => r.Categories)
-                .Include(r => r.Features)
                 .Include(r => r.PriceRange)
                 .Include(r => r.Reviews)
-                .Distinct()
+                .Distinct();
+
+            var totalItems = await query.CountAsync();
+
+            var items = await query
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return new PaginationResult<List<Restaurant>>
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                Items = items
+            };
         }
 
         public async Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15)  // AI
