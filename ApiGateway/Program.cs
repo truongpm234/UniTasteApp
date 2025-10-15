@@ -35,21 +35,26 @@ namespace ApiGateway
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,  // Hoặc = false nếu không cần
+            ValidateIssuer = false,
+            ValidateAudience = false,  
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
-
-        // Thêm event để debug
         options.Events = new JwtBearerEvents
         {
-            OnAuthenticationFailed = context =>
+            OnAuthenticationFailed = ctx =>
             {
-                Console.WriteLine($"Token validation failed: {context.Exception.Message}");
+                Console.WriteLine($"[AUTH FAILED] {ctx.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                var userId = ctx.Principal?.FindFirst("sub")?.Value
+                          ?? ctx.Principal?.FindFirst("nameid")?.Value;
+                Console.WriteLine($"[TOKEN VALID] User: {userId}");
                 return Task.CompletedTask;
             }
         };

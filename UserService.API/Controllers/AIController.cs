@@ -52,16 +52,17 @@ namespace UserService.API.Controllers
         {
             var client = _httpClientFactory.CreateClient();
 
-            // LẤY TOKEN TỪ REQUEST HIỆN TẠI
+            // ✅ LẤY TOKEN
             var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(token))
-            {
-                client.DefaultRequestHeaders.Add("Authorization", token);
-            }
-            else
-            {
-                return Unauthorized("No token provided");
-            }
+
+            // ✅ DEBUG LOG
+            Console.WriteLine($"[DEBUG] Token received: {token?.Substring(0, 20)}...");
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized("No Authorization header!");
+
+            // ✅ FORWARD TOKEN
+            client.DefaultRequestHeaders.Add("Authorization", token);
 
             var gatewayBase = "https://apigateway-5s3w.onrender.com";
 
