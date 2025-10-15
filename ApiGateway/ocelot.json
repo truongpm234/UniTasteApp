@@ -42,11 +42,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/reviews/google/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5003
+          "Host": "unitasteapp-restaurantservice.onrender.com",
+          "Port": 443
         }
       ],
       "UpstreamPathTemplate": "/api/reviews/google/{everything}",
