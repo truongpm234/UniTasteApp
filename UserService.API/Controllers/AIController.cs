@@ -110,7 +110,7 @@ namespace UserService.API.Controllers
             sb.AppendLine("Trươc tiên nếu user hỏi các câu hỏi không liên quan đến gợi ý quán ăn thì hãy trả lời câu hỏi của họ, " +
                 "nếu user hỏi những câu hỏi có liên quan " +
                 "đến những việc cần các dữ liệu từ database, không cần quá chú trọng vào nhu cầu user mà linh hoạt gợi ý, " +
-                "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập," +
+                "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập trong bán kính 5km," +
                 " không nên xa quá 5km, không được gợi ý dùng các tool, hay " +
                 "web khác hay các dịch vụ bên khác để gợi ý, mà chỉ trả lời ngay tại đây và cho ra quán cụ thể, nếu thật sự không có thì " +
                 "bạn có thể tự chọn quán dựa trên dữ liệu của google và cho ra kết quả, không được trả về response là dựa vào các dịch vụ google hay các bên thứ 3 khác, " +

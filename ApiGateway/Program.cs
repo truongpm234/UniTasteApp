@@ -26,9 +26,9 @@ namespace ApiGateway
             builder.Services.AddControllers();
 
             // Cấu hình JWT authentication (ưu tiên lấy từ env, fallback sang file nếu cần)
-            var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? builder.Configuration["Jwt:Issuer"];
-            var jwtAudience = builder.Configuration["JWT_AUDIENCE"] ?? builder.Configuration["Jwt:Audience"];
-            var jwtKey = builder.Configuration["JWT_KEY"] ?? builder.Configuration["Jwt:Key"];
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["Jwt:Audience"];
+            var jwtKey = builder.Configuration["Jwt:Key"];
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
