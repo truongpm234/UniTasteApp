@@ -83,7 +83,7 @@
 
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:8001"
+    "BaseUrl": "https://apigateway-5s3w.onrender.com"
   },
   "Jwt": {
     "Key": "0ccfeb299b126a479a64630e2d34e9e91e5fcbcaea8ac9e3347e224b0557a53e",
