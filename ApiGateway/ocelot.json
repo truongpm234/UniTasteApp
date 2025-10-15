@@ -1,7 +1,7 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/users/{everything}",
+      "DownstreamPathTemplate": "/api/users/{everything}",               //userService.API
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -13,7 +13,21 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/social/{everything}",
+      "DownstreamPathTemplate": "/api/AI/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "unitasteapp1.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/AI/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+
+
+    {
+      "DownstreamPathTemplate": "/api/social/{everything}",                   //socialService.API
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -24,8 +38,10 @@
       "UpstreamPathTemplate": "/api/social/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
+
+
     {
-      "DownstreamPathTemplate": "/api/restaurants/{everything}",
+      "DownstreamPathTemplate": "/api/restaurants/{everything}",             //restaurantService.API
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -52,8 +68,11 @@
       "UpstreamPathTemplate": "/api/reviews/google/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
+
+
+
     {
-      "DownstreamPathTemplate": "/api/reviews/{everything}",
+      "DownstreamPathTemplate": "/api/reviews/{everything}",                      //reviewService.API
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -64,8 +83,11 @@
       "UpstreamPathTemplate": "/api/reviews/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
+
+
+
     {
-      "DownstreamPathTemplate": "/api/payments/{everything}",
+      "DownstreamPathTemplate": "/api/payments/{everything}",                      //paymentService.API
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
