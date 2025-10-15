@@ -57,14 +57,17 @@ namespace UserService.API.Controllers
             else
                 return Unauthorized("Thiếu Bearer token ở header!");
 
+
+            var gatewayBase = "https://apigateway-5s3w.onrender.com";
+
             // 1. Lấy preference user
-            var userPrefRes = await client.GetAsync($"http://localhost:8001/api/users/get-user-preference-by-userid/{userId}");
+            var userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
             if (!userPrefRes.IsSuccessStatusCode)
                 return BadRequest("Không lấy được preference người dùng!");
             var userPrefJson = await userPrefRes.Content.ReadAsStringAsync();
 
             // 2. Lấy 15 quán gần nhất
-            var resRes = await client.GetAsync($"http://localhost:8001/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=15");
+            var resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=15");
             if (!resRes.IsSuccessStatusCode)
                 return BadRequest("Không lấy được danh sách quán gần nhất!");
             var restaurantJson = await resRes.Content.ReadAsStringAsync();
@@ -80,7 +83,7 @@ namespace UserService.API.Controllers
                 Encoding.UTF8, "application/json"
             );
             var reviewRes = await client.PostAsync(
-                $"http://localhost:8001/api/reviews/google/get-top-reviews-multiple?top=4", reviewContent
+                $"{gatewayBase}/api/reviews/google/get-top-reviews-multiple?top=4", reviewContent
             );
             if (!reviewRes.IsSuccessStatusCode)
                 return BadRequest("Không lấy được review!");
