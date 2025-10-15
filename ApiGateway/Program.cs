@@ -12,16 +12,24 @@ namespace ApiGateway
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Load Ocelot config
+            // Đọc ocelot.json
             builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+            // Đọc biến môi trường (Render, Azure, Heroku, ... sẽ inject env cho bạn)
+            builder.Configuration.AddEnvironmentVariables();
 
-            // Add services
+            // Thêm dịch vụ Ocelot
             builder.Services.AddOcelot();
-            builder.Services.AddControllers();
+
+            // Thêm swagger cho debug gateway (không bắt buộc)
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddControllers();
 
-            // 🔑 Add Authentication + JWT
+            // Cấu hình JWT authentication (ưu tiên lấy từ env, fallback sang file nếu cần)
+            var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["JWT_AUDIENCE"] ?? builder.Configuration["Jwt:Audience"];
+            var jwtKey = builder.Configuration["JWT_KEY"] ?? builder.Configuration["Jwt:Key"];
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -31,19 +39,17 @@ namespace ApiGateway
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
                     };
                 });
-            builder.Configuration.AddEnvironmentVariables();
 
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
-            // Swagger
+            // Swagger UI cho dev
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -54,13 +60,13 @@ namespace ApiGateway
 
             app.UseHttpsRedirection();
 
-            // Middleware pipeline
+            // AuthN/AuthZ middleware
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
 
-            // Ocelot Gateway
+            // Ocelot pipeline (bắt buộc phải cuối cùng)
             app.UseOcelot().Wait();
 
             app.Run();
