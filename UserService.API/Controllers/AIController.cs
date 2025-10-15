@@ -51,12 +51,17 @@ namespace UserService.API.Controllers
     [FromQuery] double lng)
         {
             var client = _httpClientFactory.CreateClient();
-            var accessToken = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(accessToken))
-                client.DefaultRequestHeaders.Add("Authorization", accessToken);
-            else
-                return Unauthorized("Thiếu Bearer token ở header!");
 
+            // LẤY TOKEN TỪ REQUEST HIỆN TẠI
+            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(token))
+            {
+                client.DefaultRequestHeaders.Add("Authorization", token);
+            }
+            else
+            {
+                return Unauthorized("No token provided");
+            }
 
             var gatewayBase = "https://apigateway-5s3w.onrender.com";
 
