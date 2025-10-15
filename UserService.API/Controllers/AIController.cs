@@ -130,7 +130,6 @@ namespace UserService.API.Controllers
             public int RestaurantId { get; set; }
             public string Name { get; set; }
             public double? GoogleRating { get; set; }
-            // ... các trường khác nếu muốn
         }
 
         public class ReviewDto
