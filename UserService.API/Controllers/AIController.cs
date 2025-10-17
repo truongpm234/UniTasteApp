@@ -73,13 +73,13 @@ namespace UserService.API.Controllers
             // 1. Lấy preference user
             var userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
             if (!userPrefRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được preference người dùng!");
+                return BadRequest("Không lấy được preference người dùng!  Vui lòng điền thông tin về nhu cầu của bạn.");
             var userPrefJson = await userPrefRes.Content.ReadAsStringAsync();
 
             // 2. Lấy 15 quán gần nhất
-            var resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=15");
+            var resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=10");
             if (!resRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được danh sách quán gần nhất! Vui lòng điền thông tin về nhu cầu của bạn.");
+                return BadRequest("Không lấy được danh sách quán gần nhất!");
             var restaurantJson = await resRes.Content.ReadAsStringAsync();
             var restaurants = System.Text.Json.JsonSerializer.Deserialize<List<RestaurantDto>>(restaurantJson);
 
