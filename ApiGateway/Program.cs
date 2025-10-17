@@ -13,7 +13,11 @@ namespace ApiGateway
             var builder = WebApplication.CreateBuilder(args);
 
             // Đọc ocelot.json
-            builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+            builder.Configuration
+    .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+
             // Đọc biến môi trường (Render, Azure, Heroku, ... sẽ inject env cho bạn)
             builder.Configuration.AddEnvironmentVariables();
 

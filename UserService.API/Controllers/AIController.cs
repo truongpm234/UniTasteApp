@@ -64,7 +64,11 @@ namespace UserService.API.Controllers
             // ✅ FORWARD TOKEN
             client.DefaultRequestHeaders.Add("Authorization", token);
 
-            var gatewayBase = "https://apigateway-5s3w.onrender.com";
+            //var gatewayBase = "https://apigateway-5s3w.onrender.com";
+            var gatewayBase = Environment.GetEnvironmentVariable("GATEWAY_BASEURL")
+    ?? (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+        ? "http://localhost:8001"
+        : "https://apigateway-5s3w.onrender.com");
 
             // 1. Lấy preference user
             var userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
@@ -75,7 +79,7 @@ namespace UserService.API.Controllers
             // 2. Lấy 15 quán gần nhất
             var resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=15");
             if (!resRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được danh sách quán gần nhất!");
+                return BadRequest("Không lấy được danh sách quán gần nhất! Vui lòng điền thông tin về nhu cầu của bạn.");
             var restaurantJson = await resRes.Content.ReadAsStringAsync();
             var restaurants = System.Text.Json.JsonSerializer.Deserialize<List<RestaurantDto>>(restaurantJson);
 
@@ -131,8 +135,6 @@ namespace UserService.API.Controllers
 
             return Ok(new { answer = aiResponse });
         }
-
-
 
         public class RestaurantDto
         {
