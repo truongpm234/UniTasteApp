@@ -119,7 +119,7 @@ namespace UserService.API.Controllers
             }
             sb.AppendLine("Trươc tiên nếu user hỏi các câu hỏi không liên quan đến gợi ý quán ăn thì hãy trả lời câu hỏi của họ, " +
                 "nếu user hỏi những câu hỏi có liên quan " +
-                "đến những việc cần các dữ liệu từ database, không cần quá chú trọng vào nhu cầu user mà linh hoạt gợi ý, " +
+                "đến những việc liên quan đến nhu cầu ăn uống giair trí, không cần quá chú trọng vào nhu cầu đã có mà linh hoạt gợi ý, " +
                 "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập trong bán kính 5km," +
                 " không nên xa quá 5km, không được gợi ý dùng các tool, hay " +
                 "web khác hay các dịch vụ bên khác để gợi ý, mà chỉ trả lời ngay tại đây và cho ra quán cụ thể, nếu thật sự không có thì " +
@@ -135,26 +135,5 @@ namespace UserService.API.Controllers
 
             return Ok(new { answer = aiResponse });
         }
-
-        public class RestaurantDto
-        {
-            public int RestaurantId { get; set; }
-            public string Name { get; set; }
-            public double? GoogleRating { get; set; }
-        }
-
-        public class ReviewDto
-        {
-            public string UserName { get; set; }
-            public double Rating { get; set; }
-            public string Comment { get; set; }
-        }
-
-        public class ReviewGroupDto
-        {
-            public int RestaurantId { get; set; }
-            public List<ReviewDto> Reviews { get; set; }
-        }
-
     }
 }
