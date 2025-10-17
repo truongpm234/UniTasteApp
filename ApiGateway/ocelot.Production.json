@@ -24,10 +24,8 @@
       "UpstreamPathTemplate": "/api/AI/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
-
-
     {
-      "DownstreamPathTemplate": "/api/social/{everything}", //socialService.API
+      "DownstreamPathTemplate": "/api/social/{everything}",       //socialService.API
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -38,10 +36,8 @@
       "UpstreamPathTemplate": "/api/social/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
-
-
     {
-      "DownstreamPathTemplate": "/api/restaurants/{everything}", //restaurantService.API
+      "DownstreamPathTemplate": "/api/restaurants/{everything}",      //restaurantService.API.restaurantsController
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -49,7 +45,7 @@
           "Port": 443
         }
       ],
-      "UpstreamPathTemplate": "/api/restaurants/{everything}",
+      "UpstreamPathTemplate": "/api/restaurants/{everything}", 
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
@@ -57,7 +53,23 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/reviews/google/{everything}",
+      "DownstreamPathTemplate": "/api/userreviews/{everything}",        //restaurantService.API.UserReviewsController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "unitasteapp-restaurantservice.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/userreviews/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/reviews/google/{everything}", //review of goolemap
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
