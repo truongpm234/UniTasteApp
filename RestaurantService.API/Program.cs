@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +19,9 @@ namespace RestaurantService.API
 
             builder.Services.AddDbContext<Exe201RestaurantServiceDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
-
+            // Đăng ký DI cho 3 lớp
+            builder.Services.AddScoped<IUserReviewRepository, UserReviewRepository>();
+            builder.Services.AddScoped<IUserReviewService, UserReviewService>();
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -39,8 +41,7 @@ namespace RestaurantService.API
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
             builder.Services.AddControllers()
