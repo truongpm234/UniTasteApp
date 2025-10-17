@@ -69,6 +69,22 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/GooglePlaces/{everything}", //restaurantService.API.GooglePlacesController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/GooglePlaces/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/api/reviews/google/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -77,7 +93,7 @@
           "Port": 5003
         }
       ],
-      "UpstreamPathTemplate": "/api/reviews/google/{everything}",    //review of goolemap
+      "UpstreamPathTemplate": "/api/reviews/google/{everything}", //review of goolemap
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
