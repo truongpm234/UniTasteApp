@@ -102,15 +102,15 @@ public class RestaurantsController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("search-by-name-category-paging")]
-    public async Task<IActionResult> SearchByNameAndCategoryWithPagingAsync([FromQuery] string name, [FromQuery] string category, [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
+    [HttpGet("search-by-categoryId-with-paging")]
+    public async Task<IActionResult> SearchByCategoryWithPagingAsync(
+    [FromQuery] int categoryId, [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
     {
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(category))
-            return BadRequest("Name and Category are required.");
-        var result = await _restaurantService.SearchByNameAndCategoryWithPagingAsync(name, category, currentPage, pageSize);
+        if (categoryId <= 0)
+            return BadRequest("CategoryId is required.");
+        var result = await _restaurantService.SearchByCategoryWithPagingAsync(categoryId, currentPage, pageSize);
         return Ok(result);
     }
-
 
     [Authorize]
     [HttpPost("find-by-location-and-category")]

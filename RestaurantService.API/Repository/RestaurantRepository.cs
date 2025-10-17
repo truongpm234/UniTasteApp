@@ -274,15 +274,15 @@ namespace RestaurantService.API.Repository
                 Items = restaurants
             };
         }
-        public async Task<PaginationResult<List<Restaurant>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize)
+        public async Task<PaginationResult<List<Restaurant>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize)
         {
+            // Join bảng liên kết để lấy restaurant theo categoryId
             var query = from r in _context.Restaurants
                         join rc in _context.RestaurantCategories on r.RestaurantId equals rc.RestaurantId
-                        join c in _context.Categories on rc.CategoryId equals c.CategoryId
-                        where EF.Functions.Like(r.Name.ToLower(), $"%{name.ToLower()}%")
-                              && c.Name.ToLower().Contains(categoryName.ToLower())
+                        where rc.CategoryId == categoryId
                         select r;
 
+            // Include navigation property nếu cần trả về thêm thông tin
             query = query
                 .Include(r => r.Categories)
                 .Include(r => r.PriceRange)

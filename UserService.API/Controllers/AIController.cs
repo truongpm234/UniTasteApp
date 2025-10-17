@@ -64,11 +64,16 @@ namespace UserService.API.Controllers
             // ✅ FORWARD TOKEN
             client.DefaultRequestHeaders.Add("Authorization", token);
 
-            //var gatewayBase = "https://apigateway-5s3w.onrender.com";
-            var gatewayBase = Environment.GetEnvironmentVariable("GATEWAY_BASEURL")
-    ?? (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
-        ? "http://localhost:8001"
-        : "https://apigateway-5s3w.onrender.com");
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")?.ToLower() ?? "production";
+            var gatewayBase = Environment.GetEnvironmentVariable("GATEWAY_BASEURL");
+
+            if (string.IsNullOrEmpty(gatewayBase))
+            {
+                if (env == "development")
+                    gatewayBase = "http://localhost:8001";
+                else
+                    gatewayBase = "https://apigateway-5s3w.onrender.com";
+            }
 
             // 1. Lấy preference user
             var userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
@@ -123,7 +128,7 @@ namespace UserService.API.Controllers
                 "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập trong bán kính 5km," +
                 " không nên xa quá 5km, không được gợi ý dùng các tool, hay " +
                 "web khác hay các dịch vụ bên khác để gợi ý, mà chỉ trả lời ngay tại đây và cho ra quán cụ thể, nếu thật sự không có thì " +
-                "bạn có thể tự chọn quán dựa trên dữ liệu của google và cho ra kết quả, không được trả về response là dựa vào các dịch vụ google hay các bên thứ 3 khác, " +
+                "bạn có thể tự chọn quán dựa t}rên dữ liệu của google và cho ra kết quả, không được trả về response là dựa vào các dịch vụ google hay các bên thứ 3 khác, " +
                 "mà chỉ nói là 'dựa vào dữ liệu của chúng tôi'. " +
                 "Lưu ý quan trọng là khi trả về kết quả thì cần có các thông tin về tên quán, địa chỉ quán, thời gian hoạt động và sẽ có những món gì và lưu ý là " +
                 "nên gợi ý những nơi sinh viên thường đến, hạn chế gợi ý những nơi sang trọng và giá cả đắt đỏ. Kết quả cho ra ít nhất có thông tin 5 quán ăn hoặc cafe hoặc cả hai," +
@@ -135,5 +140,6 @@ namespace UserService.API.Controllers
 
             return Ok(new { answer = aiResponse });
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using RestaurantService.API.Models.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using RestaurantService.API.Models.DTO;
 using RestaurantService.API.Models.Entity;
 using RestaurantService.API.Models.GooglePlaces;
 
@@ -22,7 +23,7 @@ public interface IRestaurantService
     Task<Category> GetOrCreateCategoryByNameAsync(string name, string sourceType = "Google");
     Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name);
     Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchWithPagingAsync(string name, int currentPage, int pageSize);
-    Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize);
+    Task<PaginationResult<List<Restaurant>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize);
     Task<PaginationResult<List<RestaurantResponseDto>>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName, int currentPage, int pageSize);
     Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15);  // AI
 

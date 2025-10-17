@@ -192,42 +192,9 @@ namespace RestaurantService.API.Service
             };
         }
 
-        public async Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchByNameAndCategoryWithPagingAsync(string name, string categoryName, int currentPage, int pageSize)
+        public async Task<PaginationResult<List<Restaurant>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize)
         {
-            var restaurantsPaged = await _restaurantRepo.SearchByNameAndCategoryWithPagingAsync(name, categoryName, currentPage, pageSize);
-
-            var dtoList = new List<GetCategoryIdByRestaurantIdDto>();
-
-            foreach (var r in restaurantsPaged.Items)
-            {
-                var categories = await _restaurantRepo.GetCategoriesByRestaurantIdAsync(r.RestaurantId);
-
-                dtoList.Add(new GetCategoryIdByRestaurantIdDto
-                {
-                    RestaurantId = r.RestaurantId,
-                    PriceRangeId = r.PriceRangeId,
-                    Name = r.Name,
-                    PriceRange = r.PriceRange,
-                    Address = r.Address,
-                    Latitude = r.Latitude,
-                    Longitude = r.Longitude,
-                    GooglePlaceId = r.GooglePlaceId,
-                    Phone = r.Phone,
-                    Website = r.Website,
-                    CoverImageUrl = r.CoverImageUrl,
-                    GoogleRating = r.GoogleRating,
-                    Categories = categories.ToList()
-                });
-            }
-
-            return new PaginationResult<List<GetCategoryIdByRestaurantIdDto>>
-            {
-                TotalItems = restaurantsPaged.TotalItems,
-                TotalPages = restaurantsPaged.TotalPages,
-                CurrentPage = restaurantsPaged.CurrentPage,
-                PageSize = restaurantsPaged.PageSize,
-                Items = dtoList
-            };
+            return await _restaurantRepo.SearchByCategoryWithPagingAsync(categoryId, currentPage, pageSize);
         }
 
         public async Task<PaginationResult<List<RestaurantResponseDto>>> GetRestaurantsWithinRadiusAndCategoryAsync(
