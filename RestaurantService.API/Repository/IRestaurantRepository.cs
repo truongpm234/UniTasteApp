@@ -24,9 +24,8 @@ namespace RestaurantService.API.Repository
         Task<Category> GetOrCreateCategoryByNameAsync(string name, string sourceType = "Google");
         Task<List<Restaurant>> SearchRestaurantsByNameAsync(string name);
         Task<PaginationResult<List<Restaurant>>> SearchWithPagingAsync(string name, int currentPage, int pageSize);
-        Task<PaginationResult<List<Restaurant>>> SearchByCategoryWithPagingAsync(
-            int categoryId, int currentPage, int pageSize);        
-            Task<PaginationResult<List<Restaurant>>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName, int currentPage, int pageSize);
+        Task<PaginationResult<List<RestaurantWithCategoriesDto>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize);
+        Task<PaginationResult<List<Restaurant>>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName, int currentPage, int pageSize);
         Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15);  // AI
 
 

@@ -103,11 +103,11 @@ public class RestaurantsController : ControllerBase
 
     [Authorize]
     [HttpGet("search-by-categoryId-with-paging")]
-    public async Task<IActionResult> SearchByCategoryWithPagingAsync(
-    [FromQuery] int categoryId, [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> SearchByCategoryWithPagingAsync([FromQuery] int categoryId, [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 5)
     {
         if (categoryId <= 0)
-            return BadRequest("CategoryId is required.");
+            return BadRequest("CategoryId is required!");
+
         var result = await _restaurantService.SearchByCategoryWithPagingAsync(categoryId, currentPage, pageSize);
         return Ok(result);
     }
@@ -138,5 +138,7 @@ public class RestaurantsController : ControllerBase
         var data = await _restaurantService.GetNearestRestaurantsAsync(lat, lng, limit);
         return Ok(data);
     }
+
+    
 
 }

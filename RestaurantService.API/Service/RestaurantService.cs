@@ -192,7 +192,7 @@ namespace RestaurantService.API.Service
             };
         }
 
-        public async Task<PaginationResult<List<Restaurant>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize)
+        public async Task<PaginationResult<List<RestaurantWithCategoriesDto>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize)
         {
             return await _restaurantRepo.SearchByCategoryWithPagingAsync(categoryId, currentPage, pageSize);
         }

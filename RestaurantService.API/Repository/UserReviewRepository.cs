@@ -27,5 +27,11 @@ namespace RestaurantService.API.Repository
             await _context.SaveChangesAsync();
             return review;
         }
+
+        public async Task<bool> ExistsReviewByUserAsync(int userId, int restaurantId)
+        {
+            return await _context.Reviews.AnyAsync(r => r.UserId == userId && r.RestaurantId == restaurantId);
+        }
+
     }
 }

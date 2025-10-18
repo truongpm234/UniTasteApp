@@ -274,43 +274,62 @@ namespace RestaurantService.API.Repository
                 Items = restaurants
             };
         }
-        public async Task<PaginationResult<List<Restaurant>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize)
+        public async Task<PaginationResult<List<RestaurantWithCategoriesDto>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize)
         {
-            // Join bảng liên kết để lấy restaurant theo categoryId
-            var query = from r in _context.Restaurants
-                        join rc in _context.RestaurantCategories on r.RestaurantId equals rc.RestaurantId
-                        where rc.CategoryId == categoryId
-                        select r;
+            // 1. Lấy tất cả restaurantId thuộc category này
+            var restaurantIds = await _context.RestaurantCategories
+                .Where(rc => rc.CategoryId == categoryId)
+                .Select(rc => rc.RestaurantId)
+                .Distinct()
+                .ToListAsync();
 
-            // Include navigation property nếu cần trả về thêm thông tin
-            query = query
-                .Include(r => r.Categories)
-                .Include(r => r.PriceRange)
-                .Distinct();
+            // 2. Query restaurant theo các id vừa lấy
+            var query = _context.Restaurants
+                .Where(r => restaurantIds.Contains(r.RestaurantId));
 
             var totalItems = await query.CountAsync();
             var totalPages = pageSize > 0 ? (int)Math.Ceiling((double)totalItems / pageSize) : 0;
 
-            List<Restaurant> items;
-            if (pageSize > 0 && currentPage > 0)
+            var items = await query
+                .OrderBy(r => r.RestaurantId)
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var result = new List<RestaurantWithCategoriesDto>();
+
+            foreach (var r in items)
             {
-                items = await query
-                    .Skip((currentPage - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-            }
-            else
-            {
-                items = await query.ToListAsync();
+                // Lấy tất cả category cho từng restaurant
+                var categories = await (from rc in _context.RestaurantCategories
+                                        join c in _context.Categories on rc.CategoryId equals c.CategoryId
+                                        where rc.RestaurantId == r.RestaurantId
+                                        select new CategoryDto
+                                        {
+                                            CategoryId = c.CategoryId,
+                                            Name = c.Name
+                                        }).ToListAsync();
+
+                result.Add(new RestaurantWithCategoriesDto
+                {
+                    RestaurantId = r.RestaurantId,
+                    Name = r.Name,
+                    Address = r.Address,
+                    Latitude = r.Latitude,
+                    Longitude = r.Longitude,
+                    CoverImageUrl = r.CoverImageUrl,
+                    GoogleRating = r.GoogleRating,
+                    Categories = categories
+                });
             }
 
-            return new PaginationResult<List<Restaurant>>
+            return new PaginationResult<List<RestaurantWithCategoriesDto>>
             {
                 TotalItems = totalItems,
                 TotalPages = totalPages,
                 CurrentPage = currentPage,
                 PageSize = pageSize,
-                Items = items
+                Items = result
             };
         }
 

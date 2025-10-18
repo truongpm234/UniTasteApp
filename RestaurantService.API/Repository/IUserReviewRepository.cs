@@ -6,5 +6,6 @@ namespace RestaurantService.API.Repository
     {
         Task<List<Review>> GetReviewsByRestaurantIdAsync(int restaurantId);
         Task<Review> AddReviewAsync(Review review);
+        Task<bool> ExistsReviewByUserAsync(int userId, int restaurantId);
     }
 }

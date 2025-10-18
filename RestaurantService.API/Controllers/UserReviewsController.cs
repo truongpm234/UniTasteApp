@@ -10,7 +10,7 @@ namespace RestaurantService.API.Controllers
     [Route("api/[controller]")]
     public class UserReviewsController : ControllerBase
     {
-        private readonly IUserReviewService _reviewService;
+        private readonly IUserReviewService _reviewService; 
         public UserReviewsController(IUserReviewService reviewService)
         {
             _reviewService = reviewService;
@@ -35,6 +35,15 @@ namespace RestaurantService.API.Controllers
 
             var created = await _reviewService.AddReviewAsync(review);
             return Ok(created);
+        }
+
+        [Authorize]
+        [HttpGet("user-has-reviewed")]
+        public async Task<IActionResult> UserHasReviewed([FromQuery] int userId, [FromQuery] int restaurantId)
+        {
+            // Gọi Repo kiểm tra
+            var hasReviewed = await _reviewService.UserHasReviewedAsync(userId, restaurantId);
+            return Ok(new { hasReviewed });
         }
     }
 }

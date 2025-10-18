@@ -7,5 +7,8 @@ namespace RestaurantService.API.Service
     {
         Task<List<Review>> GetReviewsByRestaurantIdAsync(int restaurantId);
         Task<Review> AddReviewAsync(ReviewCreateDto dto);
+        Task<bool> CheckUserReviewedAsync(int userId, int restaurantId);
+        Task<bool> UserHasReviewedAsync(int userId, int restaurantId);
+
     }
 }
