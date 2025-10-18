@@ -31,17 +31,24 @@ namespace RestaurantService.API.Controllers
             });
         }
 
-        [Authorize]
         [HttpPost("get-top-reviews-multiple")]
         public async Task<IActionResult> GetTopReviewsMultiple([FromBody] List<int> restaurantIds, int top = 4)
         {
-            var result = new List<object>();
-            foreach (var id in restaurantIds)
+            try
             {
-                var reviews = await _reviewService.GetTopReviewsByRestaurantIdAsync(id, top);
-                result.Add(new { RestaurantId = id, Reviews = reviews });
+                var result = new List<object>();
+                foreach (var id in restaurantIds)
+                {
+                    var reviews = await _reviewService.GetTopReviewsByRestaurantIdAsync(id, top);
+                    result.Add(new { RestaurantId = id, Reviews = reviews });
+                }
+                return Ok(result);
             }
-            return Ok(result);
+            catch (Exception ex)
+            {
+                // Log lỗi cụ thể ở đây
+                return StatusCode(500, $"Internal error: {ex.Message} | {ex.StackTrace}");
+            }
         }
 
     }

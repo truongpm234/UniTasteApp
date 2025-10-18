@@ -41,7 +41,7 @@ namespace ApiGateway
         {
             ValidateIssuer = false,
             ValidateAudience = false,  
-            ValidateLifetime = true,
+            ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,

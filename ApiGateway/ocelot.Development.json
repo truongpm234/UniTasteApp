@@ -54,7 +54,7 @@
     },
     {
       "DownstreamPathTemplate": "/api/userreviews/{everything}", //restaurantService.API.UserReviewsController
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
@@ -70,7 +70,7 @@
     },
     {
       "DownstreamPathTemplate": "/api/GooglePlaces/{everything}", //restaurantService.API.GooglePlacesController
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
