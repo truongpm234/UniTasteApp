@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Data\DBContext\" />
     <Folder Include="Data\Repository\" />
     <Folder Include="Models\DTO\" />
     <Folder Include="Models\Entity\" />

@@ -1,6 +1,5 @@
 
 using Microsoft.EntityFrameworkCore;
-using ReviewService.API.Data.DBContext;
 
 namespace ReviewService.API
 {
@@ -11,8 +10,8 @@ namespace ReviewService.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext<Exe201ReviewServiceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
+    //        builder.Services.AddDbContext<Exe201ReviewServiceDbContext>(options =>
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

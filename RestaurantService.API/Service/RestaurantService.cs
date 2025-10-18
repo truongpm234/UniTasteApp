@@ -230,11 +230,14 @@ namespace RestaurantService.API.Service
             };
         }
 
-        public async Task<List<RestaurantResponseDto>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName)
+        public async Task<PaginationResult<List<RestaurantResponseDto>>> GetRestaurantsWithinRadiusAndCategoryAsync(
+    double latitude, double longitude, double radiusKm, string categoryName, int currentPage, int pageSize)
         {
-            var restaurants = await _restaurantRepo.GetRestaurantsWithinRadiusAndCategoryAsync(latitude, longitude, radiusKm, categoryName);
+            var pagedResult = await _restaurantRepo.GetRestaurantsWithinRadiusAndCategoryAsync(
+                latitude, longitude, radiusKm, categoryName, currentPage, pageSize);
+
             var result = new List<RestaurantResponseDto>();
-            foreach (var r in restaurants)
+            foreach (var r in pagedResult.Items)
             {
                 var categories = await _restaurantRepo.GetCategoriesByRestaurantIdAsync(r.RestaurantId);
                 var openingHourDto2List = _restaurantRepo.ParseOpeningHours(r.OpeningHours ?? string.Empty);
@@ -243,8 +246,8 @@ namespace RestaurantService.API.Service
                     RestaurantId = r.RestaurantId,
                     Name = r.Name,
                     Address = r.Address,
-                    Latitude = (double)r.Latitude,
-                    Longitude = (double)r.Longitude,
+                    Latitude = r.Latitude ?? 0,
+                    Longitude = r.Longitude ?? 0,
                     GooglePlaceId = r.GooglePlaceId,
                     Phone = r.Phone,
                     Website = r.Website,
@@ -254,13 +257,20 @@ namespace RestaurantService.API.Service
                     CreatedAt = r.CreatedAt,
                     Status = r.Status,
                     PriceRange = r.PriceRange,
-                    Categories = categories.ToList(),
-                    Features = r.Features?.ToList() ?? new List<Feature>(),
+                    Categories = categories,
                     Reviews = r.Reviews?.ToList() ?? new List<Review>(),
                     OpeningHours = openingHourDto2List
                 });
             }
-            return result;
+
+            return new PaginationResult<List<RestaurantResponseDto>>
+            {
+                TotalItems = pagedResult.TotalItems,
+                TotalPages = pagedResult.TotalPages,
+                CurrentPage = pagedResult.CurrentPage,
+                PageSize = pagedResult.PageSize,
+                Items = result
+            };
         }
 
         public async Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15)

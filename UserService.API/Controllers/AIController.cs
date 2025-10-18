@@ -51,20 +51,33 @@ namespace UserService.API.Controllers
     [FromQuery] double lng)
         {
             var client = _httpClientFactory.CreateClient();
-            var accessToken = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(accessToken))
-                client.DefaultRequestHeaders.Add("Authorization", accessToken);
-            else
-                return Unauthorized("Thiếu Bearer token ở header!");
+
+            // ✅ LẤY TOKEN
+            var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+
+            // ✅ DEBUG LOG
+            Console.WriteLine($"[DEBUG] Token received: {token?.Substring(0, 20)}...");
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized("No Authorization header!");
+
+            // ✅ FORWARD TOKEN
+            client.DefaultRequestHeaders.Add("Authorization", token);
+
+            //var gatewayBase = "https://apigateway-5s3w.onrender.com";
+            var gatewayBase = Environment.GetEnvironmentVariable("GATEWAY_BASEURL")
+    ?? (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+        ? "http://localhost:8001"
+        : "https://apigateway-5s3w.onrender.com");
 
             // 1. Lấy preference user
-            var userPrefRes = await client.GetAsync($"http://localhost:8001/api/users/get-user-preference-by-userid/{userId}");
+            var userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
             if (!userPrefRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được preference người dùng!");
+                return BadRequest("Không lấy được preference người dùng!  Vui lòng điền thông tin về nhu cầu của bạn.");
             var userPrefJson = await userPrefRes.Content.ReadAsStringAsync();
 
             // 2. Lấy 15 quán gần nhất
-            var resRes = await client.GetAsync($"http://localhost:8001/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=15");
+            var resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=10");
             if (!resRes.IsSuccessStatusCode)
                 return BadRequest("Không lấy được danh sách quán gần nhất!");
             var restaurantJson = await resRes.Content.ReadAsStringAsync();
@@ -80,7 +93,7 @@ namespace UserService.API.Controllers
                 Encoding.UTF8, "application/json"
             );
             var reviewRes = await client.PostAsync(
-                $"http://localhost:8001/api/reviews/google/get-top-reviews-multiple?top=4", reviewContent
+                $"{gatewayBase}/api/reviews/google/get-top-reviews-multiple?top=4", reviewContent
             );
             if (!reviewRes.IsSuccessStatusCode)
                 return BadRequest("Không lấy được review!");
@@ -106,8 +119,8 @@ namespace UserService.API.Controllers
             }
             sb.AppendLine("Trươc tiên nếu user hỏi các câu hỏi không liên quan đến gợi ý quán ăn thì hãy trả lời câu hỏi của họ, " +
                 "nếu user hỏi những câu hỏi có liên quan " +
-                "đến những việc cần các dữ liệu từ database, không cần quá chú trọng vào nhu cầu user mà linh hoạt gợi ý, " +
-                "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập," +
+                "đến những việc liên quan đến nhu cầu ăn uống giair trí, không cần quá chú trọng vào nhu cầu đã có mà linh hoạt gợi ý, " +
+                "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập trong bán kính 5km," +
                 " không nên xa quá 5km, không được gợi ý dùng các tool, hay " +
                 "web khác hay các dịch vụ bên khác để gợi ý, mà chỉ trả lời ngay tại đây và cho ra quán cụ thể, nếu thật sự không có thì " +
                 "bạn có thể tự chọn quán dựa trên dữ liệu của google và cho ra kết quả, không được trả về response là dựa vào các dịch vụ google hay các bên thứ 3 khác, " +
@@ -122,29 +135,5 @@ namespace UserService.API.Controllers
 
             return Ok(new { answer = aiResponse });
         }
-
-
-
-        public class RestaurantDto
-        {
-            public int RestaurantId { get; set; }
-            public string Name { get; set; }
-            public double? GoogleRating { get; set; }
-            // ... các trường khác nếu muốn
-        }
-
-        public class ReviewDto
-        {
-            public string UserName { get; set; }
-            public double Rating { get; set; }
-            public string Comment { get; set; }
-        }
-
-        public class ReviewGroupDto
-        {
-            public int RestaurantId { get; set; }
-            public List<ReviewDto> Reviews { get; set; }
-        }
-
     }
 }

@@ -263,6 +263,7 @@ namespace UserService.API.Controllers
             });
         }
 
+        [Authorize]
         [HttpGet("count-active")]
         public async Task<IActionResult> CountActiveAccounts()
         {
@@ -270,6 +271,7 @@ namespace UserService.API.Controllers
             return Ok(new { status = "Active", total = count });
         }
 
+        [Authorize]
         [HttpGet("count-inactive")]
         public async Task<IActionResult> CountInactiveAccounts()
         {
@@ -277,7 +279,7 @@ namespace UserService.API.Controllers
             return Ok(new { status = "Inactive", total = count });
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllUsers()
         {

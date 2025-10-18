@@ -119,14 +119,16 @@ public class RestaurantsController : ControllerBase
         if (request == null || string.IsNullOrWhiteSpace(request.CategoryName))
             return BadRequest("Invalid request. Please provide location and category name.");
 
-        var restaurants = await _restaurantService.GetRestaurantsWithinRadiusAndCategoryAsync(request.Latitude, request.Longitude, request.RadiusKm, request.CategoryName);
-        int count = restaurants?.Count ?? 0;
+        var pagedResult = await _restaurantService.GetRestaurantsWithinRadiusAndCategoryAsync(
+            request.Latitude,
+            request.Longitude,
+            request.RadiusKm,
+            request.CategoryName,
+            request.CurrentPage,
+            request.PageSize
+        );
 
-        return Ok(new
-        {
-            count,
-            restaurants
-        });
+        return Ok(pagedResult);
     }
 
     [Authorize]

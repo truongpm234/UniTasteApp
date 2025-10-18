@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using SocialService.API.Data.DBContext;
+using SocialService.API.Hubs;
 
 namespace SocialService.API
 {
@@ -19,6 +20,16 @@ namespace SocialService.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Configuration.AddEnvironmentVariables();
+            builder.Services.AddSignalR();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy => policy
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .SetIsOriginAllowed(_ => true)
+                        .AllowCredentials());
+            });
 
             var app = builder.Build();
 
@@ -29,13 +40,12 @@ namespace SocialService.API
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowAll");
+
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
-
+            app.MapHub<ChatHub>("/chathub");
             app.Run();
         }
     }
