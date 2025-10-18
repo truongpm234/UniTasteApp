@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Text;
 using UserService.API.Models.DTO;
 using UserService.API.Models.Entity;
@@ -76,35 +77,121 @@ namespace UserService.API.Controllers
             }
 
             // 1. Lấy preference user
+            string userPrefJson;
             var userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
             if (!userPrefRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được preference người dùng!  Vui lòng điền thông tin về nhu cầu của bạn.");
-            var userPrefJson = await userPrefRes.Content.ReadAsStringAsync();
+            {
+                Console.WriteLine($"[AI] ❌ Không lấy được preference (Status: {userPrefRes.StatusCode})");
 
-            // 2. Lấy 15 quán gần nhất
+                // Retry nhẹ nếu 429
+                if (userPrefRes.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    await Task.Delay(1000);
+                    userPrefRes = await client.GetAsync($"{gatewayBase}/api/users/get-user-preference-by-userid/{userId}");
+                }
+
+                if (!userPrefRes.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("[AI] ⚠️ Dùng preference rỗng để tiếp tục.");
+                    userPrefJson = "{}";
+                }
+                else
+                {
+                    userPrefJson = await userPrefRes.Content.ReadAsStringAsync();
+                }
+            }
+            else
+            {
+                userPrefJson = await userPrefRes.Content.ReadAsStringAsync();
+            }
+
+            // ==================================================================================
+            // 2️⃣ Lấy danh sách quán gần nhất
+            // ==================================================================================
+            List<RestaurantDto>? restaurants = null;
             var resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=10");
+
             if (!resRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được danh sách quán gần nhất!");
-            var restaurantJson = await resRes.Content.ReadAsStringAsync();
-            var restaurants = System.Text.Json.JsonSerializer.Deserialize<List<RestaurantDto>>(restaurantJson);
+            {
+                Console.WriteLine($"[AI] ❌ Không lấy được danh sách quán (Status: {resRes.StatusCode})");
+
+                if (resRes.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    await Task.Delay(1000);
+                    resRes = await client.GetAsync($"{gatewayBase}/api/restaurants/get-nearest-restaurants?lat={lat}&lng={lng}&limit=10");
+                }
+
+                if (!resRes.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("[AI] ⚠️ Gateway quá tải — dùng danh sách quán rỗng.");
+                    restaurants = new List<RestaurantDto>();
+                }
+                else
+                {
+                    var restaurantJson = await resRes.Content.ReadAsStringAsync();
+                    restaurants = System.Text.Json.JsonSerializer.Deserialize<List<RestaurantDto>>(restaurantJson);
+                }
+            }
+            else
+            {
+                var restaurantJson = await resRes.Content.ReadAsStringAsync();
+                restaurants = System.Text.Json.JsonSerializer.Deserialize<List<RestaurantDto>>(restaurantJson);
+            }
 
             if (restaurants == null || restaurants.Count == 0)
-                return Ok("Không tìm thấy quán phù hợp gần bạn!");
+            {
+                Console.WriteLine("[AI] ⚠️ Không tìm thấy quán phù hợp gần người dùng.");
+                restaurants = new List<RestaurantDto>();
+            }
 
-            // 3. Lấy top review mỗi quán (POST list id sang API review)
-            var restIds = restaurants.Select(r => r.RestaurantId).ToList();
-            var reviewContent = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(restIds),
-                Encoding.UTF8, "application/json"
-            );
-            var reviewRes = await client.PostAsync(
-                $"{gatewayBase}/api/reviews/google/get-top-reviews-multiple?top=4", reviewContent
-            );
-            if (!reviewRes.IsSuccessStatusCode)
-                return BadRequest("Không lấy được review!");
+            List<ReviewGroupDto>? reviewDict = new();
 
-            var reviewJson = await reviewRes.Content.ReadAsStringAsync();
-            var reviewDict = System.Text.Json.JsonSerializer.Deserialize<List<ReviewGroupDto>>(reviewJson);
+            if (restaurants.Any())
+            {
+                var restIds = restaurants.Select(r => r.RestaurantId).ToList();
+                var reviewContent = new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(restIds),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var reviewRes = await client.PostAsync(
+                    $"{gatewayBase}/api/reviews/google/get-top-reviews-multiple?top=4",
+                    reviewContent
+                );
+
+                if (!reviewRes.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"[AI] ❌ Không lấy được review! (Status: {reviewRes.StatusCode})");
+
+                    if (reviewRes.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        await Task.Delay(1000);
+                        reviewRes = await client.PostAsync(
+                            $"{gatewayBase}/api/reviews/google/get-top-reviews-multiple?top=4",
+                            reviewContent
+                        );
+                    }
+
+                    if (!reviewRes.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("[AI] ⚠️ Dùng review rỗng để tiếp tục.");
+                        reviewDict = new List<ReviewGroupDto>();
+                    }
+                    else
+                    {
+                        var reviewJson = await reviewRes.Content.ReadAsStringAsync();
+                        reviewDict = System.Text.Json.JsonSerializer.Deserialize<List<ReviewGroupDto>>(reviewJson)
+                                     ?? new List<ReviewGroupDto>();
+                    }
+                }
+                else
+                {
+                    var reviewJson = await reviewRes.Content.ReadAsStringAsync();
+                    reviewDict = System.Text.Json.JsonSerializer.Deserialize<List<ReviewGroupDto>>(reviewJson)
+                                 ?? new List<ReviewGroupDto>();
+                }
+            }
 
             var sb = new StringBuilder();
             sb.AppendLine("[USER REQUEST]: " + prompt);
@@ -122,22 +209,15 @@ namespace UserService.API.Controllers
                         sb.AppendLine($"    • \"{rv.Comment}\" - {rv.UserName} ({rv.Rating}★)");
                 }
             }
-            sb.AppendLine("Trươc tiên nếu user hỏi các câu hỏi không liên quan đến gợi ý quán ăn thì hãy trả lời câu hỏi của họ, " +
-                "nếu user hỏi những câu hỏi có liên quan " +
-                "đến những việc liên quan đến nhu cầu ăn uống giair trí, không cần quá chú trọng vào nhu cầu đã có mà linh hoạt gợi ý, " +
-                "chủ yếu cần các quán ở vị trí gần là được, vị trí các quán nên gợi ý ở gần vị trí kinh độ và vĩ độ người dùng nhập trong bán kính 5km," +
-                " không nên xa quá 5km, không được gợi ý dùng các tool, hay " +
-                "web khác hay các dịch vụ bên khác để gợi ý, mà chỉ trả lời ngay tại đây và cho ra quán cụ thể, nếu thật sự không có thì " +
-                "bạn có thể tự chọn quán dựa t}rên dữ liệu của google và cho ra kết quả, không được trả về response là dựa vào các dịch vụ google hay các bên thứ 3 khác, " +
-                "mà chỉ nói là 'dựa vào dữ liệu của chúng tôi'. " +
-                "Lưu ý quan trọng là khi trả về kết quả thì cần có các thông tin về tên quán, địa chỉ quán, thời gian hoạt động và sẽ có những món gì và lưu ý là " +
-                "nên gợi ý những nơi sinh viên thường đến, hạn chế gợi ý những nơi sang trọng và giá cả đắt đỏ. Kết quả cho ra ít nhất có thông tin 5 quán ăn hoặc cafe hoặc cả hai," +
-                " không được yêu cầu user dùng google maps để tìm địa chỉ mà phải cho ra địa chỉ cụ thể, nếu không tìm được địa chỉ cụ thể thì không nên đưa ra gợi ý.");
 
-            // 5. Gửi prompt sang Gemini
+            sb.AppendLine("Trước tiên, nếu user hỏi câu không liên quan đến quán ăn thì hãy trả lời đúng trọng tâm. " +
+                          "Nếu liên quan đến ăn uống, hãy linh hoạt gợi ý dựa vào vị trí gần (≤ 5km), " +
+                          "không cần quá chú trọng preference nếu trống. " +
+                          "Không được yêu cầu user mở Google Maps, không gọi API ngoài. " +
+                          "Phải trả về ít nhất 5 quán ăn hoặc cafe phổ biến, giá hợp lý cho sinh viên, " +
+                          "có đủ thông tin: tên, địa chỉ, giờ mở cửa, món nổi bật.");
+
             var aiResponse = await _geminiAIService.getChatResponse(sb.ToString());
-
-
             return Ok(new { answer = aiResponse });
         }
 
