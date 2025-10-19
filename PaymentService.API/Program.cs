@@ -22,6 +22,8 @@ namespace PaymentService.API
             builder.Services.AddScoped<IPaymentService, Service.PaymentService>();
             builder.Services.AddScoped<IServicePackageRepository, ServicePackageRepository>();
             builder.Services.AddScoped<IServicePackageService, ServicePackageService>();
+            builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
+            builder.Services.AddScoped<IPurchaseService, PurchaseService>();
             builder.Services.AddDbContext<Exe201PaymentServiceDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 

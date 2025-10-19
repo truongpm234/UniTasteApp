@@ -21,7 +21,7 @@ namespace PaymentService.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("create")]
+        [HttpPost("create-payment")]
         public async Task<IActionResult> CreatePost([FromBody] CreatePaymentDto dto)
         {
             if (!ModelState.IsValid)
@@ -71,7 +71,7 @@ namespace PaymentService.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("get-all-paymentTransaction")]
+        [HttpGet("get-all-payment-transaction")]
         public async Task<IActionResult> GetAllPayments()
         {
             var payments = await _paymentService.GetAllTransactionsAsync();
