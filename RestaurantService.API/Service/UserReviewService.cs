@@ -18,6 +18,7 @@ namespace RestaurantService.API.Service
 
         public async Task<List<Review>> GetReviewsByRestaurantIdAsync(int restaurantId)
         {
+            
             return await _repository.GetReviewsByRestaurantIdAsync(restaurantId);
         }
 
@@ -29,7 +30,9 @@ namespace RestaurantService.API.Service
                 UserName = dto.UserName,
                 Rating = dto.Rating,
                 Comment = dto.Comment,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Type = "UniTaste",
+                UserId = dto.UserId
             };
             return await _repository.AddReviewAsync(review);
         }

@@ -14,11 +14,18 @@ namespace RestaurantService.API.Repository
 
         public async Task<List<Review>> GetReviewsByRestaurantIdAsync(int restaurantId)
         {
-            return await _context.Reviews
+            var reviews = await _context.Reviews
                 .Where(r => r.RestaurantId == restaurantId)
                 .OrderByDescending(r => r.CreatedAt)
                 .Include(r => r.PhotoReviews)
                 .ToListAsync();
+
+            foreach (var r in reviews)
+            {
+                if (string.IsNullOrEmpty(r.Type))
+                    r.Type = "Google";
+            }
+            return reviews;
         }
 
         public async Task<Review> AddReviewAsync(Review review)

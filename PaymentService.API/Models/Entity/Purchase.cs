@@ -16,4 +16,8 @@ public partial class Purchase
     public string? Description { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public int? ServicePackageId { get; set; }
+
+    public virtual ServicePackage? ServicePackage { get; set; }
 }

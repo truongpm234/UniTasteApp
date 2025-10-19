@@ -18,7 +18,7 @@ namespace PaymentService.API.Data.DBContext
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<UserMiniGamePlay> UserMiniGamePlays { get; set; }
         public DbSet<UserVoucher> UserVouchers { get; set; }
-        public DbSet<UserWallet> UserWallets { get; set; }
+        public DbSet<ServicePackage> ServicePackages { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
 
 
@@ -68,6 +68,11 @@ namespace PaymentService.API.Data.DBContext
                 entity.Property(e => e.Amount).HasColumnType("money");
                 entity.Property(e => e.Description).HasMaxLength(250);
                 entity.Property(e => e.PurchaseType).HasMaxLength(30);
+
+                entity.HasOne(d => d.ServicePackage)
+                      .WithMany(p => p.Purchases)
+                      .HasForeignKey(d => d.ServicePackageId)
+                      .HasConstraintName("FK_Purchase_ServicePackage");
             });
 
             // ===== UserMiniGamePlay =====
@@ -110,17 +115,17 @@ namespace PaymentService.API.Data.DBContext
                 entity.Property(e => e.DiscountType).HasMaxLength(20);
             });
 
-
-            // ===== UserWallet =====
-            modelBuilder.Entity<UserWallet>(entity =>
+            // ===== ServicePackage =====
+            modelBuilder.Entity<ServicePackage>(entity =>
             {
-                entity.HasKey(e => e.UserId)
-                      .HasName("PK__UserWallet");
+                entity.HasKey(e => e.ServicePackageId)
+                      .HasName("PK__ServicePackage");
 
-                entity.ToTable("UserWallet");
+                entity.ToTable("ServicePackage");
 
-                entity.Property(e => e.UserId).ValueGeneratedNever();
-                entity.Property(e => e.Balance).HasColumnType("money");
+                entity.Property(e => e.Name).HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(250);
+                entity.Property(e => e.Price).HasColumnType("money");
             });
 
             OnModelCreatingPartial(modelBuilder);

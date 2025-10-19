@@ -15,6 +15,8 @@ public partial class Review
 
     public string? Comment { get; set; }
 
+    public string? Type { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public int? UserId { get; set; }
