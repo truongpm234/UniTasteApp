@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PaymentService.API.Data.DBContext;
 using PaymentService.API.Repositories;
+using PaymentService.API.Repository;
 using PaymentService.API.Service;
 using System.Text;
 
@@ -17,9 +18,10 @@ namespace PaymentService.API
 
             // 🔹 Services
             builder.Services.AddScoped<IPayOSService, PayOSService>();
-            builder.Services.AddScoped<IPaymentRepsitory, PaymentRepsitory>();
+            builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
             builder.Services.AddScoped<IPaymentService, Service.PaymentService>();
-
+            builder.Services.AddScoped<IServicePackageRepository, ServicePackageRepository>();
+            builder.Services.AddScoped<IServicePackageService, ServicePackageService>();
             builder.Services.AddDbContext<Exe201PaymentServiceDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 

@@ -5,6 +5,7 @@ using RestaurantService.API.Models.GooglePlaces;
 
 public interface IRestaurantService
 {
+    Task<PaginationResult<List<Restaurant>>> GetAllRestaurantSimpleAsync(int currentPage, int pageSize);
     Task<List<Restaurant>> GetAllRestaurantAsync();
     Task<List<RestaurantResponseDto>> GetAllRestaurantFullAsync();
     Task<List<Restaurant>> GetRestaurantsWithinRadiusAsync(double latitude, double longitude, double radiusKm);

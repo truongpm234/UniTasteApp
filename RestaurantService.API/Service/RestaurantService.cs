@@ -15,6 +15,11 @@ namespace RestaurantService.API.Service
         {
             _restaurantRepo = restaurantRepo;
         }
+        public async Task<PaginationResult<List<Restaurant>>> GetAllRestaurantSimpleAsync(int currentPage, int pageSize)
+        {
+            return await _restaurantRepo.GetAllRestaurantSimpleAsync(currentPage, pageSize);
+        }
+
         public async Task<List<Restaurant>> GetAllRestaurantAsync()
         {
             return await _restaurantRepo.GetAllRestaurantAsync();

@@ -6,6 +6,7 @@ namespace RestaurantService.API.Repository
 {
     public interface IRestaurantRepository
     {
+        Task<PaginationResult<List<Restaurant>>> GetAllRestaurantSimpleAsync(int currentPage, int pageSize);
         Task<List<Restaurant>> GetAllRestaurantAsync();
         Task<List<Category>> GetCategoriesByRestaurantIdAsync(int restaurantId);
         List<OpeningHourDto2> ParseOpeningHours(string openingHours);

@@ -6,11 +6,11 @@ using PaymentService.API.Models.Entity;
 
 namespace PaymentService.API.Repositories
 {
-    public class PaymentRepsitory : IPaymentRepsitory
+    public class PaymentRepository : IPaymentRepository
     {
         private readonly Exe201PaymentServiceDbContext _context;
 
-        public PaymentRepsitory(Exe201PaymentServiceDbContext context)
+        public PaymentRepository(Exe201PaymentServiceDbContext context)
         {
             _context = context;
         }
@@ -40,20 +40,6 @@ namespace PaymentService.API.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<ServicePackage>> GetAllServicePackagesAsync()
-        {
-            return await _context.ServicePackages.ToListAsync();
-        }
-
-        public async Task<int> GetServicePackageByIdAsync(int packageId)
-        {
-            var package = await _context.ServicePackages.FirstOrDefaultAsync(p => p.ServicePackageId == packageId);
-            if (package == null)
-            {
-                throw new Exception("Service package not found");
-            }
-            return package.ServicePackageId;
-        }
-
+        
     }
 }

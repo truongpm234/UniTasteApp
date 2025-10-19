@@ -5,9 +5,9 @@ namespace PaymentService.API.Service
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IPaymentRepsitory _repository;
+        private readonly IPaymentRepository _repository;
 
-        public PaymentService(IPaymentRepsitory repository)
+        public PaymentService(IPaymentRepository repository)
         {
             _repository = repository;
         }

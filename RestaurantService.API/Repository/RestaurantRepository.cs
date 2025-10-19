@@ -15,6 +15,33 @@ namespace RestaurantService.API.Repository
         {
             _context = context;
         }
+
+        public async Task<PaginationResult<List<Restaurant>>> GetAllRestaurantSimpleAsync(int currentPage, int pageSize)
+        {
+            if (currentPage < 1) currentPage = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var query = _context.Restaurants.AsQueryable();
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            var items = await query
+                .OrderBy(r => r.RestaurantId)
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PaginationResult<List<Restaurant>>
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                Items = items
+            };
+        }
+
         public async Task<List<Restaurant>> GetAllRestaurantAsync()
         {
             return await _context.Restaurants
