@@ -3,8 +3,8 @@ using PaymentService.API.Models.Entity;
 
 public interface IPaymentRepsitory
 {
-    Task AddTransactionAsync(PaymentTransaction entity);
-    Task AddPurchaseAsync(Purchase p);
+    Task<PaymentTransaction> AddTransactionAsync(PaymentTransaction entity);
+    Task<Purchase> AddPurchaseAsync(Purchase p);
     Task<IEnumerable<PaymentTransaction>> GetAllTransactionsAsync();
 
 }

@@ -18,6 +18,7 @@ namespace PaymentService.API
             // 🔹 Services
             builder.Services.AddScoped<IPayOSService, PayOSService>();
             builder.Services.AddScoped<IPaymentRepsitory, PaymentRepsitory>();
+            builder.Services.AddScoped<IPaymentService, Service.PaymentService>();
 
             builder.Services.AddDbContext<Exe201PaymentServiceDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));

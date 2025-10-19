@@ -7,17 +7,17 @@ using System.Security.Claims;
 
 namespace PaymentService.API.Controllers
 {
-    [Route("payment")]
     [ApiController]
+    [Route("api/[controller]")]
     public class PaymentsController : ControllerBase
     {
-        private readonly PayOSService _payOSService;
-        private readonly IPaymentRepsitory _paymentRepository;
+        private readonly IPayOSService _payOSService;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentsController(PayOSService payOSService, IPaymentRepsitory paymentRepository)
+        public PaymentsController(IPayOSService payOSService, IPaymentService paymentService)
         {
             _payOSService = payOSService;
-            _paymentRepository = paymentRepository;
+            _paymentService = paymentService;
         }
 
         [Authorize]
@@ -53,7 +53,7 @@ namespace PaymentService.API.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _paymentRepository.AddTransactionAsync(transaction);
+            await _paymentService.AddTransactionAsync(transaction);
 
             return Ok(new { checkoutUrl = link });
         }
@@ -74,7 +74,7 @@ namespace PaymentService.API.Controllers
         [HttpGet("get-all-paymentTransaction")]
         public async Task<IActionResult> GetAllPayments()
         {
-            var payments = await _paymentRepository.GetAllTransactionsAsync();
+            var payments = await _paymentService.GetAllTransactionsAsync();
             return Ok(payments);
         }
 

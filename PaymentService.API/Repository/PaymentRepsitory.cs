@@ -15,19 +15,22 @@ namespace PaymentService.API.Repositories
             _context = context;
         }
 
-        public async Task AddTransactionAsync(PaymentTransaction entity)
+        public async Task<PaymentTransaction> AddTransactionAsync(PaymentTransaction entity)
         {
             entity.CreatedAt = DateTime.UtcNow;
 
             _context.PaymentTransactions.Add(entity);
+
             await _context.SaveChangesAsync();
+            return entity;
         }
 
-        public async Task AddPurchaseAsync(Purchase p)
+        public async Task<Purchase> AddPurchaseAsync(Purchase p)
         {
             p.CreatedAt = DateTime.UtcNow;
             await _context.Purchases.AddAsync(p);
             await _context.SaveChangesAsync();
+            return p;
         }
 
         public async Task<IEnumerable<PaymentTransaction>> GetAllTransactionsAsync()
