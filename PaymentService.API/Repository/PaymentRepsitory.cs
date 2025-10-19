@@ -6,11 +6,11 @@ using PaymentService.API.Models.Entity;
 
 namespace PaymentService.API.Repositories
 {
-    public class PaymentReps : IPaymentReps
+    public class PaymentRepsitory : IPaymentRepsitory
     {
         private readonly Exe201PaymentServiceDbContext _context;
 
-        public PaymentReps(Exe201PaymentServiceDbContext context)
+        public PaymentRepsitory(Exe201PaymentServiceDbContext context)
         {
             _context = context;
         }

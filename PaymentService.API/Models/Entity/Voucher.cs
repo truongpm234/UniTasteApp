@@ -28,9 +28,4 @@ public partial class Voucher
     public virtual ICollection<UserMiniGamePlay> UserMiniGamePlays { get; set; } = new List<UserMiniGamePlay>();
 
     public virtual ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
-
-    internal static async Task AddTransactionAsync(PaymentTransaction paymentTransaction)
-    {
-        throw new NotImplementedException();
-    }
 }

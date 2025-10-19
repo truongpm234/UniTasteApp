@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PaymentService.API.Models.DTO;
 using PaymentService.API.Models.Entity;
 using PaymentService.API.Service;
 using System.Security.Claims;
@@ -8,22 +9,15 @@ namespace PaymentService.API.Controllers
 {
     [Route("payment")]
     [ApiController]
-    public class PaymentController : ControllerBase
+    public class PaymentsController : ControllerBase
     {
         private readonly PayOSService _payOSService;
-        private readonly IPaymentReps _paymentRepository;
+        private readonly IPaymentRepsitory _paymentRepository;
 
-        public PaymentController(PayOSService payOSService, IPaymentReps paymentRepository)
+        public PaymentsController(PayOSService payOSService, IPaymentRepsitory paymentRepository)
         {
             _payOSService = payOSService;
             _paymentRepository = paymentRepository;
-        }
-
-        [HttpGet("create")]
-        public async Task<IActionResult> Create(long orderCode, long amount, string description)
-        {
-            var link = await _payOSService.CreatePaymentLink(orderCode, amount, description);
-            return Redirect(link);
         }
 
         [Authorize]
@@ -32,6 +26,9 @@ namespace PaymentService.API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            //create ordercode new/1time
+            long orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // ✅ Lấy UserId từ JWT
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -46,9 +43,9 @@ namespace PaymentService.API.Controllers
             // 2. Lưu transaction
             var transaction = new PaymentTransaction
             {
-                UserId = userId,  // ✅ lấy từ token, không lấy từ client
+                UserId = userId,
                 Amount = dto.Amount,
-                TransactionType = "Payment",
+                TransactionType = "PayOS",
                 Status = "Pending",
                 ReferenceId = Guid.NewGuid().ToString(),
                 OrderCode = dto.OrderCode,
@@ -73,21 +70,13 @@ namespace PaymentService.API.Controllers
             return Content("Payment Cancelled!");
         }
 
-        //[Authorize]
-        [HttpGet("get-all")]
+        [Authorize]
+        [HttpGet("get-all-paymentTransaction")]
         public async Task<IActionResult> GetAllPayments()
         {
             var payments = await _paymentRepository.GetAllTransactionsAsync();
             return Ok(payments);
         }
 
-    }
-
-    // DTO cho request body
-    public class CreatePaymentDto
-    {
-        public long OrderCode { get; set; }
-        public long Amount { get; set; }
-        public string Description { get; set; } = string.Empty;
-    }
+    }    
 }

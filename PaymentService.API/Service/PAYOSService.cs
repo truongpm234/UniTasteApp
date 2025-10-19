@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PaymentService.API.Service
 {
-    public class PayOSService
+    public class PayOSService : IPayOSService
     {
         private readonly string _baseUrl;
         private readonly string _clientId;
@@ -29,13 +29,26 @@ namespace PaymentService.API.Service
             _checksumKey = config["PayOS:ChecksumKey"];
             _returnUrl = config["PayOS:ReturnUrl"];
             _cancelUrl = config["PayOS:CancelUrl"];
+
+            // ✅ Kiểm tra cấu hình có null không
+            if (string.IsNullOrEmpty(_baseUrl))
+                throw new Exception("❌ PayOS BaseUrl is missing in appsettings.json");
+            if (string.IsNullOrEmpty(_clientId))
+                throw new Exception("❌ PayOS ClientId is missing in appsettings.json");
+            if (string.IsNullOrEmpty(_apiKey))
+                throw new Exception("❌ PayOS ApiKey is missing in appsettings.json");
+            if (string.IsNullOrEmpty(_checksumKey))
+                throw new Exception("❌ PayOS ChecksumKey is missing in appsettings.json");
+            if (string.IsNullOrEmpty(_returnUrl))
+                throw new Exception("❌ PayOS ReturnUrl is missing in appsettings.json");
+            if (string.IsNullOrEmpty(_cancelUrl))
+                throw new Exception("❌ PayOS CancelUrl is missing in appsettings.json");
         }
 
         public async Task<string> CreatePaymentLink(long orderCode, long amount, string description)
         {
             string endpoint = "/v2/payment-requests";
             var url = $"{_baseUrl.TrimEnd('/')}{endpoint}";
-
 
             var sorted = new SortedDictionary<string, object>
             {
@@ -60,12 +73,13 @@ namespace PaymentService.API.Service
             };
 
             string json = JsonConvert.SerializeObject(body);
-            // 🔹 Log thông tin gửi đi
+
+            // 🧾 Ghi log chi tiết
             Console.WriteLine("---- PayOS Request ----");
             Console.WriteLine($"URL: {url}");
-            Console.WriteLine($"Raw String: {raw}");
+            Console.WriteLine($"Raw: {raw}");
             Console.WriteLine($"Signature: {signature}");
-            Console.WriteLine($"Request JSON: {json}");
+            Console.WriteLine($"Body: {json}");
 
             using var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Post, url)
@@ -77,10 +91,10 @@ namespace PaymentService.API.Service
 
             var response = await client.SendAsync(request);
             var respJson = await response.Content.ReadAsStringAsync();
-            // 🔹 Log thông tin nhận về
+
             Console.WriteLine("---- PayOS Response ----");
-            Console.WriteLine($"StatusCode: {response.StatusCode}");
-            Console.WriteLine($"Response JSON: {respJson}");
+            Console.WriteLine($"Status: {response.StatusCode}");
+            Console.WriteLine(respJson);
 
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"PayOS API error: {respJson}");
@@ -96,8 +110,13 @@ namespace PaymentService.API.Service
 
         private string ComputeHmacSha256(string key, string data)
         {
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentException("Checksum key cannot be null or empty.", nameof(key));
+            if (string.IsNullOrEmpty(data))
+                throw new ArgumentException("Data cannot be null or empty.", nameof(data));
+
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key));
-            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+            byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
     }

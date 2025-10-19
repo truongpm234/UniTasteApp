@@ -18,7 +18,9 @@ public partial class PaymentTransaction
     public string? ReferenceId { get; set; } = string.Empty;        
 
     public DateTime? CreatedAt { get; set; }
+
     public long OrderCode { get; internal set; }
+
     public string Description { get; internal set; }
 }
 

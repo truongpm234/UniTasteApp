@@ -16,13 +16,22 @@ namespace PaymentService.API
             var builder = WebApplication.CreateBuilder(args);
 
             // 🔹 Services
-            builder.Services.AddScoped<PayOSService>();
-            builder.Services.AddScoped<IPaymentReps, PaymentReps>();
+            builder.Services.AddScoped<IPayOSService, PayOSService>();
+            builder.Services.AddScoped<IPaymentRepsitory, PaymentRepsitory>();
 
             builder.Services.AddDbContext<Exe201PaymentServiceDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 
             builder.Services.AddControllersWithViews();
+
+            // 🔑 CORS Policy
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
 
             // 🔑 Add Authentication + JWT
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -30,9 +39,9 @@ namespace PaymentService.API
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = false,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
@@ -90,8 +99,8 @@ namespace PaymentService.API
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors("AllowAllOrigins");
 
-            // ✅ Authentication & Authorization middleware
             app.UseAuthentication();
             app.UseAuthorization();
 
