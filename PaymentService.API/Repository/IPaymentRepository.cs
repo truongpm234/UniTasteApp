@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.API.Models.Entity;
+using System.Threading.Tasks;
 
 public interface IPaymentRepository
 {
     Task<PaymentTransaction> AddTransactionAsync(PaymentTransaction entity);
     Task<Purchase> AddPurchaseAsync(Purchase p);
     Task<IEnumerable<PaymentTransaction>> GetAllTransactionsAsync();
-
+    Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode);
+    Task UpdateTransactionAsync(PaymentTransaction entity);
+    
 }

@@ -22,5 +22,19 @@ namespace PaymentService.API.Service
         {
             return await _purchaseRepository.GetPurchasesByUserIdAsync(userId);
         }
+        public async Task<bool> IsStatus(int userId)
+        {
+            return await _purchaseRepository.IsStatus(userId);
+        }
+
+        public async Task UpdatePurchaseAsync(Purchase purchase)
+        {
+            await _purchaseRepository.UpdatePurchaseAsync(purchase);
+        }
+
+        public async Task<Purchase?> GetPurchaseByOrderCodeAsync(long orderCode)
+        {
+            return await _purchaseRepository.GetPurchaseByOrderCodeAsync(orderCode);
+        }
     }
 }

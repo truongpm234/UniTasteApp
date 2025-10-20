@@ -13,11 +13,13 @@ namespace PaymentService.API.Controllers
     {
         private readonly IPayOSService _payOSService;
         private readonly IPaymentService _paymentService;
+        private readonly IPurchaseService _purchaseService;
 
-        public PaymentsController(IPayOSService payOSService, IPaymentService paymentService)
+        public PaymentsController(IPayOSService payOSService, IPaymentService paymentService, IPurchaseService purchaseService)
         {
             _payOSService = payOSService;
             _paymentService = paymentService;
+            _purchaseService = purchaseService;
         }
 
         [Authorize]
@@ -78,5 +80,19 @@ namespace PaymentService.API.Controllers
             return Ok(payments);
         }
 
-    }    
+        [HttpGet("payment-success-callback")]
+        public async Task<IActionResult> PaymentSuccessCallback([FromQuery] long orderCode)
+        {
+            // 1. Tìm transaction theo orderCode
+            var transaction = await _paymentService.GetTransactionByOrderCodeAsync(orderCode);
+            if (transaction == null)
+                return NotFound("Transaction not found");
+
+            // 2. Update trạng thái transaction và purchase
+            transaction.Status = "Active";
+            await _paymentService.UpdateTransactionAsync(transaction);
+
+            return Ok("Thanh toán thành công, gói đã được kích hoạt!");
+        }
+    }
 }

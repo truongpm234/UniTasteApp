@@ -28,5 +28,23 @@ namespace PaymentService.API.Repository
                 .OrderByDescending(x => x.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<bool> IsStatus(int userId)
+        {
+            var hasActive = _context.PaymentTransactions
+                .Any(p => p.UserId == userId && p.Status == "Active");
+            return hasActive;
+        }
+        public async Task<Purchase?> GetPurchaseByOrderCodeAsync(long orderCode)
+        {
+            return await _context.Purchases.FirstOrDefaultAsync(x => x.Description.Contains(orderCode.ToString()));
+        }
+
+        public async Task UpdatePurchaseAsync(Purchase purchase)
+        {
+            _context.Purchases.Update(purchase);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

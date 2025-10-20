@@ -92,6 +92,19 @@ namespace PaymentService.API.Controller
         }
 
         [Authorize]
+        [HttpGet("check-service-package-status")]
+        public async Task<IActionResult> CheckServicePackageStatus([FromQuery] int userId)
+        {
+            // Lấy userId từ JWT
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized("UserId not found in token");
+            int userIdParse = int.Parse(userIdClaim);
+            var hasPurchased = await _purchaseService.IsStatus(userIdParse);
+            return Ok(new { hasPurchased });
+        }
+
+        [Authorize]
         [HttpGet("get-purchases-by-user-token")]
         public async Task<IActionResult> GetPurchasesByUser()
         {

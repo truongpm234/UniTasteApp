@@ -7,6 +7,9 @@ namespace PaymentService.API.Repository
     {
         Task<List<Purchase>> GetAllPurchasesAsync();
         Task<List<Purchase>> GetPurchasesByUserIdAsync(int userId);
+        Task<bool> IsStatus(int userId);
+        Task<Purchase?> GetPurchaseByOrderCodeAsync(long orderCode);
+        Task UpdatePurchaseAsync(Purchase purchase);
         
     }
 }

@@ -25,5 +25,15 @@ namespace PaymentService.API.Service
         {
             return await _repository.GetAllTransactionsAsync();
         }
+        public async Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode)
+        {
+            return await _repository.GetTransactionByOrderCodeAsync(orderCode);
+        }
+
+        public async Task UpdateTransactionAsync(PaymentTransaction entity)
+        {
+            await _repository.UpdateTransactionAsync(entity);
+        }
+
     }
 }

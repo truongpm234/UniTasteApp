@@ -1,4 +1,5 @@
-﻿using PaymentService.API.Models.Entity;
+﻿using Microsoft.EntityFrameworkCore;
+using PaymentService.API.Models.Entity;
 
 namespace PaymentService.API.Service
 {
@@ -7,5 +8,8 @@ namespace PaymentService.API.Service
         Task<PaymentTransaction> AddTransactionAsync(PaymentTransaction entity);
         Task<Purchase> AddPurchaseAsync(Purchase p);
         Task<IEnumerable<PaymentTransaction>> GetAllTransactionsAsync();
+        Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode);
+        Task UpdateTransactionAsync(PaymentTransaction entity);
+        
     }
 }

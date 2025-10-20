@@ -40,6 +40,17 @@ namespace PaymentService.API.Repositories
                 .ToListAsync();
         }
 
-        
+        public async Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode)
+        {
+            return await _context.PaymentTransactions.FirstOrDefaultAsync(x => x.OrderCode == orderCode);
+        }
+
+        public async Task UpdateTransactionAsync(PaymentTransaction entity)
+        {
+            _context.PaymentTransactions.Update(entity);
+            await _context.SaveChangesAsync();
+        }
+
+
     }
 }
