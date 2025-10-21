@@ -1,8 +1,4 @@
 ﻿using Google.Cloud.Storage.V1;
-<<<<<<< HEAD
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-=======
->>>>>>> 56be046 (add social)
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -13,10 +9,7 @@ using SocialService.API.Hubs;
 using SocialService.API.Models.DTO;
 using SocialService.API.Repository;
 using SocialService.API.Service;
-<<<<<<< HEAD
-=======
 using Microsoft.AspNetCore.Authentication.JwtBearer;
->>>>>>> 56be046 (add social)
 
 namespace SocialService.API
 {
