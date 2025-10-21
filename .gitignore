@@ -19,6 +19,7 @@ npm-debug.log*
 # Secrets and user configs
 appsettings.json
 UserService.API/Credentials/*.json
+SocialService.API/Credentials/*.json
 *.nupkg
 packages/
 .nuget/
