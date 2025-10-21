@@ -15,7 +15,6 @@ public class RestaurantsController : ControllerBase
         _restaurantService = restaurantService;
     }
 
-    [Authorize]
     [HttpGet("get-all-simple")]
     public async Task<IActionResult> GetAllRestaurantSimple([FromQuery] int currentPage = 1, [FromQuery] int pageSize = 10)
     {
