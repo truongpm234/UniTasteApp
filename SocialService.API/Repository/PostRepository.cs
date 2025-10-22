@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using SocialService.API.Data.DBContext;
 using SocialService.API.Models.Entity;
 
@@ -12,25 +15,17 @@ namespace SocialService.API.Repository
             _context = context;
         }
 
-        public async Task<(IEnumerable<Post> posts, int totalCount)> GetAllReviewsPagedAsync(int page, int pageSize)
+        public async Task<IEnumerable<Post>> GetAllReviewsAsync()
         {
-            var query = _context.Posts
+            return await _context.Posts
                 .Where(p => !p.IsDeleted && p.IsReview)
                 .Include(p => p.PostMedia)
                 .Include(p => p.Tags)
                 .Include(p => p.PostReactions)
                 .Include(p => p.Comments)
                 .Include(p => p.PostRestaurantTags)
-                .OrderByDescending(p => p.CreatedAt);
-
-            int totalCount = await query.CountAsync();
-
-            var posts = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
-
-            return (posts, totalCount);
         }
 
         public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(int userId)
@@ -52,6 +47,7 @@ namespace SocialService.API.Repository
                 .Include(p => p.Tags)
                 .FirstOrDefaultAsync(p => p.PostId == postId && !p.IsDeleted);
         }
+
         public async Task AddPostAsync(Post post)
         {
             await _context.Posts.AddAsync(post);
@@ -83,6 +79,12 @@ namespace SocialService.API.Repository
             _context.Posts.Update(post);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddPostRestaurantTagAsync(PostRestaurantTag tag)
+        {
+            await _context.PostRestaurantTags.AddAsync(tag);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
