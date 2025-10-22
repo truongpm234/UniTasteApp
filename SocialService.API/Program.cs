@@ -91,6 +91,7 @@ namespace SocialService.API
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
             });
+            builder.Services.AddHttpContextAccessor();
 
             // 🔹 5️⃣ JWT Authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -126,6 +127,8 @@ namespace SocialService.API
             builder.Services.AddScoped<IPostShareService, PostShareService>();
             builder.Services.AddScoped<IPostReactionRepository, PostReactionRepository>();
             builder.Services.AddScoped<IPostReactionService, PostReactionService>();
+            builder.Services.AddHttpClient<IRestaurantApiService, RestaurantApiService>();
+
 
 
             // 🔹 8️⃣ SignalR

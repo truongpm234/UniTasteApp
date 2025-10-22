@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using SocialService.API.Data.DBContext;
 using SocialService.API.Models.DTO;
 using SocialService.API.Models.Entity;
 using SocialService.API.Repository;
-using System.Linq.Dynamic.Core;
 
 namespace SocialService.API.Service
 {
@@ -12,24 +15,32 @@ namespace SocialService.API.Service
         private readonly IPostRepository _repo;
         private readonly IFirebaseStorageService _firebaseStorage;
         private readonly Exe201SocialServiceDbContext _context;
-        public PostService(IPostRepository repo, IFirebaseStorageService firebaseStorage, Exe201SocialServiceDbContext context)
+        private readonly IRestaurantApiService _restaurantApi;
+
+        public PostService(
+            IPostRepository repo,
+            IFirebaseStorageService firebaseStorage,
+            Exe201SocialServiceDbContext context,
+            IRestaurantApiService restaurantApi)
         {
             _repo = repo;
             _firebaseStorage = firebaseStorage;
             _context = context;
+            _restaurantApi = restaurantApi;
         }
 
-        public async Task<Models.DTO.PagedResult<PostDto>> GetAllReviewsPagedAsync(int page, int pageSize)
+        public async Task<IEnumerable<PostDto>> GetAllReviewsAsync()
         {
-            var (posts, totalCount) = await _repo.GetAllReviewsPagedAsync(page, pageSize);
+            var posts = await _repo.GetAllReviewsAsync();
 
-            var data = posts.Select(p => new PostDto
+            return posts.Select(p => new PostDto
             {
                 PostId = p.PostId,
                 AuthorUserId = p.AuthorUserId,
                 Title = p.Title,
                 Content = p.Content,
-                Rating = p.Rating,
+                Rating = (byte?)p.Rating,
+                IsReview = p.IsReview,
                 Visibility = p.Visibility,
                 CreatedAt = p.CreatedAt,
                 MediaUrls = p.PostMedia.Select(m => m.MediaUrl).ToList(),
@@ -37,15 +48,7 @@ namespace SocialService.API.Service
                 ReactionsCount = p.ReactionsCount,
                 CommentsCount = p.CommentsCount,
                 SharesCount = p.SharesCount
-            }).ToList();
-
-            return new Models.DTO.PagedResult<PostDto>
-            {
-                Items = data,
-                TotalCount = totalCount,
-                Page = page,
-                PageSize = pageSize
-            };
+            });
         }
 
         public async Task<IEnumerable<PostDto>> GetPostsByUserIdAsync(int userId)
@@ -58,7 +61,7 @@ namespace SocialService.API.Service
                 AuthorUserId = p.AuthorUserId,
                 Title = p.Title,
                 Content = p.Content,
-                Rating = p.Rating,
+                Rating = (byte?)p.Rating,
                 IsReview = p.IsReview,
                 Visibility = p.Visibility,
                 CreatedAt = p.CreatedAt,
@@ -73,20 +76,17 @@ namespace SocialService.API.Service
         public async Task DeletePostAsync(int postId, int userId)
         {
             var post = await _repo.GetPostByIdAsync(postId);
-            if (post == null)
-                throw new Exception("Bài viết không tồn tại.");
+            if (post == null) throw new Exception("Bài viết không tồn tại.");
 
-            // ✅ Kiểm tra quyền xóa
             if (post.AuthorUserId != userId)
                 throw new Exception("Bạn không có quyền xóa bài viết này.");
 
-            // ✅ Thực hiện soft delete
             post.IsDeleted = true;
             post.UpdatedAt = DateTime.UtcNow;
-
             await _repo.DeletePostAsync(post);
         }
-        public async Task<int> CreatePostAsync(PostCreateDto dto, int userId)
+
+        public async Task<(int postId, string? googlePlaceId)> CreatePostAsync(PostCreateDto dto, int userId)
         {
             if (string.IsNullOrWhiteSpace(dto.Content))
                 throw new Exception("Nội dung bài viết không được để trống.");
@@ -107,16 +107,15 @@ namespace SocialService.API.Service
             };
 
             await _repo.AddPostAsync(post);
-            await _repo.SaveChangesAsync(); // cần có PostId trước khi thêm media
+            await _repo.SaveChangesAsync(); // cần PostId
 
-            // ✅ Upload ảnh
+            // Upload ảnh (nếu có)
             if (dto.MediaFiles != null && dto.MediaFiles.Count > 0)
             {
                 int sort = 1;
                 foreach (var file in dto.MediaFiles)
                 {
                     var url = await _firebaseStorage.UploadFileAsync(file, "posts");
-
                     var media = new PostMedium
                     {
                         PostId = post.PostId,
@@ -130,7 +129,7 @@ namespace SocialService.API.Service
                 await _repo.SaveChangesAsync();
             }
 
-            // ✅ Tag (nếu có)
+            // Gắn Tag (nếu có)
             if (dto.Tags != null && dto.Tags.Count > 0)
             {
                 foreach (var tagName in dto.Tags)
@@ -138,34 +137,44 @@ namespace SocialService.API.Service
                     var tag = await _repo.GetTagByNameAsync(tagName);
                     if (tag == null)
                     {
-                        tag = new Tag
-                        {
-                            Name = tagName,
-                            CreatedAt = DateTime.UtcNow
-                        };
+                        tag = new Tag { Name = tagName, CreatedAt = DateTime.UtcNow };
                         await _repo.AddTagAsync(tag);
                         await _repo.SaveChangesAsync();
                     }
-
                     post.Tags.Add(tag);
                 }
                 await _repo.SaveChangesAsync();
             }
 
-            return post.PostId;
+            // ✅ Nếu có RestaurantId → gọi Gateway lấy GooglePlaceId
+            string? googlePlaceId = null;
+            if (dto.RestaurantId.HasValue)
+            {
+                googlePlaceId = await _restaurantApi.GetGooglePlaceIdAsync(dto.RestaurantId.Value);
+                if (string.IsNullOrEmpty(googlePlaceId))
+                    throw new Exception("Không tìm thấy GooglePlaceId từ RestaurantService.");
+
+                var restaurantTag = new PostRestaurantTag
+                {
+                    PostId = post.PostId,
+                    RestaurantId = dto.RestaurantId.Value,
+                    GooglePlaceId = googlePlaceId,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _repo.AddPostRestaurantTagAsync(restaurantTag);
+                await _repo.SaveChangesAsync();
+            }
+
+            return (post.PostId, googlePlaceId);
         }
 
         public async Task UpdatePostAsync(int postId, int userId, PostUpdateDto dto)
         {
             var post = await _repo.GetPostByIdAsync(postId);
-            if (post == null)
-                throw new Exception("Bài viết không tồn tại.");
+            if (post == null) throw new Exception("Bài viết không tồn tại.");
+            if (post.AuthorUserId != userId) throw new Exception("Bạn không có quyền chỉnh sửa bài viết này.");
 
-            // ✅ Kiểm tra quyền chỉnh sửa
-            if (post.AuthorUserId != userId)
-                throw new Exception("Bạn không có quyền chỉnh sửa bài viết này.");
-
-            // ✅ Cập nhật nội dung cơ bản
             if (!string.IsNullOrWhiteSpace(dto.Title)) post.Title = dto.Title;
             if (!string.IsNullOrWhiteSpace(dto.Content)) post.Content = dto.Content;
             if (dto.Rating.HasValue) post.Rating = dto.Rating;
@@ -173,17 +182,13 @@ namespace SocialService.API.Service
             if (!string.IsNullOrWhiteSpace(dto.Visibility)) post.Visibility = dto.Visibility;
             post.UpdatedAt = DateTime.UtcNow;
 
-            // ✅ Cập nhật ảnh (nếu có upload mới)
             if (dto.MediaFiles != null && dto.MediaFiles.Count > 0)
             {
-                // Xóa ảnh cũ trước
                 _context.PostMedia.RemoveRange(post.PostMedia);
-
                 int sort = 1;
                 foreach (var file in dto.MediaFiles)
                 {
                     var url = await _firebaseStorage.UploadFileAsync(file, "posts");
-
                     var media = new PostMedium
                     {
                         PostId = post.PostId,
@@ -196,7 +201,6 @@ namespace SocialService.API.Service
                 }
             }
 
-            // ✅ Cập nhật Tag (nếu có)
             if (dto.Tags != null && dto.Tags.Count > 0)
             {
                 post.Tags.Clear();
@@ -205,11 +209,7 @@ namespace SocialService.API.Service
                     var tag = await _repo.GetTagByNameAsync(tagName);
                     if (tag == null)
                     {
-                        tag = new Tag
-                        {
-                            Name = tagName,
-                            CreatedAt = DateTime.UtcNow
-                        };
+                        tag = new Tag { Name = tagName, CreatedAt = DateTime.UtcNow };
                         await _repo.AddTagAsync(tag);
                         await _repo.SaveChangesAsync();
                     }
