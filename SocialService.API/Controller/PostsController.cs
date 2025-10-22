@@ -3,58 +3,31 @@ using Microsoft.AspNetCore.Mvc;
 using SocialService.API.Models.DTO;
 using SocialService.API.Service;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SocialService.API.Controllers
 {
-    //[Route("api/social/posts")]
-    [Route("api/[controller]")]
+    [Route("api/social/posts")]
     [ApiController]
-    public class PostsController : ControllerBase
+    public class PostController : ControllerBase
     {
         private readonly IPostService _service;
 
-        public PostsController(IPostService service)
+        public PostController(IPostService service)
         {
             _service = service;
         }
 
-        [HttpGet("get-all-post-with-paging")]
-        public async Task<IActionResult> GetAllReviewsPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 3)
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllReviews()
         {
-            try
-            {
-                var result = await _service.GetAllReviewsPagedAsync(page, pageSize);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var data = await _service.GetAllReviewsAsync();
+            return Ok(data);
         }
 
         [Authorize]
-        [HttpGet("get-post-by-user-id")]
-        public async Task<IActionResult> GetPostsByUser()
-        {
-            try
-            {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim))
-                    return Unauthorized(new { message = "Không tìm thấy user trong token." });
-
-                int userId = int.Parse(userIdClaim);
-                var data = await _service.GetPostsByUserIdAsync(userId);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [Authorize]
-        [HttpPost("create-post")]
-        [RequestSizeLimit(50_000_000)] // cho phép upload file lớn hơn mặc định
+        [HttpPost("create")]
+        [RequestSizeLimit(50_000_000)]
         public async Task<IActionResult> CreatePost([FromForm] PostCreateDto dto)
         {
             try
@@ -65,10 +38,15 @@ namespace SocialService.API.Controllers
 
                 int userId = int.Parse(userIdClaim);
 
-                var id = await _service.CreatePostAsync(dto, userId);
-                return Ok(new { message = "Tạo bài viết thành công.", postId = id });
+                var (postId, googlePlaceId) = await _service.CreatePostAsync(dto, userId);
+                return Ok(new
+                {
+                    message = "Tạo bài viết thành công.",
+                    postId,
+                    googlePlaceId
+                });
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
             }
@@ -96,6 +74,7 @@ namespace SocialService.API.Controllers
             }
         }
 
+
         [Authorize]
         [HttpDelete("delete/{postId}")]
         public async Task<IActionResult> DeletePost(int postId)
@@ -116,5 +95,7 @@ namespace SocialService.API.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+
     }
 }

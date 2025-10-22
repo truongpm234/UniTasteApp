@@ -13,7 +13,7 @@ public partial class Post
 
     public string Content { get; set; } = null!;
 
-    public byte? Rating { get; set; }
+    public double? Rating { get; set; }
 
     public bool IsReview { get; set; }
 
