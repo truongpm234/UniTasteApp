@@ -6,18 +6,19 @@ using System.Security.Claims;
 
 namespace SocialService.API.Controllers
 {
-    [Route("api/social/comments")]
+    //[Route("api/social/comments")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class CommentController : ControllerBase
+    public class CommentsController : ControllerBase
     {
         private readonly ICommentService _commentService;
 
-        public CommentController(ICommentService commentService)
+        public CommentsController(ICommentService commentService)
         {
             _commentService = commentService;
         }
         [Authorize]
-        [HttpPost("create")]
+        [HttpPost("create-comment-for-post")]
         public async Task<IActionResult> CreateComment([FromBody] CommentCreateDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Content))
@@ -43,7 +44,7 @@ namespace SocialService.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(404, new { message = ex.Message });
             }
         }
     }

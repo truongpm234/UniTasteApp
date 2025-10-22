@@ -1,6 +1,5 @@
 ﻿using SocialService.API.Models.DTO;
 using System.Linq.Dynamic.Core;
-
 namespace SocialService.API.Service
 {
     public interface IPostService

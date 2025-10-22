@@ -5,19 +5,20 @@ using System.Security.Claims;
 
 namespace SocialService.API.Controllers
 {
-    [Route("api/social/reactions")]
+    //[Route("api/social/reactions")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class PostReactionController : ControllerBase
+    public class PostReactionsController : ControllerBase
     {
         private readonly IPostReactionService _service;
 
-        public PostReactionController(IPostReactionService service)
+        public PostReactionsController(IPostReactionService service)
         {
             _service = service;
         }
 
         [Authorize]
-        [HttpPost("toggle")]
+        [HttpPost("make-creaction")]
         public async Task<IActionResult> ToggleReaction(int postId, string reactionType)
         {
             try
@@ -38,7 +39,7 @@ namespace SocialService.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("check")]
+        [HttpGet("Is-make-reaction-for-post")]
         public async Task<IActionResult> CheckReaction(int postId)
         {
             try
@@ -57,7 +58,7 @@ namespace SocialService.API.Controllers
             }
         }
         [Authorize]
-        [HttpGet("summary")]
+        [HttpGet("summary-amount-react")]
         public async Task<IActionResult> GetReactionsSummary(int postId)
         {
             try

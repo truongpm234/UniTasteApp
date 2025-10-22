@@ -18,7 +18,7 @@ namespace SocialService.API.Controllers
             _service = service;
         }
 
-        [HttpGet("get-all-paged")]
+        [HttpGet("get-all-post-with-paging")]
         public async Task<IActionResult> GetAllReviewsPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 3)
         {
             try
@@ -33,7 +33,7 @@ namespace SocialService.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("get-by-user")]
+        [HttpGet("get-post-by-user-id")]
         public async Task<IActionResult> GetPostsByUser()
         {
             try
@@ -53,7 +53,7 @@ namespace SocialService.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("create")]
+        [HttpPost("create-post")]
         [RequestSizeLimit(50_000_000)] // cho phép upload file lớn hơn mặc định
         public async Task<IActionResult> CreatePost([FromForm] PostCreateDto dto)
         {
