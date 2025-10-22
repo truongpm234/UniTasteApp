@@ -27,3 +27,4 @@ packages/
 # Entity Framework migrations snapshot (nếu muốn)
 *Migrations/*.Designer.cs
 *Migrations/*ModelSnapshot.cs
+SocialService.API/Credentials/*.json

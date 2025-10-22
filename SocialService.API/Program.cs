@@ -1,5 +1,4 @@
 ﻿using Google.Cloud.Storage.V1;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +9,7 @@ using SocialService.API.Hubs;
 using SocialService.API.Models.DTO;
 using SocialService.API.Repository;
 using SocialService.API.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SocialService.API
 {
