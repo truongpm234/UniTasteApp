@@ -12,19 +12,46 @@ namespace SocialService.API.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Post>> GetAllReviewsAsync()
+        public async Task<(IEnumerable<Post> posts, int totalCount)> GetAllReviewsPagedAsync(int page, int pageSize)
+        {
+            var query = _context.Posts
+                .Where(p => !p.IsDeleted && p.IsReview)
+                .Include(p => p.PostMedia)
+                .Include(p => p.Tags)
+                .Include(p => p.PostReactions)
+                .Include(p => p.Comments)
+                .Include(p => p.PostRestaurantTags)
+                .OrderByDescending(p => p.CreatedAt);
+
+            int totalCount = await query.CountAsync();
+
+            var posts = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (posts, totalCount);
+        }
+
+        public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(int userId)
         {
             return await _context.Posts
-                .Where(p => !p.IsDeleted && p.IsReview)
-                .Include(p => p.PostMedia)          // ảnh đính kèm
-                .Include(p => p.Tags)               // hashtag nhiều-nhiều
-                .Include(p => p.PostReactions)      // cảm xúc
-                .Include(p => p.Comments)           // bình luận
-                .Include(p => p.PostRestaurantTags) // vị trí quán
+                .Where(p => p.AuthorUserId == userId && !p.IsDeleted)
+                .Include(p => p.PostMedia)
+                .Include(p => p.Tags)
+                .Include(p => p.PostReactions)
+                .Include(p => p.Comments)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }
 
+        public async Task<Post?> GetPostByIdAsync(int postId)
+        {
+            return await _context.Posts
+                .Include(p => p.PostMedia)
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p => p.PostId == postId && !p.IsDeleted);
+        }
         public async Task AddPostAsync(Post post)
         {
             await _context.Posts.AddAsync(post);
@@ -43,6 +70,18 @@ namespace SocialService.API.Repository
         public async Task AddTagAsync(Tag tag)
         {
             await _context.Tags.AddAsync(tag);
+        }
+
+        public void UpdatePost(Post post)
+        {
+            _context.Posts.Update(post);
+        }
+
+        public async Task DeletePostAsync(Post post)
+        {
+            post.IsDeleted = true;
+            _context.Posts.Update(post);
+            await _context.SaveChangesAsync();
         }
         public async Task SaveChangesAsync()
         {
