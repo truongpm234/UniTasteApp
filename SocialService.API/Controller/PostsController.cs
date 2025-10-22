@@ -6,13 +6,14 @@ using System.Security.Claims;
 
 namespace SocialService.API.Controllers
 {
-    [Route("api/social/posts")]
+    //[Route("api/social/posts")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class PostController : ControllerBase
+    public class PostsController : ControllerBase
     {
         private readonly IPostService _service;
 
-        public PostController(IPostService service)
+        public PostsController(IPostService service)
         {
             _service = service;
         }
