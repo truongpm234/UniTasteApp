@@ -73,7 +73,7 @@ namespace UserService.API.Controllers
                 if (env == "development")
                     gatewayBase = "http://localhost:8001";
                 else
-                    gatewayBase = "https://apigateway-5s3w.onrender.com";
+                    gatewayBase = "https://apigateway-otsb.onrender.com";
             }
 
             // 1. Lấy preference user
