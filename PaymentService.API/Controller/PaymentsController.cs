@@ -14,51 +14,79 @@ namespace PaymentService.API.Controllers
         private readonly IPayOSService _payOSService;
         private readonly IPaymentService _paymentService;
         private readonly IPurchaseService _purchaseService;
+        private readonly IServicePackageService _servicePackageService;
 
-        public PaymentsController(IPayOSService payOSService, IPaymentService paymentService, IPurchaseService purchaseService)
+        public PaymentsController(IPayOSService payOSService, IPaymentService paymentService, IPurchaseService purchaseService, IServicePackageService servicePackageService)
         {
             _payOSService = payOSService;
             _paymentService = paymentService;
             _purchaseService = purchaseService;
+            _servicePackageService = servicePackageService;
         }
 
-        [Authorize]
-        [HttpPost("create-payment")]
-        public async Task<IActionResult> CreatePost([FromBody] CreatePaymentDto dto)
+        [Authorize] // Hoặc để mặc định nếu user thường cũng được quyền tự kích hoạt
+        [HttpPost("manual-create-payment")]
+        public async Task<IActionResult> ManualCreatePayment([FromBody] ManualCreatePaymentDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            //create ordercode new/1time
-            long orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            // ✅ Lấy UserId từ JWT
+            // 1. Lấy userId từ JWT claims
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
                 return Unauthorized("UserId not found in token");
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("UserId invalid");
 
-            int userId = int.Parse(userIdClaim);
+            // 2. Lấy gói dịch vụ
+            var package = (await _servicePackageService.GetAllServicePackagesAsync())
+                .FirstOrDefault(p => p.ServicePackageId == dto.ServicePackageId);
 
-            // 1. Gọi PayOS
-            var link = await _payOSService.CreatePaymentLink(dto.OrderCode, dto.Amount, dto.Description);
+            if (package == null)
+                return BadRequest("Gói dịch vụ không tồn tại");
 
-            // 2. Lưu transaction
-            var transaction = new PaymentTransaction
+            // 3. Tạo bản ghi transaction thành công
+            long orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var description = $"[Manual] Thanh toán {package.Name} ({package.DurationInMonths} tháng) - {dto.Note}";
+
+            var paymentTransaction = new PaymentTransaction
             {
                 UserId = userId,
                 Amount = dto.Amount,
-                TransactionType = "PayOS",
-                Status = "Pending",
+                TransactionType = "Manual", // Đánh dấu là tạo thủ công
+                Status = "Success",         // Luôn thành công (manual)
                 ReferenceId = Guid.NewGuid().ToString(),
-                OrderCode = dto.OrderCode,
-                Description = dto.Description,
+                OrderCode = orderCode,
+                Description = description,
                 CreatedAt = DateTime.UtcNow
             };
+            await _paymentService.AddTransactionAsync(paymentTransaction);
 
-            await _paymentService.AddTransactionAsync(transaction);
+            // 4. Tạo bản ghi Purchase
+            var purchase = new Purchase
+            {
+                UserId = userId,
+                PurchaseType = "Payment",
+                Amount = dto.Amount,
+                Description = description,
+                CreatedAt = DateTime.UtcNow,
+                ServicePackageId = package.ServicePackageId
+            };
+            await _paymentService.AddPurchaseAsync(purchase);
 
-            return Ok(new { checkoutUrl = link });
+            // 5. Trả kết quả
+            return Ok(new
+            {
+                message = "Manual payment created successfully.",
+                transactionId = paymentTransaction.PaymentTransactionId,
+                purchaseId = purchase.PurchaseId,
+                amount = dto.Amount,
+                package = new
+                {
+                    package.ServicePackageId,
+                    package.Name,
+                    package.DurationInMonths
+                }
+            });
         }
+
 
         [HttpGet("success")]
         public IActionResult Success()
