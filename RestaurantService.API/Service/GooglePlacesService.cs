@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RestaurantService.API.Data.DBContext;
 using RestaurantService.API.Models.DTO;
 using RestaurantService.API.Models.Entity;
@@ -74,7 +75,11 @@ namespace RestaurantService.API.Service
 
             string coverImageUrl = null;
             if (place.Photos != null && place.Photos.Any())
-                coverImageUrl = await GetPhotoUrlAsync(place.Photos.First().PhotoReference, 800);
+            {
+                string photoReference = place.Photos.First().PhotoReference;
+                string photoUrl = await GetPhotoUrlAsync(photoReference, 800);
+                coverImageUrl = await DownloadAndSaveImageAsync(photoUrl);
+            }
 
             return new Restaurant
             {
@@ -141,11 +146,17 @@ namespace RestaurantService.API.Service
                     { restaurant.Website = place.Website; needUpdate = true; }
                     if (place.Photos != null && place.Photos.Any())
                     {
-                        var newCover = await GetPhotoUrlAsync(place.Photos.First().PhotoReference, 800);
-                        if (string.IsNullOrEmpty(restaurant.CoverImageUrl) || restaurant.CoverImageUrl != newCover)
+                        if (place.Photos != null && place.Photos.Any())
                         {
-                            restaurant.CoverImageUrl = newCover;
-                            needUpdate = true;
+                            string photoReference = place.Photos.First().PhotoReference;
+                            string photoUrl = await GetPhotoUrlAsync(photoReference, 800);
+                            string savedImageUrl = await DownloadAndSaveImageAsync(photoUrl);
+
+                            if (string.IsNullOrEmpty(restaurant.CoverImageUrl) || restaurant.CoverImageUrl != savedImageUrl)
+                            {
+                                restaurant.CoverImageUrl = savedImageUrl;
+                                needUpdate = true;
+                            }
                         }
                     }
                     if ((restaurant.GoogleRating == null || restaurant.GoogleRating == 0) && place.Rating != null)
@@ -429,5 +440,75 @@ namespace RestaurantService.API.Service
             var detail = JsonConvert.DeserializeObject<GooglePlaceDetailsResponse>(response);
             return detail?.Result?.Reviews ?? new List<GoogleReview>();
         }
+
+        public async Task<bool> IsImageUrlValidAsync(string url)
+        {
+            try
+            {
+                using var httpClient = new HttpClient();
+                using var response = await httpClient.GetAsync(url);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<string> DownloadAndSaveImageAsync(string googlePhotoUrl, string saveFolder = "wwwroot/uploads")
+        {
+            // Tạo thư mục nếu chưa có
+            if (!Directory.Exists(saveFolder))
+                Directory.CreateDirectory(saveFolder);
+
+            using var httpClient = new HttpClient();
+            var imageBytes = await httpClient.GetByteArrayAsync(googlePhotoUrl);
+
+            // Xác định loại file từ header (hoặc tự chọn jpg)
+            string extension = ".jpg"; // mặc định
+                                       // Nếu cần check header
+                                       // var contentType = response.Content.Headers.ContentType?.MediaType;
+                                       // if (contentType == "image/png") extension = ".png";
+
+            string fileName = Guid.NewGuid().ToString("N") + extension;
+            string filePath = Path.Combine(saveFolder, fileName);
+
+            await File.WriteAllBytesAsync(filePath, imageBytes);
+
+            // Trả về đường dẫn public, ví dụ "/uploads/xxx.jpg"
+            // Nếu web root, nhớ cấu hình app cho phép truy cập folder này (static files)
+            return $"/uploads/{fileName}";
+        }
+
+        public async Task<int> FixInvalidCoverImagesAndSaveAsync()
+        {
+            var allRestaurants = await _context.Restaurants.Where(r => !string.IsNullOrEmpty(r.CoverImageUrl)).ToListAsync();
+            int fixedCount = 0;
+
+            foreach (var restaurant in allRestaurants)
+            {
+                bool isValid = await IsImageUrlValidAsync(restaurant.CoverImageUrl);
+                if (!isValid && !string.IsNullOrEmpty(restaurant.GooglePlaceId))
+                {
+                    var place = await GetPlaceDetailAsync(restaurant.GooglePlaceId);
+                    if (place?.Photos != null && place.Photos.Any())
+                    {
+                        string photoReference = place.Photos.First().PhotoReference;
+                        string googlePhotoUrl = await GetPhotoUrlAsync(photoReference, 800);
+
+                        // Download and save image to local folder
+                        string savedImageUrl = await DownloadAndSaveImageAsync(googlePhotoUrl);
+
+                        // Update restaurant
+                        restaurant.CoverImageUrl = savedImageUrl;
+                        _context.Restaurants.Update(restaurant);
+                        fixedCount++;
+                    }
+                }
+            }
+            await _context.SaveChangesAsync();
+            return fixedCount;
+        }
+
     }
 }

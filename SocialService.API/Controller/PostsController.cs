@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SocialService.API.Controllers
 {
-    [Route("api/social/posts")]
+    [Route("api/[controller]")]
     [ApiController]
     public class PostController : ControllerBase
     {
