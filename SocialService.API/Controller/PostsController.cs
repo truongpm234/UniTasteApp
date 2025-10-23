@@ -18,11 +18,18 @@ namespace SocialService.API.Controllers
             _service = service;
         }
 
-        [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllReviews()
+        [HttpGet("get-all-paged")]
+        public async Task<IActionResult> GetAllReviewsPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 3)
         {
-            var data = await _service.GetAllReviewsAsync();
-            return Ok(data);
+            try
+            {
+                var result = await _service.GetAllReviewsPagedAsync(page, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         [Authorize]

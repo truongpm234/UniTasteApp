@@ -6,7 +6,7 @@ namespace SocialService.API.Repository
 {
     public interface IPostRepository
     {
-        Task<IEnumerable<Post>> GetAllReviewsAsync();
+        Task<(IEnumerable<Post> posts, int totalCount)> GetAllReviewsPagedAsync(int page, int pageSize);
         Task<IEnumerable<Post>> GetPostsByUserIdAsync(int userId);
         Task<Post?> GetPostByIdAsync(int postId);
         Task AddPostAsync(Post post);

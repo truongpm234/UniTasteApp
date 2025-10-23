@@ -15,19 +15,26 @@ namespace SocialService.API.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Post>> GetAllReviewsAsync()
+        public async Task<(IEnumerable<Post> posts, int totalCount)> GetAllReviewsPagedAsync(int page, int pageSize)
         {
-            return await _context.Posts
+            var query = _context.Posts
                 .Where(p => !p.IsDeleted && p.IsReview)
                 .Include(p => p.PostMedia)
                 .Include(p => p.Tags)
                 .Include(p => p.PostReactions)
                 .Include(p => p.Comments)
                 .Include(p => p.PostRestaurantTags)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-        }
+                .OrderByDescending(p => p.CreatedAt);
 
+            int totalCount = await query.CountAsync();
+
+            var posts = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (posts, totalCount);
+        }
         public async Task<IEnumerable<Post>> GetPostsByUserIdAsync(int userId)
         {
             return await _context.Posts

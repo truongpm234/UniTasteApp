@@ -29,18 +29,17 @@ namespace SocialService.API.Service
             _restaurantApi = restaurantApi;
         }
 
-        public async Task<IEnumerable<PostDto>> GetAllReviewsAsync()
+        public async Task<Models.DTO.PagedResult<PostDto>> GetAllReviewsPagedAsync(int page, int pageSize)
         {
-            var posts = await _repo.GetAllReviewsAsync();
+            var (posts, totalCount) = await _repo.GetAllReviewsPagedAsync(page, pageSize);
 
-            return posts.Select(p => new PostDto
+            var data = posts.Select(p => new PostDto
             {
                 PostId = p.PostId,
                 AuthorUserId = p.AuthorUserId,
                 Title = p.Title,
                 Content = p.Content,
-                Rating = (byte?)p.Rating,
-                IsReview = p.IsReview,
+                Rating = p.Rating,
                 Visibility = p.Visibility,
                 CreatedAt = p.CreatedAt,
                 MediaUrls = p.PostMedia.Select(m => m.MediaUrl).ToList(),
@@ -48,9 +47,16 @@ namespace SocialService.API.Service
                 ReactionsCount = p.ReactionsCount,
                 CommentsCount = p.CommentsCount,
                 SharesCount = p.SharesCount
-            });
-        }
+            }).ToList();
 
+            return new Models.DTO.PagedResult<PostDto>
+            {
+                Items = data,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
         public async Task<IEnumerable<PostDto>> GetPostsByUserIdAsync(int userId)
         {
             var posts = await _repo.GetPostsByUserIdAsync(userId);

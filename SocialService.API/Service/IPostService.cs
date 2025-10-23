@@ -6,7 +6,7 @@ namespace SocialService.API.Service
 {
     public interface IPostService
     {
-        Task<IEnumerable<PostDto>> GetAllReviewsAsync();
+        Task<Models.DTO.PagedResult<PostDto>> GetAllReviewsPagedAsync(int page, int pageSize);
         Task<IEnumerable<PostDto>> GetPostsByUserIdAsync(int userId);
         Task<(int postId, string? googlePlaceId)> CreatePostAsync(PostCreateDto dto, int userId);
         Task UpdatePostAsync(int postId, int userId, PostUpdateDto dto);
