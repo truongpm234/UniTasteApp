@@ -5,7 +5,7 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://userservice-5qvn.onrender.com",
+          "Host": "userservice-5qvn.onrender.com",
           "Port": 443
         }
       ],
@@ -17,7 +17,7 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://userservice-5qvn.onrender.com",
+          "Host": "userservice-5qvn.onrender.com",
           "Port": 443
         }
       ],
@@ -29,7 +29,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://socialservice-i0f5.onrender.com",
+          "Host": "socialservice-i0f5.onrender.com",
           "Port": 443
         }
       ],
@@ -41,7 +41,7 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://restaurantservice-2dyf.onrender.com",
+          "Host": "restaurantservice-2dyf.onrender.com",
           "Port": 443
         }
       ],
@@ -57,7 +57,7 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://restaurantservice-2dyf.onrender.com",
+          "Host": "restaurantservice-2dyf.onrender.com",
           "Port": 443
         }
       ],
@@ -73,7 +73,7 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://restaurantservice-2dyf.onrender.com",
+          "Host": "restaurantservice-2dyf.onrender.com",
           "Port": 443
         }
       ],
@@ -89,7 +89,7 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "https://restaurantservice-2dyf.onrender.com",
+          "Host": "restaurantservice-2dyf.onrender.com",
           "Port": 443
         }
       ],
