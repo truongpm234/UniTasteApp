@@ -1,5 +1,7 @@
-﻿using SocialService.API.Data.DBContext;
+﻿using Microsoft.EntityFrameworkCore;
+using SocialService.API.Data.DBContext;
 using SocialService.API.Models.Entity;
+using System.Linq.Dynamic.Core;
 
 namespace SocialService.API.Repository
 {
@@ -11,7 +13,11 @@ namespace SocialService.API.Repository
         {
             _context = context;
         }
-
+        public async Task<Comment?> GetCommentByPostIdAsync(int postId)
+        {
+            return await _context.Comments
+                .FirstOrDefaultAsync(c => c.PostId == postId);
+        }
         public async Task AddComment(Comment comment)
         {
             await _context.Comments.AddAsync(comment);

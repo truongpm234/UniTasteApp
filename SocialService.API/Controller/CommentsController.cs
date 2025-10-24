@@ -17,6 +17,24 @@ namespace SocialService.API.Controllers
         {
             _commentService = commentService;
         }
+
+        [Authorize]
+        [HttpGet("get-comments-by-postId")]
+        public async Task<IActionResult> GetCommentsByPostId([FromQuery] int postId)
+        {
+            try
+            {
+                var comment = await _commentService.GetCommentByPostIdAsync(postId);
+                if (comment == null)
+                    return NotFound(new { message = "Comment not found for the given Post ID." });
+                return Ok(comment);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
         [Authorize]
         [HttpPost("create-comment-for-post")]
         public async Task<IActionResult> CreateComment([FromBody] CommentCreateDto dto)
