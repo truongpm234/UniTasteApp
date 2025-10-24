@@ -60,6 +60,25 @@ namespace SocialService.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("get-all-post-of-userId")]
+        public async Task<IActionResult> GetPostsByUserId()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { message = "Không tìm thấy user trong token." });
+                int userId = int.Parse(userIdClaim);
+                var posts = await _service.GetPostsByUserIdAsync(userId);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
         [HttpPut("update/{postId}")]
         [RequestSizeLimit(50_000_000)] // cho phép upload ảnh lớn
         public async Task<IActionResult> UpdatePost(int postId, [FromForm] PostUpdateDto dto)
