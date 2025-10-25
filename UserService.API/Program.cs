@@ -94,6 +94,10 @@ namespace UserService.API
             builder.Services.AddScoped<IUserService, Services.UserService>();
             builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
+
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+            builder.Services.AddSingleton<ICloudinaryService, CloudinaryService>();
+
             builder.Services.AddHttpClient();
 
             // JWT Authentication

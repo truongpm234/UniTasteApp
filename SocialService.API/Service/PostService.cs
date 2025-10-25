@@ -16,17 +16,19 @@ namespace SocialService.API.Service
         private readonly IFirebaseStorageService _firebaseStorage;
         private readonly Exe201SocialServiceDbContext _context;
         private readonly IRestaurantApiService _restaurantApi;
-
+        private readonly ICloudinaryService _cloudinaryService;
         public PostService(
             IPostRepository repo,
             IFirebaseStorageService firebaseStorage,
             Exe201SocialServiceDbContext context,
-            IRestaurantApiService restaurantApi)
+            IRestaurantApiService restaurantApi,
+            ICloudinaryService cloudinaryService)
         {
             _repo = repo;
             _firebaseStorage = firebaseStorage;
             _context = context;
             _restaurantApi = restaurantApi;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<Models.DTO.PagedResult<PostDto>> GetAllReviewsPagedAsync(int page, int pageSize)
@@ -113,15 +115,16 @@ namespace SocialService.API.Service
             };
 
             await _repo.AddPostAsync(post);
-            await _repo.SaveChangesAsync(); // cần PostId
+            await _repo.SaveChangesAsync(); // Lấy PostId
 
-            // Upload ảnh (nếu có)
+            // Upload nhiều ảnh lên Cloudinary
             if (dto.MediaFiles != null && dto.MediaFiles.Count > 0)
             {
                 int sort = 1;
-                foreach (var file in dto.MediaFiles)
+                var urls = await _cloudinaryService.UploadImagesAsync(dto.MediaFiles, "posts");
+                foreach (var url in urls)
                 {
-                    var url = await _firebaseStorage.UploadFileAsync(file, "posts");
+                    var file = dto.MediaFiles[sort - 1]; // Để lấy ContentType
                     var media = new PostMedium
                     {
                         PostId = post.PostId,
@@ -152,7 +155,7 @@ namespace SocialService.API.Service
                 await _repo.SaveChangesAsync();
             }
 
-            // ✅ Nếu có RestaurantId → gọi Gateway lấy GooglePlaceId
+            // Gắn RestaurantTag (nếu có)
             string? googlePlaceId = null;
             if (dto.RestaurantId.HasValue)
             {
@@ -192,9 +195,10 @@ namespace SocialService.API.Service
             {
                 _context.PostMedia.RemoveRange(post.PostMedia);
                 int sort = 1;
-                foreach (var file in dto.MediaFiles)
+                var urls = await _cloudinaryService.UploadImagesAsync(dto.MediaFiles, "posts");
+                foreach (var url in urls)
                 {
-                    var url = await _firebaseStorage.UploadFileAsync(file, "posts");
+                    var file = dto.MediaFiles[sort - 1];
                     var media = new PostMedium
                     {
                         PostId = post.PostId,

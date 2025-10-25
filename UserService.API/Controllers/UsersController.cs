@@ -20,12 +20,14 @@ namespace UserService.API.Controllers
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
         private readonly IFirebaseStorageService _firebaseStorageService;
-        public UsersController(IConfiguration config, IUserService userService, IEmailService emailService, IFirebaseStorageService firebaseStorageService)
+        private readonly ICloudinaryService _cloudinaryService;
+        public UsersController(IConfiguration config, IUserService userService, IEmailService emailService, IFirebaseStorageService firebaseStorageService, ICloudinaryService cloudinaryService)
         {
             _config = config;
             _userService = userService;
             _emailService = emailService;
             _firebaseStorageService = firebaseStorageService;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpPost("Login")]
@@ -168,7 +170,8 @@ namespace UserService.API.Controllers
             if (avatarFile == null || avatarFile.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            var url = await _firebaseStorageService.UploadFileAsync(avatarFile, "avatars");
+            // Sử dụng Cloudinary
+            var url = await _cloudinaryService.UploadAvatarAsync(avatarFile, "avatars");
             return Ok(new { avatarUrl = url });
         }
 
@@ -201,7 +204,7 @@ namespace UserService.API.Controllers
         }
 
         [Authorize]
-        [HttpPut("update-profile-user-by-userid/{userId}")]
+        [HttpPut("update-profile-user-by-userid/{userId}-firebase")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateProfile(int userId, [FromForm] UpdateUserProfileForm form)
         {

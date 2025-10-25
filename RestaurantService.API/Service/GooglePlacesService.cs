@@ -15,10 +15,12 @@ namespace RestaurantService.API.Service
         private readonly IReviewRepository _reviewRepo;
         private readonly IRestaurantRepository _restaurantRepository;
         private readonly Exe201RestaurantServiceDbContext _context;
+        private readonly ICloudinaryService _cloudinaryService;
         private readonly string _apiKey;
         private readonly string _baseUrl;
 
-        public GooglePlacesService(HttpClient httpClient, IConfiguration configuration, IRestaurantRepository restaurantRepository, IReviewRepository reviewRepo, Exe201RestaurantServiceDbContext context)
+        public GooglePlacesService(HttpClient httpClient, IConfiguration configuration, IRestaurantRepository restaurantRepository,
+            IReviewRepository reviewRepo, Exe201RestaurantServiceDbContext context, ICloudinaryService cloudinaryService)
         {
             _httpClient = httpClient;
             _configuration = configuration;
@@ -27,6 +29,7 @@ namespace RestaurantService.API.Service
             _apiKey = _configuration["GooglePlaces:ApiKey"];
             _baseUrl = _configuration["GooglePlaces:BaseUrl"];
             _reviewRepo = reviewRepo;
+            _cloudinaryService = cloudinaryService;
         }
 
         public int MapPriceLevelToPriceRangeId(int? priceLevel)
@@ -78,7 +81,7 @@ namespace RestaurantService.API.Service
             {
                 string photoReference = place.Photos.First().PhotoReference;
                 string photoUrl = await GetPhotoUrlAsync(photoReference, 800);
-                coverImageUrl = await DownloadAndSaveImageAsync(photoUrl);
+                coverImageUrl = await DownloadAndUploadToCloudinaryAsync(photoUrl);
             }
 
             return new Restaurant
@@ -150,7 +153,7 @@ namespace RestaurantService.API.Service
                         {
                             string photoReference = place.Photos.First().PhotoReference;
                             string photoUrl = await GetPhotoUrlAsync(photoReference, 800);
-                            string savedImageUrl = await DownloadAndSaveImageAsync(photoUrl);
+                            string savedImageUrl = await DownloadAndUploadToCloudinaryAsync(photoUrl);
 
                             if (string.IsNullOrEmpty(restaurant.CoverImageUrl) || restaurant.CoverImageUrl != savedImageUrl)
                             {
@@ -322,7 +325,6 @@ namespace RestaurantService.API.Service
                 await _reviewRepo.AddOrUpdateReviewsAsync(restaurant.RestaurantId, reviews);
 
                 // 5. Map lại DTO từ database (đảm bảo trả đúng PriceRangeId và CategoryIds)
-                // (Có thể gọi lại hàm MapGooglePlaceToDto, hoặc tự build)
                 var categories = await _restaurantRepository.GetCategoriesByRestaurantIdAsync(restaurant.RestaurantId);
                 var dto = new GooglePlaceDTO
                 {
@@ -375,8 +377,6 @@ namespace RestaurantService.API.Service
                     ? await _restaurantRepository.GetOrCreatePriceRangeIdAsync(place.PriceLevel)
                     : null;
 
-                // map lại từ list type (có thể trả về ID giả lập nếu cần)
-                // Nếu muốn lấy CategoryId thực sự thì phải gọi GetOrCreateCategoryByNameAsync cho từng type
                 foreach (var type in place.Types ?? new List<string>())
                 {
                     var cat = await _restaurantRepository.GetOrCreateCategoryByNameAsync(type, "Google");
@@ -455,59 +455,26 @@ namespace RestaurantService.API.Service
             }
         }
 
-        public async Task<string> DownloadAndSaveImageAsync(string googlePhotoUrl, string saveFolder = "wwwroot/uploads")
+        public async Task<string> DownloadAndUploadToCloudinaryAsync(string imageUrl)
         {
-            // Tạo thư mục nếu chưa có
-            if (!Directory.Exists(saveFolder))
-                Directory.CreateDirectory(saveFolder);
+            // Download về thư mục tạm (giống như cũ)
+            string tempFolder = Path.Combine(Directory.GetCurrentDirectory(), "TempImages");
+            if (!Directory.Exists(tempFolder)) Directory.CreateDirectory(tempFolder);
+            string tempFile = Path.Combine(tempFolder, Guid.NewGuid().ToString("N") + ".jpg");
 
-            using var httpClient = new HttpClient();
-            var imageBytes = await httpClient.GetByteArrayAsync(googlePhotoUrl);
-
-            // Xác định loại file từ header (hoặc tự chọn jpg)
-            string extension = ".jpg"; // mặc định
-                                       // Nếu cần check header
-                                       // var contentType = response.Content.Headers.ContentType?.MediaType;
-                                       // if (contentType == "image/png") extension = ".png";
-
-            string fileName = Guid.NewGuid().ToString("N") + extension;
-            string filePath = Path.Combine(saveFolder, fileName);
-
-            await File.WriteAllBytesAsync(filePath, imageBytes);
-
-            // Trả về đường dẫn public, ví dụ "/uploads/xxx.jpg"
-            // Nếu web root, nhớ cấu hình app cho phép truy cập folder này (static files)
-            return $"/uploads/{fileName}";
-        }
-
-        public async Task<int> FixInvalidCoverImagesAndSaveAsync()
-        {
-            var allRestaurants = await _context.Restaurants.Where(r => !string.IsNullOrEmpty(r.CoverImageUrl)).ToListAsync();
-            int fixedCount = 0;
-
-            foreach (var restaurant in allRestaurants)
+            using (var client = new HttpClient())
             {
-                bool isValid = await IsImageUrlValidAsync(restaurant.CoverImageUrl);
-                if (!isValid && !string.IsNullOrEmpty(restaurant.GooglePlaceId))
-                {
-                    var place = await GetPlaceDetailAsync(restaurant.GooglePlaceId);
-                    if (place?.Photos != null && place.Photos.Any())
-                    {
-                        string photoReference = place.Photos.First().PhotoReference;
-                        string googlePhotoUrl = await GetPhotoUrlAsync(photoReference, 800);
-
-                        // Download and save image to local folder
-                        string savedImageUrl = await DownloadAndSaveImageAsync(googlePhotoUrl);
-
-                        // Update restaurant
-                        restaurant.CoverImageUrl = savedImageUrl;
-                        _context.Restaurants.Update(restaurant);
-                        fixedCount++;
-                    }
-                }
+                var bytes = await client.GetByteArrayAsync(imageUrl);
+                await File.WriteAllBytesAsync(tempFile, bytes);
             }
-            await _context.SaveChangesAsync();
-            return fixedCount;
+
+            // Upload lên Cloudinary
+            var cloudinaryService = await _cloudinaryService.UploadImageAsync(tempFile);
+            // Xóa file tạm
+            if (File.Exists(tempFile))
+                File.Delete(tempFile);
+
+            return cloudinaryService;
         }
 
     }

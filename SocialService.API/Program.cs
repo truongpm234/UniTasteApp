@@ -84,6 +84,8 @@ namespace SocialService.API
             builder.Services.Configure<FirebaseSettings>(firebaseSection);
             builder.Services.AddSingleton(StorageClient.Create());
             builder.Services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
             // 🔹 4️⃣ Controllers & JSON options
             builder.Services.AddControllers().AddJsonOptions(options =>

@@ -15,7 +15,7 @@ namespace RestaurantService.API.Service
         Task<List<GoogleReview>> GetGoogleReviewsAsync(string googlePlaceId);
         int MapPriceLevelToPriceRangeId(int? priceLevel);
         Task<int> SyncAllRestaurantCoverImagesAsync();
-
+        Task<string> DownloadAndUploadToCloudinaryAsync(string imageUrl);
 
     }
 }
