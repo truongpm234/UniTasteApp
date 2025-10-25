@@ -290,6 +290,37 @@ namespace UserService.API.Controllers
             return Ok(users);
         }
 
+        [HttpGet("getuser-by-fullname/{fullname}")]
+        public async Task<IActionResult> GetByFullName(string fullname)
+        {
+            var user = await _userService.GetUserByFullNameAsync(fullname);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            // Chỉ trả về thông tin cần thiết (để SocialService sử dụng)
+            return Ok(new
+            {
+                userId = user.UserId,
+                fullName = user.FullName,
+                email = user.Email
+            });
+        }
+
+        [HttpGet("getuser-by-id/{userId}")]
+        public async Task<IActionResult> GetById(int userId)
+        {
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            // ✅ chỉ trả thông tin cần thiết cho SocialService
+            return Ok(new
+            {
+                userId = user.UserId,
+                fullName = user.FullName,
+                email = user.Email
+            });
+        }
 
     }
 }

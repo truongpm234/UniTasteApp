@@ -277,6 +277,14 @@ namespace UserService.API.Services
             return await _userRepository.GetAllUsersAsync();
         }
 
+        public async Task<User?> GetUserByFullNameAsync(string fullName)
+        {
+            return await _userRepository.GetUserByFullNameAsync(fullName);
+        }
 
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _userRepository.GetUserByIdAsync(userId);
+        }
     }
 }

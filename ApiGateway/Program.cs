@@ -8,7 +8,7 @@ namespace ApiGateway
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +63,17 @@ namespace ApiGateway
             }
         };
     });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
@@ -76,16 +87,17 @@ namespace ApiGateway
 
             app.MapGet("/", () => "API Gateway is running!");
 
-            app.UseHttpsRedirection();
-
+            //app.UseHttpsRedirection();
+            app.UseCors("AllowFrontend");
             // AuthN/AuthZ middleware
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
+            app.UseWebSockets();
 
             // Ocelot pipeline (bắt buộc phải cuối cùng)
-            app.UseOcelot().Wait();
+            await app.UseOcelot();
 
             app.Run();
         }
