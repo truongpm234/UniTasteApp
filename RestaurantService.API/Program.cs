@@ -30,6 +30,9 @@ namespace RestaurantService.API
             builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IRestaurantService, Service.RestaurantService>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
