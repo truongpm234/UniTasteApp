@@ -19,5 +19,9 @@ public partial class Message
 
     public virtual Group? Group { get; set; }
 
+    public bool IsDelivered { get; set; } = false;
+
+    public bool IsSeen { get; set; } = false;
+
     public virtual ICollection<MessageAttachment> MessageAttachments { get; set; } = new List<MessageAttachment>();
 }

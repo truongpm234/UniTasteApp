@@ -23,7 +23,8 @@ namespace UserService.API.Services
         Task<UserPreference?> GetUserPreferenceByUserIdAsync(int userId);
         Task<UserPreference?> UpdateUserPreferenceAsync(int userId, UpdateUserPreferenceDto dto);
         Task<IEnumerable<User>> GetAllUsersAsync();
-
+        Task<User?> GetUserByFullNameAsync(string fullName);
+        Task<User?> GetUserByIdAsync(int userId);
 
     }
 }

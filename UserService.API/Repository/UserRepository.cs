@@ -81,7 +81,7 @@ namespace UserService.API.Repository
 
         public async Task<User?> GetUserByIdAsync(int userId)
         {
-            return await _context.Users.FindAsync(userId);
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
         public async Task UpdateAsync(User user)
@@ -155,6 +155,10 @@ namespace UserService.API.Repository
             return await _context.Users.ToListAsync();
         }
 
+        public async Task<User?> GetUserByFullNameAsync(string fullName)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.FullName == fullName);
+        }
 
     }
 }
