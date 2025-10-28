@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialService.API.Models.DTO;
+using SocialService.API.Models.Entity;
 using SocialService.API.Service;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -9,13 +10,15 @@ namespace SocialService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostController : ControllerBase
+    public class PostsController : ControllerBase
     {
         private readonly IPostService _service;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public PostController(IPostService service)
+        public PostsController(IPostService service, ICloudinaryService cloudinaryService)
         {
             _service = service;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpGet("get-all-paged")]
@@ -45,11 +48,45 @@ namespace SocialService.API.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
-        
+        [Authorize]
+        [HttpPost("upload-images")]
+        public async Task<List<string>> UploadImagesAsync([FromForm] List<IFormFile> files)
+        {
+            var urls = await _cloudinaryService.UploadImagesAsync(files, "posts");
+            return urls;
+        }
+
         [Authorize]
         [HttpPost("create")]
         [RequestSizeLimit(50_000_000)]
         public async Task<IActionResult> CreatePost([FromForm] PostCreateDto dto)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { message = "Không tìm thấy user trong token." });
+
+                int userId = int.Parse(userIdClaim);
+
+                var (postId, googlePlaceId) = await _service.CreatePostAsync(dto, userId);
+                return Ok(new
+                {
+                    message = "Tạo bài viết thành công.",
+                    postId,
+                    googlePlaceId
+                });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("create-post-mobile")]
+        [RequestSizeLimit(50_000_000)]
+        public async Task<IActionResult> CreatePostMobile([FromBody] PostCreateDto dto)
         {
             try
             {
@@ -136,6 +173,12 @@ namespace SocialService.API.Controllers
             }
         }
 
-
+        [Authorize]
+        [HttpGet("get-all-post-of-restaurant-of-userId")]
+        public async Task<List<Post>> GetAllPostOfRestaurantByUserId(int userId, int restaurantId)
+        {
+            return await _service.GetAllPostOfRestaurantIdByUserId(userId, restaurantId);
+        }
+        
     }
 }

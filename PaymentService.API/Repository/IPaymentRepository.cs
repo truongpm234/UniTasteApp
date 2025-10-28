@@ -9,5 +9,10 @@ public interface IPaymentRepository
     Task<IEnumerable<PaymentTransaction>> GetAllTransactionsAsync();
     Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode);
     Task UpdateTransactionAsync(PaymentTransaction entity);
-    
+    Task<int> CountSuccessTransactionsAsync();
+    Task<int> CountCancelTransactionsAsync();
+    Task<int> CountPendingTransactionsAsync();
+    Task<double> TotalAmountOfSuccessfulTransactionsAsync();
+    Task<int> CountAmountOfPaymentTransactionAsync();
+
 }

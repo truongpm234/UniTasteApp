@@ -159,6 +159,5 @@ namespace UserService.API.Repository
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.FullName == fullName);
         }
-
     }
 }

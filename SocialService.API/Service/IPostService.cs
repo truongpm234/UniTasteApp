@@ -13,5 +13,7 @@ namespace SocialService.API.Service
         Task<(int postId, string? googlePlaceId)> CreatePostAsync(PostCreateDto dto, int userId);
         Task UpdatePostAsync(int postId, int userId, PostUpdateDto dto);
         Task DeletePostAsync(int postId, int userId);
+        Task<List<Post>> GetAllPostOfRestaurantIdByUserId(int userId, int restaurantId);
+
     }
 }

@@ -18,5 +18,6 @@ namespace SocialService.API.Repository
         Task DeletePostAsync(Post post);
         Task SaveChangesAsync();
         Task AddPostRestaurantTagAsync(PostRestaurantTag tag);
+        Task<List<Post>> GetAllPostOfRestaurantIdByUserId(int userId, int restaurantId);
     }
 }

@@ -37,6 +37,7 @@ namespace SocialService.API.Service
 
             var data = posts.Select(p => new PostDto
             {
+                RestaurantId = p.PostRestaurantTags.FirstOrDefault()?.RestaurantId ?? 0,
                 PostId = p.PostId,
                 AuthorUserId = p.AuthorUserId,
                 Title = p.Title,
@@ -93,6 +94,7 @@ namespace SocialService.API.Service
             post.UpdatedAt = DateTime.UtcNow;
             await _repo.DeletePostAsync(post);
         }
+
 
         public async Task<(int postId, string? googlePlaceId)> CreatePostAsync(PostCreateDto dto, int userId)
         {
@@ -234,6 +236,11 @@ namespace SocialService.API.Service
         public async Task<List<Post>> GetAllPostByRestaurantId(int id)
         {
             return await _repo.GetAllPostByRestaurantId(id);
+        }
+
+        public async Task<List<Post>> GetAllPostOfRestaurantIdByUserId(int userId, int restaurantId)
+        {
+            return await _repo.GetAllPostOfRestaurantIdByUserId(userId, restaurantId);
         }
     }
 }
