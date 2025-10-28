@@ -7,6 +7,8 @@ using System.Security.Claims;
 
 namespace PaymentService.API.Controller
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class ServicePackagesController : ControllerBase
     {
         private readonly IServicePackageService _servicePackageService;
