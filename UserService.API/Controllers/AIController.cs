@@ -17,11 +17,13 @@ namespace UserService.API.Controllers
         private readonly IGeminiAIService _geminiAIService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUserService _userService;
-        public AIController(IGeminiAIService geminiAIService, IHttpClientFactory httpClientFactory, IUserService userService)
+        private readonly IConfiguration _config;
+        public AIController(IGeminiAIService geminiAIService, IHttpClientFactory httpClientFactory, IUserService userService, IConfiguration config)
         {
             _geminiAIService = geminiAIService;
             _httpClientFactory = httpClientFactory;
             _userService = userService;
+            _config = config;
         }
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromQuery] string prompt)
@@ -202,6 +204,13 @@ namespace UserService.API.Controllers
             foreach (var rest in restaurants)
             {
                 sb.AppendLine($"- {rest.Name} ({rest.GoogleRating ?? 0:F1}★):");
+                sb.AppendLine($"    • Google Maps: https://www.google.com/maps/place/?q=place_id:{rest.GooglePlaceId}");
+                if(rest.GooglePlaceId != null)
+                {
+                    sb.AppendLine($"    • Address: https://maps.google.com/?cid={rest.GooglePlaceId}");
+                    Console.WriteLine($"[AI] Added address link for {rest.Name}");
+                }
+
                 var reviews = reviewDict?.FirstOrDefault(x => x.RestaurantId == rest.RestaurantId)?.Reviews;
                 if (reviews != null)
                 {
@@ -220,6 +229,5 @@ namespace UserService.API.Controllers
             var aiResponse = await _geminiAIService.getChatResponse(sb.ToString());
             return Ok(new { answer = aiResponse });
         }
-
     }
 }

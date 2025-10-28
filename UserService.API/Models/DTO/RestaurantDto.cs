@@ -5,5 +5,6 @@
         public int RestaurantId { get; set; }
         public string Name { get; set; }
         public double? GoogleRating { get; set; }
+        public string? GooglePlaceId { get; set; }
     }
 }

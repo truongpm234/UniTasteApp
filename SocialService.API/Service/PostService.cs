@@ -37,6 +37,7 @@ namespace SocialService.API.Service
 
             var data = posts.Select(p => new PostDto
             {
+                RestaurantId = p.PostRestaurantTags.FirstOrDefault()?.RestaurantId ?? 0,
                 PostId = p.PostId,
                 AuthorUserId = p.AuthorUserId,
                 Title = p.Title,

@@ -2,6 +2,7 @@
 {
     public class PostDto
     {
+        public int RestaurantId { get; set; }
         public int PostId { get; set; }
         public int AuthorUserId { get; set; }
         public string? Title { get; set; }
@@ -10,7 +11,6 @@
         public bool IsReview { get; set; }
         public string Visibility { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
-
         public List<string> MediaUrls { get; set; } = new();
         public List<string> Tags { get; set; } = new();
         public int ReactionsCount { get; set; }
