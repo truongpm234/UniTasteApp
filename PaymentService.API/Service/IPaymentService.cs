@@ -12,5 +12,6 @@ namespace PaymentService.API.Service
         Task UpdateTransactionAsync(PaymentTransaction entity);
         Task<int> CountSuccessTransactionsAsync();
         Task<int> CountCancelTransactionsAsync();
+        Task<double> TotalAmountOfSuccessfulTransactionsAsync();
     }
 }

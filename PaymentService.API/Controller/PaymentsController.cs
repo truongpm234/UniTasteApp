@@ -154,5 +154,13 @@ namespace PaymentService.API.Controllers
             int cancel = await _paymentService.CountCancelTransactionsAsync();
             return Ok(new { cancelTransactionCount = cancel });
         }
+
+        [Authorize]
+        [HttpGet("sum-amount-success-transactions")]
+        public async Task<double> SumAmountSuccessTransactions()
+        {
+            double total = await _paymentService.TotalAmountOfSuccessfulTransactionsAsync();
+            return total;
+        }
     }
 }
