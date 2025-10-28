@@ -51,6 +51,14 @@ namespace PaymentService.API.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<int> CountSuccessTransactionsAsync()
+        {
+            return await _context.PaymentTransactions.CountAsync(t => t.Status == "Success");
+        }
 
+        public async Task<int> CountCancelTransactionsAsync()
+        {
+            return await _context.PaymentTransactions.CountAsync(t => t.Status == "Cancel");
+        }
     }
 }

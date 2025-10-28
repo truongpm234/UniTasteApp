@@ -24,7 +24,7 @@ namespace PaymentService.API.Controllers
             _servicePackageService = servicePackageService;
         }
 
-        [Authorize] // Hoặc để mặc định nếu user thường cũng được quyền tự kích hoạt
+        [Authorize]
         [HttpPost("manual-create-payment")]
         public async Task<IActionResult> ManualCreatePayment([FromBody] ManualCreatePaymentDto dto)
         {
@@ -121,6 +121,38 @@ namespace PaymentService.API.Controllers
             await _paymentService.UpdateTransactionAsync(transaction);
 
             return Ok("Thanh toán thành công, gói đã được kích hoạt!");
+        }
+
+        [Authorize]
+        [HttpGet("payment-cancel-callback")]
+        public async Task<IActionResult> PaymentCancelCallback([FromQuery] long orderCode)
+        {
+            // 1. Tìm transaction theo orderCode
+            var transaction = await _paymentService.GetTransactionByOrderCodeAsync(orderCode);
+            if (transaction == null)
+                return NotFound("Transaction not found");
+
+            // 2. Update trạng thái transaction và purchase
+            transaction.Status = "Cancel";
+            await _paymentService.UpdateTransactionAsync(transaction);
+
+            return Ok("Đã hủy gói thanh toán!");
+        }
+
+        [Authorize]
+        [HttpGet("count-success-transactions")]
+        public async Task<IActionResult> CountSuccessTransactions()
+        {
+            int count = await _paymentService.CountSuccessTransactionsAsync();
+            return Ok(new { successTransactionCount = count });
+        }
+
+        [Authorize]
+        [HttpGet("count-cancel-transactions")]
+        public async Task<IActionResult> CountCancelTransactions()
+        {
+            int cancel = await _paymentService.CountCancelTransactionsAsync();
+            return Ok(new { cancelTransactionCount = cancel });
         }
     }
 }

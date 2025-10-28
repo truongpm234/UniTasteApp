@@ -34,6 +34,13 @@ namespace PaymentService.API.Service
         {
             await _repository.UpdateTransactionAsync(entity);
         }
-
+        public async Task<int> CountSuccessTransactionsAsync()
+        {
+            return await _repository.CountSuccessTransactionsAsync();
+        }
+        public async Task<int> CountCancelTransactionsAsync()
+        {
+            return await _repository.CountSuccessTransactionsAsync();
+        }
     }
 }
