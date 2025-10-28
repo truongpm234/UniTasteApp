@@ -11,7 +11,9 @@ namespace PaymentService.API.Service
         Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode);
         Task UpdateTransactionAsync(PaymentTransaction entity);
         Task<int> CountSuccessTransactionsAsync();
+        Task<int> CountPendingTransactionsAsync();
         Task<int> CountCancelTransactionsAsync();
         Task<double> TotalAmountOfSuccessfulTransactionsAsync();
+        Task<int> CountAmountOfPaymentTransactionAsync();
     }
 }

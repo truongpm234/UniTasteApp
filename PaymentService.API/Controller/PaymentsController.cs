@@ -156,11 +156,28 @@ namespace PaymentService.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("count-pending-transactions")]
+        public async Task<IActionResult> CountPendingTransactions()
+        {
+            int pending = await _paymentService.CountPendingTransactionsAsync();
+            return Ok(new { pendingTransactionCount = pending });
+        }
+
+        [Authorize]
         [HttpGet("sum-amount-success-transactions")]
         public async Task<double> SumAmountSuccessTransactions()
         {
             double total = await _paymentService.TotalAmountOfSuccessfulTransactionsAsync();
             return total;
         }
+
+        [Authorize]
+        [HttpGet("count-amount-of-paymentTransaction")]
+        public async Task<int> CountAmountOfPaymentTransaction()
+        {
+            int count = await _paymentService.CountAmountOfPaymentTransactionAsync();
+            return count;
+        }
+
     }
 }

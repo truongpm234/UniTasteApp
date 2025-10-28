@@ -11,6 +11,8 @@ public interface IPaymentRepository
     Task UpdateTransactionAsync(PaymentTransaction entity);
     Task<int> CountSuccessTransactionsAsync();
     Task<int> CountCancelTransactionsAsync();
+    Task<int> CountPendingTransactionsAsync();
     Task<double> TotalAmountOfSuccessfulTransactionsAsync();
+    Task<int> CountAmountOfPaymentTransactionAsync();
 
 }

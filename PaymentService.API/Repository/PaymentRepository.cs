@@ -61,11 +61,20 @@ namespace PaymentService.API.Repositories
             return await _context.PaymentTransactions.CountAsync(t => t.Status == "Cancel");
         }
 
+        public async Task<int> CountPendingTransactionsAsync()
+        {
+            return await _context.PaymentTransactions.CountAsync(t => t.Status == "Pending");
+        }       
         public async Task<double> TotalAmountOfSuccessfulTransactionsAsync()
         {
             return (double)await _context.PaymentTransactions
                 .Where(t => t.Status == "Success" || t.Status == "Active")
                 .SumAsync(t => t.Amount);
         }
+        public async Task<int> CountAmountOfPaymentTransactionAsync()
+        {
+            return await _context.PaymentTransactions.CountAsync();
+        }
+
     }
 }
