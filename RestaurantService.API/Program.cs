@@ -31,6 +31,7 @@ namespace RestaurantService.API
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IRestaurantService, Service.RestaurantService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 
