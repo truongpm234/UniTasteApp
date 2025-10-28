@@ -1,7 +1,19 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/users/{everything}", //userService.API
+      "DownstreamPathTemplate": "/api/message/{everything}", // MessageController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "socialservice-i0f5.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/message/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{everything}", //UsersController.API
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -26,7 +38,7 @@
     },
     {
       "DownstreamPathTemplate": "/api/social/{everything}", //socialService.API
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
           "Host": "socialservice-i0f5.onrender.com",
@@ -34,6 +46,54 @@
         }
       ],
       "UpstreamPathTemplate": "/api/social/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Comments/{everything}", //CommentsController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "socialservice-i0f5.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Comments/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/PostReactions/{everything}", //PostReactionsController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "socialservice-i0f5.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/PostReactions/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Posts/{everything}", //PostsController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "socialservice-i0f5.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Posts/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/PostShares/{everything}", //PostSharesController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "socialservice-i0f5.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/PostShares/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
@@ -69,7 +129,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/GooglePlaces/{everything}", //restaurantService.API.GooglePlacesController
+      "DownstreamPathTemplate": "/api/GooglePlaces/{everything}", //GooglePlacesController
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -98,11 +158,11 @@
     },
     {
       "DownstreamPathTemplate": "/api/payments/{everything}", //paymentService.API
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5005
+          "Host": "paymentservice-5ccj.onrender.com",
+          "Port": 443
         }
       ],
       "UpstreamPathTemplate": "/api/payments/{everything}",
@@ -111,8 +171,23 @@
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       }
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServicePackages/{everything}", //ServicePackagesController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "paymentservice-5ccj.onrender.com",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/ServicePackages/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     }
-
   ],
   "GlobalConfiguration": {
     "BaseUrl": "https://apigateway-otsb.onrender.com"
@@ -122,7 +197,6 @@
     "Issuer": "https://userservice-5qvn.onrender.com",
     "Audience": "https://userservice-5qvn.onrender.com"
   }
-
 }
 
 
