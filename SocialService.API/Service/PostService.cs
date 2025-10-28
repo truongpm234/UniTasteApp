@@ -236,5 +236,10 @@ namespace SocialService.API.Service
         {
             return await _repo.GetAllPostByRestaurantId(id);
         }
+
+        public async Task<List<Post>> GetAllPostOfRestaurantIdByUserId(int userId, int restaurantId)
+        {
+            return await _repo.GetAllPostOfRestaurantIdByUserId(userId, restaurantId);
+        }
     }
 }

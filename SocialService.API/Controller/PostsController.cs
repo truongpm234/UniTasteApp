@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialService.API.Models.DTO;
+using SocialService.API.Models.Entity;
 using SocialService.API.Service;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -172,6 +173,12 @@ namespace SocialService.API.Controllers
             }
         }
 
-
+        [Authorize]
+        [HttpGet("get-all-post-of-restaurant-of-userId")]
+        public async Task<List<Post>> GetAllPostOfRestaurantByUserId(int userId, int restaurantId)
+        {
+            return await _service.GetAllPostOfRestaurantIdByUserId(userId, restaurantId);
+        }
+        
     }
 }
