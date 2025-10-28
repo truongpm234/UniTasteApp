@@ -9,12 +9,12 @@ namespace SocialService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostController : ControllerBase
+    public class PostsController : ControllerBase
     {
         private readonly IPostService _service;
         private readonly ICloudinaryService _cloudinaryService;
 
-        public PostController(IPostService service, ICloudinaryService cloudinaryService)
+        public PostsController(IPostService service, ICloudinaryService cloudinaryService)
         {
             _service = service;
             _cloudinaryService = cloudinaryService;
