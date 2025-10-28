@@ -32,6 +32,20 @@ namespace SocialService.API.Controllers
             }
         }
 
+        [HttpGet("get-post-by-restaurant-id/{id}")]
+        public async Task<IActionResult> GetPostByRestaurantId(int id)
+        {
+            try
+            {
+                var posts = await _service.GetAllPostByRestaurantId(id);
+                return Ok(posts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+        
         [Authorize]
         [HttpPost("create")]
         [RequestSizeLimit(50_000_000)]

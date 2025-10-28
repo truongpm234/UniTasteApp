@@ -8,6 +8,7 @@ namespace SocialService.API.Repository
     {
         Task<(IEnumerable<Post> posts, int totalCount)> GetAllReviewsPagedAsync(int page, int pageSize);
         Task<IEnumerable<Post>> GetPostsByUserIdAsync(int userId);
+        Task<List<Post>> GetAllPostByRestaurantId(int id);
         Task<Post?> GetPostByIdAsync(int postId);
         Task AddPostAsync(Post post);
         Task AddPostMediaAsync(PostMedium media);

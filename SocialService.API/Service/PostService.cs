@@ -230,5 +230,10 @@ namespace SocialService.API.Service
             _repo.UpdatePost(post);
             await _repo.SaveChangesAsync();
         }
+
+        public async Task<List<Post>> GetAllPostByRestaurantId(int id)
+        {
+            return await _repo.GetAllPostByRestaurantId(id);
+        }
     }
 }

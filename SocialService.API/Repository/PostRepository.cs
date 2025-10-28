@@ -47,6 +47,23 @@ namespace SocialService.API.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Post>> GetAllPostByRestaurantId(int id)
+        {
+            return await _context.PostRestaurantTags
+                .Where(prt => prt.RestaurantId == id)
+                .Include(prt => prt.Post)
+                    .ThenInclude(p => p.PostMedia)
+                .Include(prt => prt.Post)
+                    .ThenInclude(p => p.Tags)
+                .Include(prt => prt.Post)
+                    .ThenInclude(p => p.PostReactions)
+                .Include(prt => prt.Post)
+                    .ThenInclude(p => p.Comments)
+                .Select(prt => prt.Post)
+                .Where(p => !p.IsDeleted)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
         public async Task<Post?> GetPostByIdAsync(int postId)
         {
             return await _context.Posts
