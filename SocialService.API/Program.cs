@@ -134,6 +134,8 @@ namespace SocialService.API
             builder.Services.AddHttpClient<IRestaurantApiService, RestaurantApiService>();
             builder.Services.AddScoped<IMessageRepository, MessageRepository>();
             builder.Services.AddScoped<IMessageService, MessageService>();
+            builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+            builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 
             // 🔹 9️⃣ SignalR
             builder.Services.AddSignalR();
