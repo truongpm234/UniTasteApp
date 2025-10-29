@@ -113,16 +113,15 @@ namespace SocialService.API
             // 🔹 7️⃣ CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowFrontend", policy =>
+                options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+                    policy.AllowAnyOrigin()
                           .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials()
-                          .AllowAnyOrigin();
-
+                          .AllowAnyMethod();
+                    // KHÔNG .AllowCredentials()
                 });
             });
+
 
             // 🔹 8️⃣ Repository & Service
             builder.Services.AddScoped<IPostRepository, PostRepository>();
@@ -182,7 +181,7 @@ namespace SocialService.API
                 app.UseSwaggerUI();
             }
 
-            app.UseCors("AllowFrontend");
+            app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
 
