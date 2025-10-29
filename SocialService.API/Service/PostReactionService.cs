@@ -17,22 +17,41 @@ namespace SocialService.API.Service
         }
 
         // ✅ Toggle reaction (like, love, haha...) — chỉ 1 loại / user
-        public async Task<string> ToggleReactionAsync(int userId, int postId, string reactionType)
+        public async Task<string> ToggleReactionAsync(int userId, int postId, string? reactionType)
         {
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.PostId == postId && !p.IsDeleted);
             if (post == null)
                 throw new Exception("Bài viết không tồn tại.");
 
             var existing = await _repo.GetUserReactionAsync(userId, postId);
+
+            // ✅ NÊU reactionType là null/empty → XÓA reaction hiện tại
+            if (string.IsNullOrWhiteSpace(reactionType))
+            {
+                if (existing != null)
+                {
+                    _repo.RemoveReaction(existing);
+                    post.ReactionsCount = Math.Max(0, post.ReactionsCount - 1);
+                    await _repo.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                    return "Reaction removed";
+                }
+                return "No reaction to remove";
+            }
+
+            // ✅ Tìm reaction type từ database
             var type = await _context.ReactionTypes
-                .FirstOrDefaultAsync(r => r.Label == reactionType || r.Code == reactionType);
+                .FirstOrDefaultAsync(r =>
+                    r.Label.ToUpper() == reactionType.ToUpper() ||
+                    r.Code.ToUpper() == reactionType.ToUpper());
 
             if (type == null)
                 throw new Exception($"Reaction type '{reactionType}' không tồn tại.");
 
-            // Nếu user đã có reaction
+            // ✅ Nếu user đã có reaction
             if (existing != null)
             {
+                // Nếu cùng loại → XÓA (toggle off)
                 if (existing.ReactionTypeId == type.ReactionTypeId)
                 {
                     _repo.RemoveReaction(existing);
@@ -42,7 +61,7 @@ namespace SocialService.API.Service
                     return "Reaction removed";
                 }
 
-                // Nếu khác loại -> update
+                // Nếu khác loại → UPDATE (không thay đổi count)
                 existing.ReactionTypeId = type.ReactionTypeId;
                 existing.CreatedAt = DateTime.UtcNow;
                 await _repo.SaveChangesAsync();
@@ -50,7 +69,7 @@ namespace SocialService.API.Service
                 return $"Reaction changed to '{reactionType}'";
             }
 
-            // Nếu chưa có -> thêm mới
+            // ✅ Nếu chưa có → THÊM MỚI
             var newReaction = new PostReaction
             {
                 PostId = postId,
