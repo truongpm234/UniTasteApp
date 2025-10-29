@@ -49,7 +49,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/PostShares/{everything}",   //PostSharesController
+      "DownstreamPathTemplate": "/api/PostShares/{everything}", //PostSharesController
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -61,7 +61,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Comments/{everything}",       //CommentsController
+      "DownstreamPathTemplate": "/api/Comments/{everything}", //CommentsController
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -82,6 +82,18 @@
         }
       ],
       "UpstreamPathTemplate": "/api/message/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Friendships/{everything}", //FriendshipController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/friendships/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
