@@ -4,7 +4,7 @@ namespace SocialService.API.Repository
 {
     public interface ICommentRepository
     {
-        Task<Comment?> GetCommentByPostIdAsync(int postId);
+        Task<List<Comment?>> GetCommentByPostIdAsync(int postId);
         Task AddComment(Comment comment);
         Task SaveAsync();
     }

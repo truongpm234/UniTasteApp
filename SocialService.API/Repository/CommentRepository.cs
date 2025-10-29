@@ -13,10 +13,12 @@ namespace SocialService.API.Repository
         {
             _context = context;
         }
-        public async Task<Comment?> GetCommentByPostIdAsync(int postId)
+        public async Task<List<Comment?>> GetCommentByPostIdAsync(int postId)
         {
             return await _context.Comments
-                .FirstOrDefaultAsync(c => c.PostId == postId);
+                .Where(c => c.PostId == postId && !c.IsDeleted)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
         }
         public async Task AddComment(Comment comment)
         {

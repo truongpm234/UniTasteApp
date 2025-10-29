@@ -15,7 +15,7 @@ namespace SocialService.API.Service
             _repo = repo;
             _context = context;
         }
-        public async Task<Comment?> GetCommentByPostIdAsync(int postId)
+        public async Task<List<Comment?>> GetCommentByPostIdAsync(int postId)
         {
             return await _repo.GetCommentByPostIdAsync(postId);
         }

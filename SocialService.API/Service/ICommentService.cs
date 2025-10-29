@@ -5,7 +5,7 @@ namespace SocialService.API.Service
 {
     public interface ICommentService
     {
-        Task<Comment?> GetCommentByPostIdAsync(int postId);
+        Task<List<Comment?>> GetCommentByPostIdAsync(int postId);
         Task<int> CreateComment(CommentCreateDto dto, int userId);
     }
 }
