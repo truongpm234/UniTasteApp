@@ -14,6 +14,7 @@ namespace SocialService.API.Service
         Task UpdatePostAsync(int postId, int userId, PostUpdateDto dto);
         Task DeletePostAsync(int postId, int userId);
         Task<List<Post>> GetAllPostOfRestaurantIdByUserId(int userId, int restaurantId);
+        Task<List<DailyPostCountDto>> GetPostCountByDayLast14DaysAsync();
 
     }
 }

@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.API.Data.DBContext;
+using PaymentService.API.Models.DTO;
 using PaymentService.API.Models.Entity;
+using System;
+using System.Threading.Tasks;
 
 namespace PaymentService.API.Repositories
 {
@@ -74,6 +75,41 @@ namespace PaymentService.API.Repositories
         public async Task<int> CountAmountOfPaymentTransactionAsync()
         {
             return await _context.PaymentTransactions.CountAsync();
+        }
+        public async Task<List<DailyRevenueDto>> GetRevenueByDayLast7DaysAsync()
+        {
+            var fromDate = DateTime.UtcNow.Date.AddDays(-6); // 7 ngày: hôm nay và 6 ngày trước
+            var toDate = DateTime.UtcNow.Date.AddDays(1); // đến hết hôm nay
+
+            // Lấy giao dịch trong 7 ngày gần nhất, Status Success/Active, Amount != null
+            var data = await _context.PaymentTransactions
+                .Where(t =>
+                    (t.Status == "Success" || t.Status == "Active") &&
+                    t.CreatedAt != null &&
+                    t.CreatedAt >= fromDate && t.CreatedAt < toDate &&
+                    t.Amount != null)
+                .GroupBy(t => t.CreatedAt.Value.Date)
+                .Select(g => new DailyRevenueDto
+                {
+                    Date = g.Key,
+                    TotalRevenue = g.Sum(x => x.Amount ?? 0)
+                })
+                .OrderBy(x => x.Date)
+                .ToListAsync();
+
+            // Bảo đảm trả đủ 7 ngày (kể cả ngày không có giao dịch)
+            var results = new List<DailyRevenueDto>();
+            for (int i = 0; i < 7; i++)
+            {
+                var d = fromDate.AddDays(i);
+                var found = data.FirstOrDefault(x => x.Date.Date == d.Date);
+                results.Add(new DailyRevenueDto
+                {
+                    Date = d,
+                    TotalRevenue = found?.TotalRevenue ?? 0
+                });
+            }
+            return results;
         }
 
     }

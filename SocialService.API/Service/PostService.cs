@@ -243,5 +243,11 @@ namespace SocialService.API.Service
         {
             return await _repo.GetAllPostOfRestaurantIdByUserId(userId, restaurantId);
         }
+        public async Task<List<DailyPostCountDto>> GetPostCountByDayLast14DaysAsync()
+        {
+            return await _repo.GetPostCountByDayLast14DaysAsync();
+        }
+
+
     }
 }

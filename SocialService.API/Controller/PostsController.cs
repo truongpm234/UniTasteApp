@@ -179,6 +179,17 @@ namespace SocialService.API.Controllers
         {
             return await _service.GetAllPostOfRestaurantIdByUserId(userId, restaurantId);
         }
-        
+
+        [HttpGet("count-post-by-day-last-14-days")]
+        public async Task<IActionResult> GetPostCountByDayLast14Days()
+        {
+            var data = await _service.GetPostCountByDayLast14DaysAsync();
+            return Ok(new
+            {
+                labels = data.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList(),
+                values = data.Select(x => x.PostCount).ToList()
+            });
+        }
+
     }
 }

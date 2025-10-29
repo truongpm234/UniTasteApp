@@ -179,5 +179,15 @@ namespace PaymentService.API.Controllers
             return count;
         }
 
+        [HttpGet("revenue-by-day-last-7-days")]
+        public async Task<IActionResult> GetRevenueByDayLast7Days()
+        {
+            var data = await _paymentService.GetRevenueByDayLast7DaysAsync();
+            return Ok(new
+            {
+                labels = data.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList(),
+                values = data.Select(x => x.TotalRevenue).ToList()
+            });
+        }
     }
 }

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using SocialService.API.Models.DTO;
 using SocialService.API.Models.Entity;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SocialService.API.Repository
 {
@@ -19,5 +20,7 @@ namespace SocialService.API.Repository
         Task SaveChangesAsync();
         Task AddPostRestaurantTagAsync(PostRestaurantTag tag);
         Task<List<Post>> GetAllPostOfRestaurantIdByUserId(int userId, int restaurantId);
+        Task<List<DailyPostCountDto>> GetPostCountByDayLast14DaysAsync();
+
     }
 }

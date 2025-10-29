@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PaymentService.API.Models.DTO;
 using PaymentService.API.Models.Entity;
 
 namespace PaymentService.API.Service
@@ -56,5 +57,11 @@ namespace PaymentService.API.Service
         {
             return await _repository.CountAmountOfPaymentTransactionAsync();
         }
+        
+        public async Task<List<DailyRevenueDto>> GetRevenueByDayLast7DaysAsync()
+        {
+            return await _repository.GetRevenueByDayLast7DaysAsync();
+        }
+
     }
 }
