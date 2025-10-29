@@ -18,6 +18,13 @@ namespace UserService.API.Repository
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email && u.PasswordHash == password && u.Status == "Active");
         }
+
+        public async Task<User> GetFullNameByUserId(int userId)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+        
         public async Task<User> GetUserAccountByEmail(string email)
         {
             return await _context.Users

@@ -6,6 +6,7 @@ namespace UserService.API.Services
     public interface IUserService
     {
         Task<User> GetUserAccount(string email, string password);
+        Task<User> GetFullNameByUserIdAsync(int userId);
         Task<User> GetUserAccountByEmail(string email);
         Task<User> RegisterAsync(RegisterRequest req);
         Task<string?> SendResetPasswordEmailAsync(string email);

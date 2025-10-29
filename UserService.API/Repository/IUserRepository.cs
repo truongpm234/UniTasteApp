@@ -6,6 +6,7 @@ namespace UserService.API.Repository
     public interface IUserRepository
     {
         Task<User> GetUserAccount(string email, string password);
+        Task<User> GetFullNameByUserId(int userId);
         Task<User> GetUserAccountByEmail(string email);
         Task<User> RegisterAsync(RegisterRequest req);
         Task<PasswordResetToken?> GetByTokenAsync(string token);

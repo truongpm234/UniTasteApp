@@ -126,6 +126,14 @@ namespace UserService.API.Controllers
             return Ok(new { status = true, message = "Register successful", user = new { user.UserId, user.Email, user.FullName } });
         }
 
+        [HttpGet("get-fullname-by-userId")]
+        public async Task<IActionResult> GetFullNameByUserId([FromQuery] int userId)
+        {
+            var user = await _userService.GetFullNameByUserIdAsync(userId);
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+            return Ok(new { user.UserId, user.FullName });
+        }
 
         [HttpPost("request-reset-password")]
         public async Task<IActionResult> RequestReset([FromBody] RequestResetPasswordDto dto)
