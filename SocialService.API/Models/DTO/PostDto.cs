@@ -16,5 +16,6 @@
         public int ReactionsCount { get; set; }
         public int CommentsCount { get; set; }
         public int SharesCount { get; set; }
+        public string? GooglePlaceId { get; set; }
     }
 }

@@ -49,7 +49,8 @@ namespace SocialService.API.Service
                 Tags = p.Tags.Select(t => t.Name).ToList(),
                 ReactionsCount = p.ReactionsCount,
                 CommentsCount = p.CommentsCount,
-                SharesCount = p.SharesCount
+                SharesCount = p.SharesCount,
+                GooglePlaceId = p.PostRestaurantTags.FirstOrDefault()?.GooglePlaceId
             }).ToList();
 
             return new Models.DTO.PagedResult<PostDto>
