@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PaymentService.API.Models.DTO;
 using PaymentService.API.Models.Entity;
 using System.Threading.Tasks;
 
@@ -15,5 +14,5 @@ public interface IPaymentRepository
     Task<int> CountPendingTransactionsAsync();
     Task<double> TotalAmountOfSuccessfulTransactionsAsync();
     Task<int> CountAmountOfPaymentTransactionAsync();
-    Task<List<DailyRevenueDto>> GetRevenueByDayLast7DaysAsync();
+
 }

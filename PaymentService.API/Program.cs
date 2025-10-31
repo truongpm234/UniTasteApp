@@ -109,6 +109,8 @@ namespace PaymentService.API
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseForwardedHeaders();
+
             app.MapControllers();
 
             app.MapDefaultControllerRoute();

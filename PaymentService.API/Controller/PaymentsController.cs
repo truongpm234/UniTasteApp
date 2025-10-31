@@ -15,13 +15,19 @@ namespace PaymentService.API.Controllers
         private readonly IPaymentService _paymentService;
         private readonly IPurchaseService _purchaseService;
         private readonly IServicePackageService _servicePackageService;
+        private readonly IConfiguration _cfg;
 
-        public PaymentsController(IPayOSService payOSService, IPaymentService paymentService, IPurchaseService purchaseService, IServicePackageService servicePackageService)
+        public PaymentsController(IPayOSService payOSService, 
+            IPaymentService paymentService,
+            IPurchaseService purchaseService,
+            IServicePackageService servicePackageService,
+            IConfiguration cfg)
         {
             _payOSService = payOSService;
             _paymentService = paymentService;
             _purchaseService = purchaseService;
             _servicePackageService = servicePackageService;
+            _cfg = cfg;
         }
 
         [Authorize]
@@ -88,19 +94,52 @@ namespace PaymentService.API.Controllers
         }
 
 
-        [HttpGet("success")]
-        public IActionResult Success()
+        [AllowAnonymous]
+        [HttpGet("/payment/success")]  // absolute route KHÔNG có /api
+        [HttpGet("success")]           // giữ tương thích nếu từng gọi /api/payments/success
+        public IActionResult Success(
+            [FromQuery] string code,
+            [FromQuery] string status,
+            [FromQuery] long orderCode,
+            [FromQuery] bool cancel = false,
+            [FromQuery] string? id = null)
         {
-            return Content("Payment Successful!");
+            var fe = _cfg["Frontend:BaseUrl"]!.TrimEnd('/');
+
+            var url = $"{fe}/payment/success" +
+                      $"?orderCode={Uri.EscapeDataString(orderCode.ToString())}" +
+                      $"&status={Uri.EscapeDataString(status ?? "")}" +
+                      $"&code={Uri.EscapeDataString(code ?? "")}" +
+                      (string.IsNullOrEmpty(id) ? "" : $"&id={Uri.EscapeDataString(id)}") +
+                      $"&cancel={cancel.ToString().ToLower()}";
+
+            return Redirect(url);
         }
 
+        // PayOS -> BE (/payment/cancel) -> redirect sang FE (/payment/fail?...)
+        [AllowAnonymous]
+        [HttpGet("/payment/cancel")]
         [HttpGet("cancel")]
-        public IActionResult Cancel()
+        public IActionResult Cancel(
+            [FromQuery] string code,
+            [FromQuery] string status,
+            [FromQuery] long orderCode,
+            [FromQuery] bool cancel = true,
+            [FromQuery] string? id = null)
         {
-            return Content("Payment Cancelled!");
+            var fe = _cfg["Frontend:BaseUrl"]!.TrimEnd('/');
+
+            var url = $"{fe}/payment/fail" +
+                      $"?orderCode={Uri.EscapeDataString(orderCode.ToString())}" +
+                      $"&status={Uri.EscapeDataString(status ?? "")}" +
+                      $"&code={Uri.EscapeDataString(code ?? "")}" +
+                      (string.IsNullOrEmpty(id) ? "" : $"&id={Uri.EscapeDataString(id)}") +
+                      $"&cancel={cancel.ToString().ToLower()}";
+
+            return Redirect(url);
         }
 
-        [Authorize]
+[Authorize]
         [HttpGet("get-all-payment-transaction")]
         public async Task<IActionResult> GetAllPayments()
         {
@@ -179,15 +218,5 @@ namespace PaymentService.API.Controllers
             return count;
         }
 
-        [HttpGet("revenue-by-day-last-7-days")]
-        public async Task<IActionResult> GetRevenueByDayLast7Days()
-        {
-            var data = await _paymentService.GetRevenueByDayLast7DaysAsync();
-            return Ok(new
-            {
-                labels = data.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList(),
-                values = data.Select(x => x.TotalRevenue).ToList()
-            });
-        }
     }
 }
