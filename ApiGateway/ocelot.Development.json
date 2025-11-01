@@ -9,7 +9,7 @@
           "Port": 5002
         }
       ],
-      "UpstreamPathTemplate": "/api/social/chathub",
+      "UpstreamPathTemplate": "/api/social/chathub",              //chathub
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
     {
@@ -73,7 +73,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/message/{everything}", //MessageController
+      "DownstreamPathTemplate": "/api/message/{everything}",      //MessageController
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -85,7 +85,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Friendships/{everything}", //FriendshipController
+      "DownstreamPathTemplate": "/api/Friendships/{everything}",      //FriendshipController
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -94,6 +94,18 @@
         }
       ],
       "UpstreamPathTemplate": "/api/friendships/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/UserFeedbacks/{everything}", //UserFeedbacksController
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/UserFeedbacks/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
@@ -121,7 +133,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/restaurants/{everything}",
+      "DownstreamPathTemplate": "/api/restaurants/{everything}", //RestaurantsController
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -137,7 +149,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/userreviews/{everything}",
+      "DownstreamPathTemplate": "/api/userreviews/{everything}", //UserReviewsController
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -153,7 +165,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/GooglePlaces/{everything}",
+      "DownstreamPathTemplate": "/api/GooglePlaces/{everything}", //GooglePlacesController
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -181,7 +193,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/payments/{everything}",
+      "DownstreamPathTemplate": "/api/payments/{everything}", //PaymentsController
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {

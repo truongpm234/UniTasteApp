@@ -137,7 +137,8 @@ namespace SocialService.API
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
             builder.Services.AddScoped<IFriendshipService, FriendshipService>();
-
+            builder.Services.AddScoped<IUserFeedbackRepository, UserFeedbackRepository>();
+            builder.Services.AddScoped<IUserFeedbackService, UserFeedbackService>();
             // 🔹 9️⃣ SignalR
             builder.Services.AddSignalR();
 

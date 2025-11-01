@@ -28,7 +28,6 @@
     <Folder Include="Controllers\" />
     <Folder Include="Data\DBContext\" />
     <Folder Include="Data\Repository\" />
-    <Folder Include="Models\Entity\" />
     <Folder Include="Services\" />
   </ItemGroup>
 
