@@ -33,7 +33,6 @@ namespace RestaurantService.API
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
-            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 

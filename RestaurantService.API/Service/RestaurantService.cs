@@ -3,7 +3,6 @@ using RestaurantService.API.Models.Entity;
 using RestaurantService.API.Models.GooglePlaces;
 using RestaurantService.API.Repository;
 using RestaurantService.API.Service;
-using UserService.API.Models.DTO;
 
 namespace RestaurantService.API.Service
 {
@@ -246,24 +245,11 @@ namespace RestaurantService.API.Service
             };
         }
 
-        public async Task<List<RestaurantDto>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15) // AI
+        public async Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15)
         {
-            var entities = await _restaurantRepo.GetNearestRestaurantsAsync(userLat, userLng, limit);
+            return await _restaurantRepo.GetNearestRestaurantsAsync(userLat, userLng, limit);
+        }  // AI
 
-            var dtos = entities.Select(r => new RestaurantDto
-            {
-                RestaurantId = r.RestaurantId,
-                Name = r.Name,
-                Address = r.Address,
-                GooglePlaceId = r.GooglePlaceId,
-                OpeningHours = r.OpeningHours,
-                GoogleRating = r.GoogleRating,
-                // Map thêm field nếu cần
-            }).ToList();
-
-            return dtos;
-        }
-        
     }
 
 }

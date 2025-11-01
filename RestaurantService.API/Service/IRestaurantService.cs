@@ -2,7 +2,6 @@
 using RestaurantService.API.Models.DTO;
 using RestaurantService.API.Models.Entity;
 using RestaurantService.API.Models.GooglePlaces;
-using UserService.API.Models.DTO;
 
 public interface IRestaurantService
 {
@@ -27,7 +26,7 @@ public interface IRestaurantService
     Task<PaginationResult<List<GetCategoryIdByRestaurantIdDto>>> SearchWithPagingAsync(string name, int currentPage, int pageSize);
     Task<PaginationResult<List<RestaurantWithCategoriesDto>>> SearchByCategoryWithPagingAsync(int categoryId, int currentPage, int pageSize);
     Task<PaginationResult<List<RestaurantResponseDto>>> GetRestaurantsWithinRadiusAndCategoryAsync(double latitude, double longitude, double radiusKm, string categoryName, int currentPage, int pageSize);
-    Task<List<RestaurantDto>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15);  // AI
+    Task<List<Restaurant>> GetNearestRestaurantsAsync(double userLat, double userLng, int limit = 15);  // AI
 
 }
 

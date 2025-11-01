@@ -28,8 +28,6 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\UserService.API\UserService.API.csproj" />
-  </ItemGroup>
+  
 
 </Project>
