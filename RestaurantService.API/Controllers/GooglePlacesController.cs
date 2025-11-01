@@ -58,7 +58,7 @@ namespace RestaurantService.API.Controllers
         }
 
         [HttpPost("search-import-nearby-with-paging")]
-        public async Task<IActionResult> SearchImportNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] int radius = 5000, [FromQuery] string type = "restaurant", [FromQuery] string keyword = "", [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 5)
+        public async Task<IActionResult> SearchImportNearby([FromQuery] double latitude, [FromQuery] double longitude, [FromQuery] int radius = 5000, [FromQuery] string type = "restaurant, cafe", [FromQuery] string keyword = "", [FromQuery] int currentPage = 1, [FromQuery] int pageSize = 5)
         {
             var request = new GooglePlacesSearchRequest
             {

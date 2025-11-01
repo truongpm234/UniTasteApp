@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 using UserService.API.Data.DBContext;
 using UserService.API.Models.DTO;
 using UserService.API.Repository;
-using UserService.API.Service;
+using UserService.API.Service;  // <- Đảm bảo namespace này
 using UserService.API.Services;
 
 namespace UserService.API
@@ -76,7 +76,7 @@ namespace UserService.API
                 }
                 else
                 {
-                    throw new Exception("Firebase credentials not found! Please set FIREBASE_CREDENTIALS_JSON environment variable.");
+                    Console.WriteLine("[WARNING] Firebase credentials not found - continuing without Firebase");
                 }
             }
 
@@ -84,6 +84,7 @@ namespace UserService.API
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
             });
 
             builder.Services.Configure<FirebaseSettings>(firebaseSection);
@@ -92,8 +93,12 @@ namespace UserService.API
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserService, Services.UserService>();
-            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
+            // ✅ FIX: Đăng ký GeminiAIService đúng cách
+            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
+            // Hoặc có thể dùng:
+            // builder.Services.AddScoped<IGeminiAIService, GeminiAIService>();
+            // builder.Services.AddHttpClient();
 
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
             builder.Services.AddSingleton<ICloudinaryService, CloudinaryService>();

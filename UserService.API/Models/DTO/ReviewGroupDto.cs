@@ -5,5 +5,4 @@
         public int RestaurantId { get; set; }
         public List<ReviewDto> Reviews { get; set; }
     }
-
 }

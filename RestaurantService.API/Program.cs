@@ -26,12 +26,14 @@ namespace RestaurantService.API
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
-            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
-            builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
             builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             builder.Services.AddScoped<IRestaurantService, Service.RestaurantService>();
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<IGeminiAIService, GeminiAIService>();
+
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
+            builder.Services.AddHttpClient<IGeminiAIService, GeminiAIService>();
 
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 
