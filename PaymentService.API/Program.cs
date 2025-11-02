@@ -24,10 +24,14 @@ namespace PaymentService.API
             builder.Services.AddScoped<IServicePackageService, ServicePackageService>();
             builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
             builder.Services.AddScoped<IPurchaseService, PurchaseService>();
+            builder.Services.AddScoped<IPayOsSignature, PayOsSignature>();
             builder.Services.AddDbContext<Exe201PaymentServiceDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionStringDB")));
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews()
+    .AddJsonOptions(o => o.JsonSerializerOptions.PropertyNameCaseInsensitive = true);
+
+
 
             // 🔑 CORS Policy
             builder.Services.AddCors(options =>

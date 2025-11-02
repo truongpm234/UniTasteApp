@@ -15,5 +15,9 @@ namespace PaymentService.API.Service
         Task<int> CountCancelTransactionsAsync();
         Task<double> TotalAmountOfSuccessfulTransactionsAsync();
         Task<int> CountAmountOfPaymentTransactionAsync();
+
+        Task MarkPaidAsync(string paymentLinkId, long amount);
+        Task MarkCanceledAsync(string paymentLinkId);
+        Task MarkFailedAsync(string paymentLinkId);
     }
 }

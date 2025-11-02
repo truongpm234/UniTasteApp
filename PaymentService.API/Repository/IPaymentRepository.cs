@@ -8,6 +8,9 @@ public interface IPaymentRepository
     Task<Purchase> AddPurchaseAsync(Purchase p);
     Task<IEnumerable<PaymentTransaction>> GetAllTransactionsAsync();
     Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode);
+
+    Task<PaymentTransaction?> GetTransactionByReferenceIdAsync(string referenceId);
+
     Task UpdateTransactionAsync(PaymentTransaction entity);
     Task<int> CountSuccessTransactionsAsync();
     Task<int> CountCancelTransactionsAsync();

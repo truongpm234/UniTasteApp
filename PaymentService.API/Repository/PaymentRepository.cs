@@ -39,6 +39,11 @@ namespace PaymentService.API.Repositories
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }
+        public async Task<PaymentTransaction?> GetTransactionByReferenceIdAsync(string referenceId)
+        {
+            return await _context.PaymentTransactions
+                .FirstOrDefaultAsync(x => x.ReferenceId == referenceId);
+        }
 
         public async Task<PaymentTransaction?> GetTransactionByOrderCodeAsync(long orderCode)
         {
