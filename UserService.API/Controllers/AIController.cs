@@ -170,7 +170,7 @@ namespace UserService.API.Controllers
 
                 // 4. Tạo prompt cho AI - YÊU CẦU RESPONSE THEO FORMAT JSON
                 var sb = new StringBuilder();
-                sb.AppendLine("⚠️ QUAN TRỌNG: Bạn PHẢI trả lời theo đúng định dạng JSON bên dưới, không được thêm bớt gì:\n");
+                sb.AppendLine("⚠️ QUAN TRỌNG: Bạn PHẢI trả lời theo đúng định dạng bên dưới, không được thêm bớt gì và chỉ đề xuất tập trung vào quán ăn, cafe, nhà hàng, không nên đề xuất chỗ nào khác:\n");
                 sb.AppendLine("```json");
                 sb.AppendLine("{");
                 sb.AppendLine("  \"message\": \"Câu trả lời chi tiết bằng tiếng Việt cho người dùng\",");
@@ -238,13 +238,11 @@ namespace UserService.API.Controllers
                 sb.AppendLine("\n=== HƯỚNG DẪN ===");
                 sb.AppendLine("1. Phân tích yêu cầu và sở thích của người dùng");
                 sb.AppendLine("2. Chọn 5 quán PHÙ HỢP NHẤT");
-                sb.AppendLine("3. Trong field 'message': Viết câu trả lời chi tiết, thân thiện bằng tiếng Việt");
-                sb.AppendLine("   - Giới thiệu từng quán với tên, địa chỉ, đánh giá");
+                sb.AppendLine("3. Trong field 'message': Viết câu trả lời chi tiết, thân thiện bằng tiếng Việt, ");
+                sb.AppendLine("   - Giới thiệu từng quán ăn, cafe với tên, địa chỉ, đánh giá");
                 sb.AppendLine("   - Giải thích tại sao phù hợp với yêu cầu");
                 sb.AppendLine("   - Trích dẫn review nếu có");
                 sb.AppendLine("4. Trong field 'recommendedPlaceIds': Liệt kê CHÍNH XÁC các PlaceId của quán bạn đề xuất");
-                sb.AppendLine("5. ⚠️ CHỈ recommend quán CÓ TRONG danh sách, KHÔNG tự tạo");
-                sb.AppendLine("6. ⚠️ PlaceId phải CHÍNH XÁC từ danh sách (copy y nguyên)");
                 sb.AppendLine("Trước tiên, nếu user hỏi câu không liên quan đến quán ăn thì hãy trả lời đúng trọng tâm. " 
                     + "Nếu liên quan đến ăn uống, hãy linh hoạt gợi ý dựa vào vị trí gần (≤ 5km), " 
                     + "không cần quá chú trọng preference nếu trống. " 
